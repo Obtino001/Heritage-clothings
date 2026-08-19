@@ -1,0 +1,312 @@
+{%- comment -%} Shared Derma Space predictive search styles (bundled with theme) {%- endcomment -%}
+
+{% stylesheet %}
+  /* ── Search bar ── */
+  .search-modal--dropdown .predictive-search-form__header-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .search-modal--dropdown .predictive-search-form__header-inner {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .search-modal--dropdown input.search-input,
+  .search-modal--dropdown .predictive-search-form input[type='search'] {
+    display: block !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 16px 16px 16px 40px !important;
+    background-color: #faf9f7 !important;
+    border: 1px solid #e6e6e6 !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 300 !important;
+    line-height: 1.5 !important;
+    color: #212121 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    appearance: none !important;
+  }
+
+  .search-modal--dropdown input.search-input::placeholder {
+    color: #757575 !important;
+    font-weight: 300 !important;
+    opacity: 1 !important;
+  }
+
+  .search-modal--dropdown input.search-input:focus,
+  .search-modal--dropdown input.search-input:focus-visible {
+    border-color: #212121 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .search-modal--dropdown .predictive-search__icon {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #212121 !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+
+  .search-modal--dropdown .predictive-search__icon > svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+  }
+
+  .search-modal--dropdown .predictive-search__close-modal-button {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #212121 !important;
+    cursor: pointer !important;
+  }
+
+  .search-modal--dropdown .predictive-search__close-modal-button svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+  }
+
+  .search-modal--dropdown .predictive-search__reset-button {
+    display: none !important;
+  }
+
+  /* ── Layout: 4/8 grid like Derma Space ── */
+  .search-modal--dropdown .predictive-search-empty-state__layout,
+  .search-modal--dropdown .predictive-search-active-state__layout {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    max-width: 1280px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 16px 20px !important;
+    align-items: start !important;
+  }
+
+  .search-modal--dropdown .predictive-search-empty-state__sidebar,
+  .search-modal--dropdown .predictive-search-active-state__sidebar {
+    grid-column: span 12 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-empty-state__trending,
+  .search-modal--dropdown .predictive-search-active-state__main {
+    grid-column: span 12 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    min-width: 0 !important;
+  }
+
+  @media screen and (min-width: 990px) {
+    .search-modal--dropdown .predictive-search-empty-state__sidebar,
+    .search-modal--dropdown .predictive-search-active-state__sidebar {
+      grid-column: span 4 !important;
+    }
+
+    .search-modal--dropdown .predictive-search-empty-state__trending,
+    .search-modal--dropdown .predictive-search-active-state__main {
+      grid-column: span 8 !important;
+    }
+  }
+
+  /* ── Sidebar sections ── */
+  .search-modal--dropdown .predictive-search-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__section + .predictive-search-sidebar__section {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__heading-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 0 8px !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__heading {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    text-align: left !important;
+    color: #000 !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__heading-line {
+    flex: 1 1 auto !important;
+    display: block !important;
+    min-width: 24px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e6e6e6 !important;
+    background: transparent !important;
+    align-self: center !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__list {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__link {
+    display: grid !important;
+    grid-template-columns: 20px 1fr auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 4px 0 !important;
+    text-decoration: none !important;
+    color: #212121 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    transition: color 0.15s ease !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__link--brand,
+  .search-modal--dropdown .predictive-search-sidebar__link--blog {
+    grid-template-columns: 20px 1fr !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__link:hover {
+    background: transparent !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__link:hover .predictive-search-sidebar__text {
+    color: #000 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__text {
+    font-size: 14px !important;
+    font-weight: 300 !important;
+    line-height: 1.5 !important;
+    color: #212121 !important;
+    min-width: 0 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__icon,
+  .search-modal--dropdown .predictive-search-sidebar__arrow {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+    color: #212121 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar__icon svg,
+  .search-modal--dropdown .predictive-search-sidebar__arrow svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+  }
+
+  /* ── Trending cards ── */
+  .search-modal--dropdown .predictive-search-trending__grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    width: 100% !important;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__media {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 4px !important;
+    aspect-ratio: 658 / 955 !important;
+    background: #f2f2f2 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    transition: transform 0.3s ease !important;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__label {
+    display: block !important;
+    margin-top: 8px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+    color: #212121 !important;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__card:hover .predictive-search-trending__image {
+    transform: scale(1.1) !important;
+  }
+
+  @media screen and (max-width: 989px) {
+    .search-modal--dropdown .predictive-search-trending__grid {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+    }
+
+    .search-modal--dropdown .predictive-search-trending__grid::-webkit-scrollbar {
+      display: none !important;
+    }
+
+    .search-modal--dropdown .predictive-search-trending__item {
+      flex: 0 0 calc(50% - 4px) !important;
+      scroll-snap-align: start !important;
+      min-width: 0 !important;
+    }
+  }
+{% endstylesheet %}

@@ -1,0 +1,249 @@
+{%- liquid
+  assign heading = section.settings.heading
+  assign paragraph_1 = section.settings.paragraph_1
+  assign paragraph_2 = section.settings.paragraph_2
+  assign paragraph_3 = section.settings.paragraph_3
+  assign image_back = section.settings.image_back
+  assign image_front = section.settings.image_front
+-%}
+
+{% style %}
+  #HeritageIntroSection-{{ section.id }} {
+    background: #fff;
+    padding: clamp(3rem, 6vw, 5rem) 0;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'heading'
+      'images'
+      'text';
+    gap: clamp(2rem, 5vw, 2.5rem);
+    align-items: center;
+  }
+
+  @media screen and (min-width: 990px) {
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: 'content images';
+      gap: clamp(2rem, 4vw, 5rem);
+    }
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__content {
+    max-width: 34rem;
+  }
+
+  @media screen and (max-width: 989px) {
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__content {
+      display: contents;
+      max-width: none;
+    }
+
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__heading-wrap {
+      grid-area: heading;
+    }
+
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__text-wrap {
+      grid-area: text;
+      max-width: none;
+    }
+
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__images {
+      grid-area: images;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__content {
+      grid-area: content;
+    }
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__heading {
+    margin: 0 0 2rem;
+    color: #000;
+    font-weight: 500;
+    font-size: 45px;
+    line-height: 120%;
+    letter-spacing: 0;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__text {
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: #000;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__text:last-child {
+    margin-bottom: 0;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__images {
+    position: relative;
+    width: 100%;
+    max-width: 32rem;
+    margin: 0 auto;
+    aspect-ratio: 4 / 5;
+    min-height: 22rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__images {
+      max-width: none;
+      margin: 0 0 0 auto;
+      min-height: 28rem;
+    }
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__image {
+    position: absolute;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__image--back {
+    top: 0;
+    right: 0;
+    width: 68%;
+    height: 78%;
+    z-index: 1;
+  }
+
+  #HeritageIntroSection-{{ section.id }} .heritage-intro__image--front {
+    bottom: 50px;
+    left: -33px;
+    width: 58%;
+    height: 72%;
+    z-index: 2;
+  }
+
+  @media screen and (max-width: 767px) {
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__heading {
+      margin: 0;
+      font-size: 32px;
+      left:0 !important;
+      text-align: center;
+    }
+    #HeritageIntroSection-{{ section.id }} .heritage-intro__image--front {
+      left:0 !important;
+      bottom: 0px;
+
+    }
+
+
+  }
+{% endstyle %}
+
+<div class="heritage-intro-section" id="HeritageIntroSection-{{ section.id }}">
+  <div class="page-width">
+    <div class="heritage-intro__grid">
+      <div class="heritage-intro__content">
+        <div class="heritage-intro__heading-wrap">
+          {%- if heading != blank -%}
+            <h2 class="heritage-intro__heading">{{ heading }}</h2>
+          {%- endif -%}
+        </div>
+
+        <div class="heritage-intro__text-wrap">
+          {%- if paragraph_1 != blank -%}
+            <p class="heritage-intro__text">{{ paragraph_1 }}</p>
+          {%- endif -%}
+
+          {%- if paragraph_2 != blank -%}
+            <p class="heritage-intro__text">{{ paragraph_2 }}</p>
+          {%- endif -%}
+
+          {%- if paragraph_3 != blank -%}
+            <p class="heritage-intro__text">{{ paragraph_3 }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="heritage-intro__images">
+        {%- if image_back != blank -%}
+          <div class="heritage-intro__image heritage-intro__image--back image-wrap">
+            {{
+              image_back
+              | image_url: width: 900
+              | image_tag: loading: 'lazy', alt: heading, widths: '375, 550, 750, 900', sizes: '(min-width: 990px) 28vw, 68vw'
+            }}
+          </div>
+        {%- endif -%}
+
+        {%- if image_front != blank -%}
+          <div class="heritage-intro__image heritage-intro__image--front image-wrap">
+            {{
+              image_front
+              | image_url: width: 800
+              | image_tag: loading: 'lazy', alt: heading, widths: '375, 550, 750, 800', sizes: '(min-width: 990px) 24vw, 58vw'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Heritage intro",
+  "tag": "section",
+  "class": "section-heritage-intro",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Heritage In Our Blood. Confidence In Our Clothes."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_1",
+      "label": "Paragraph 1",
+      "default": "We are introducing Africa's cultural heritage through clothing and accessories to the world while reintroducing engagement with African print fashion."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_2",
+      "label": "Paragraph 2",
+      "default": "By combining traditional African fabrics with modern styles and silhouettes, we create pieces that honour culture while fitting seamlessly into contemporary life."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_3",
+      "label": "Paragraph 3",
+      "default": "Every design is created with the intention of helping women express themselves confidently through fashion that feels both meaningful and beautiful."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_back",
+      "label": "Back image (upper right)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_front",
+      "label": "Front image (lower left)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Heritage intro"
+    }
+  ]
+}
+{% endschema %}

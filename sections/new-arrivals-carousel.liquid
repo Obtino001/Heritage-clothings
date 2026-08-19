@@ -1,0 +1,3405 @@
+{%- liquid
+  assign collection = collections[section.settings.collection]
+  assign product_limit = section.settings.products_to_show
+  assign columns_desktop = section.settings.columns_desktop
+
+  assign color_map = 'dark green:#2e7d32,light blue:#87ceeb,sky blue:#87ceeb,dark brown:#5d4037,purple multi:#9c27b0,black:#111111,white:#ffffff,red:#e53935,blue:#2196f3,green:#4caf50,yellow:#ffeb3b,orange:#ff9800,pink:#e91e63,purple:#9c27b0,magenta:#e040fb,brown:#795548,beige:#f5f5dc,grey:#9e9e9e,gray:#9e9e9e,navy:#1a237e,teal:#009688,cream:#fffdd0,gold:#d4af37,silver:#c0c0c0,burgundy:#800020,maroon:#800000,coral:#ff7f50,mint:#98ff98,olive:#808000,khaki:#f0e68c,ivory:#fffff0,tan:#d2b48c,charcoal:#36454f,wine:#722f37,bronze:#cd7f32,copper:#b87333,lilac:#c8a2c8,lavender:#e6e6fa,peach:#ffcba4,rose:#ff007f,nude:#e3bc9a'
+  assign color_map_pairs = color_map | split: ','
+-%}
+
+<div
+  id="NewArrivals-{{ section.id }}"
+  class="na-section"
+  data-section-id="{{ section.id }}"
+  data-columns="{{ columns_desktop }}"
+  data-cart-add-url="{{ routes.cart_add_url }}.js"
+  style="
+    --na-padding-top: {{ section.settings.padding_top }}px;
+    --na-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --na-gap: {{ section.settings.card_gap }}px;
+    --na-image-radius: {{ section.settings.image_radius }}px;
+    --na-badge-sale-bg: {{ section.settings.badge_sale_color }};
+    --na-badge-new-bg: {{ section.settings.badge_new_color }};
+    --na-sale-price-color: {{ section.settings.sale_price_color }};
+    --na-rating-bg: {{ section.settings.rating_bg_color }};
+  "
+>
+  <div class="page-width">
+    <div class="na-header">
+      <h2 class="na-header__title">{{ section.settings.heading }}</h2>
+
+      {%- if section.settings.show_view_all_mobile and collection != blank -%}
+        {%- liquid
+          assign view_all_link = section.settings.view_all_url
+          if view_all_link == blank
+            assign view_all_link = collection.url
+          endif
+        -%}
+        {%- if view_all_link != blank -%}
+          <a href="{{ view_all_link }}" class="na-header__view-all na-header__view-all--mobile">
+            {{ section.settings.view_all_label | default: 'View All' }}
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    {%- if collection != blank and collection.products_count > 0 -%}
+      <div class="na-carousel" data-na-carousel>
+        <div class="na-header__nav na-header__nav--desktop">
+            <button
+            type="button"
+            class="na-arrow na-arrow--prev"
+            aria-label="Previous products"
+            data-na-prev
+            >
+           <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0.365985 8.83875L7.43723 15.91L9.20473 14.1425L3.01723 7.955L9.20473 1.7675L7.43723 0L0.365985 7.07125C0.131646 7.30566 1.90735e-06 7.62354 1.90735e-06 7.955C1.90735e-06 8.28646 0.131646 8.60434 0.365985 8.83875Z" fill="black"/>
+</svg>
+
+            </button>
+            <button
+            type="button"
+            class="na-arrow na-arrow--next"
+            aria-label="Next products"
+            data-na-next
+            >
+           <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8.83875 8.83875L1.7675 15.91L0 14.1425L6.1875 7.955L0 1.7675L1.7675 0L8.83875 7.07125C9.07309 7.30566 9.20473 7.62354 9.20473 7.955C9.20473 8.28646 9.07309 8.60434 8.83875 8.83875Z" fill="black"/>
+</svg>
+
+            </button>
+        </div>
+
+        <div class="na-track" data-na-track>
+          {%- for product in collection.products limit: product_limit -%}
+            {%- liquid
+              assign on_sale = false
+              if product.compare_at_price > product.price
+                assign on_sale = true
+                assign discount_pct = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round
+              endif
+
+              assign is_new = false
+              if product.tags contains 'new' or product.tags contains 'New'
+                assign is_new = true
+              endif
+
+              assign size_option = nil
+              assign swatch_option = nil
+              assign mf_colors = nil
+
+              for option in product.options_with_values
+                assign option_down = option.name | downcase
+                if option_down == 'size'
+                  assign size_option = option
+                endif
+              endfor
+
+              for option in product.options_with_values
+                assign option_down = option.name | downcase
+                assign option_has_swatches = false
+                for value in option.values
+                  if value.swatch.color != blank or value.swatch.image != blank
+                    assign option_has_swatches = true
+                  endif
+                endfor
+                if option_down == 'color' or option_down == 'colour' or option_down == 'colors' or option_down == 'colours'
+                  assign swatch_option = option
+                  break
+                elsif option_has_swatches and swatch_option == nil
+                  assign swatch_option = option
+                endif
+              endfor
+
+              if swatch_option == nil and size_option != nil
+                for option in product.options_with_values
+                  if option.position != size_option.position
+                    assign option_down = option.name | downcase
+                    assign option_has_swatches = false
+                    for value in option.values
+                      if value.swatch.color != blank or value.swatch.image != blank
+                        assign option_has_swatches = true
+                      endif
+                    endfor
+                    if option_down == 'color' or option_down == 'colour' or option_down == 'colors' or option_down == 'colours' or option_has_swatches
+                      assign swatch_option = option
+                      break
+                    endif
+                  endif
+                endfor
+              endif
+
+              if product.metafields.shopify['color-pattern'].value != blank
+                assign mf_colors = product.metafields.shopify['color-pattern'].value
+              elsif product.metafields.shopify.color.value != blank
+                assign mf_colors = product.metafields.shopify.color.value
+              elsif product.metafields.custom.colors.value != blank
+                assign mf_colors = product.metafields.custom.colors.value
+              endif
+
+              if swatch_option == nil and mf_colors != blank
+                for option in product.options_with_values
+                  assign option_down = option.name | downcase
+                  if option_down == 'color' or option_down == 'colour' or option_down == 'colors' or option_down == 'colours'
+                    assign swatch_option = option
+                    break
+                  endif
+                endfor
+              endif
+
+              assign show_color_swatches = false
+              if section.settings.show_color_swatches
+                if swatch_option != nil or mf_colors != blank
+                  assign show_color_swatches = true
+                endif
+              endif
+
+              assign rating_count = 0
+              if product.metafields.reviews.rating.value.rating_count != blank
+                assign rating_count = product.metafields.reviews.rating.value.rating_count | plus: 0 | round
+              elsif product.metafields.reviews.rating_count != blank
+                assign rating_count = product.metafields.reviews.rating_count | plus: 0 | round
+              elsif product.metafields.custom.review_count != blank
+                assign rating_count = product.metafields.custom.review_count | plus: 0 | round
+              endif
+
+              assign featured_variant = product.selected_or_first_available_variant
+            -%}
+
+            <article
+              class="na-card"
+              data-na-card
+              data-product-id="{{ product.id }}"
+              data-product-title="{{ product.title | escape }}"
+              {% if size_option %}
+                data-size-option-name="{{ size_option.name | escape }}"
+                data-size-position="{{ size_option.position }}"
+              {% endif %}
+              {% if swatch_option %}
+                data-color-option-name="{{ swatch_option.name | escape }}"
+                data-color-position="{{ swatch_option.position }}"
+              {% endif %}
+              {% if size_option and swatch_option %}
+                data-na-linked-variants="true"
+              {% endif %}
+              {% if featured_variant %}
+                data-default-variant-id="{{ featured_variant.id }}"
+                {% if swatch_option %}
+                  {% if swatch_option.position == 1 %}
+                    data-default-color="{{ featured_variant.option1 | escape }}"
+                  {% elsif swatch_option.position == 2 %}
+                    data-default-color="{{ featured_variant.option2 | escape }}"
+                  {% else %}
+                    data-default-color="{{ featured_variant.option3 | escape }}"
+                  {% endif %}
+                {% endif %}
+                {% if size_option %}
+                  {% if size_option.position == 1 %}
+                    data-default-size="{{ featured_variant.option1 | escape }}"
+                  {% elsif size_option.position == 2 %}
+                    data-default-size="{{ featured_variant.option2 | escape }}"
+                  {% else %}
+                    data-default-size="{{ featured_variant.option3 | escape }}"
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            >
+              <div class="na-card__media">
+                <a href="{{ product.url }}" class="na-card__image-link" aria-label="{{ product.title | escape }}">
+                  {%- if product.featured_media -%}
+                    <img
+                      class="na-card__image"
+                      src="{{ product.featured_media | image_url: width: 800 }}"
+                      srcset="
+                        {{ product.featured_media | image_url: width: 400 }} 400w,
+                        {{ product.featured_media | image_url: width: 600 }} 600w,
+                        {{ product.featured_media | image_url: width: 800 }} 800w
+                      "
+                      sizes="(max-width: 749px) 85vw, (max-width: 989px) 45vw, 25vw"
+                      alt="{{ product.featured_media.alt | default: product.title | escape }}"
+                      width="{{ product.featured_media.width }}"
+                      height="{{ product.featured_media.height }}"
+                      loading="{% if forloop.index <= columns_desktop %}eager{% else %}lazy{% endif %}"
+                      data-na-main-image
+                      data-na-default-src="{{ product.featured_media | image_url: width: 800 }}"
+                      data-na-default-srcset="{{ product.featured_media | image_url: width: 400 }} 400w, {{ product.featured_media | image_url: width: 600 }} 600w, {{ product.featured_media | image_url: width: 800 }} 800w"
+                    >
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'na-card__placeholder' }}
+                  {%- endif -%}
+                </a>
+
+                <div class="na-card__badges">
+                  {%- if on_sale and section.settings.show_sale_badge -%}
+                    <span class="na-badge na-badge--sale">{{ discount_pct }}% Off</span>
+                  {%- endif -%}
+                  {%- if is_new and section.settings.show_new_badge -%}
+                    <span class="na-badge na-badge--new">New</span>
+                  {%- endif -%}
+                </div>
+
+                {% comment %} {%- if section.settings.show_wishlist -%}
+                  <button
+                    type="button"
+                    class="wishlist-btn na-wishlist"
+                    aria-label="Add to wishlist"
+                    aria-pressed="false"
+                    data-wishlist-btn
+                    data-product-id="{{ product.id }}"
+                    data-product-handle="{{ product.handle }}"
+                    data-product-title="{{ product.title | escape }}"
+                    data-product-image="{{ product.featured_media | image_url: width: 800 }}"
+                    data-product-price="{{ product.price | money }}"
+                    data-product-url="{{ product.url }}"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                  </button>
+                {%- endif -%} {% endcomment %}
+
+                {%- if size_option != nil and section.settings.show_size_selector -%}
+                  <div class="na-sizes" data-na-sizes>
+                    <div class="na-sizes__bar" role="group" aria-label="Select size">
+                      {%- for value in size_option.values -%}
+                        {%- liquid
+                          assign size_variant = nil
+                          assign size_available = false
+                          assign size_display = value
+                          assign size_norm = value | downcase | strip
+
+                          if size_norm == 'extra small' or size_norm == 'x-small' or size_norm == 'xsmall' or size_norm == 'xs'
+                            assign size_display = 'XS'
+                          elsif size_norm == 'small' or size_norm == 's'
+                            assign size_display = 'S'
+                          elsif size_norm == 'medium' or size_norm == 'm'
+                            assign size_display = 'M'
+                          elsif size_norm == 'large' or size_norm == 'l'
+                            assign size_display = 'L'
+                          elsif size_norm == 'x-large' or size_norm == 'xlarge' or size_norm == 'x large' or size_norm == 'xl'
+                            assign size_display = 'XL'
+                          elsif size_norm == 'xx-large' or size_norm == 'xxlarge' or size_norm == 'xx large' or size_norm == '2x-large' or size_norm == '2x large' or size_norm == '2xlarge' or size_norm == '2xl'
+                            assign size_display = '2XL'
+                          elsif size_norm == 'xxx-large' or size_norm == 'xxxlarge' or size_norm == 'xxx large' or size_norm == '3x-large' or size_norm == '3x large' or size_norm == '3xlarge' or size_norm == '3xl'
+                            assign size_display = '3XL'
+                          elsif size_norm == 'xxxx-large' or size_norm == 'xxxxlarge' or size_norm == '4x-large' or size_norm == '4x large' or size_norm == '4xlarge' or size_norm == '4xl'
+                            assign size_display = '4XL'
+                          elsif size_norm == '5x-large' or size_norm == '5x large' or size_norm == '5xlarge' or size_norm == '5xl'
+                            assign size_display = '5XL'
+                          endif
+
+                          for variant in product.variants
+                            if size_option.position == 1 and variant.option1 == value
+                              assign size_variant = variant
+                            elsif size_option.position == 2 and variant.option2 == value
+                              assign size_variant = variant
+                            elsif size_option.position == 3 and variant.option3 == value
+                              assign size_variant = variant
+                            endif
+                          endfor
+                          if size_variant != nil and size_variant.available
+                            assign size_available = true
+                          endif
+                        -%}
+                        <button
+                          type="button"
+                          class="na-sizes__btn{% unless size_available %} na-sizes__btn--disabled{% endunless %}"
+                          data-size-value="{{ value | escape }}"
+                          data-variant-id="{{ size_variant.id }}"
+                          data-available="{{ size_available }}"
+                          {% unless size_available %}disabled{% endunless %}
+                          aria-label="Size {{ value }}"
+                          aria-pressed="false"
+                          title="{{ value }}"
+                        >
+                          <span class="na-sizes__label">{{ size_display }}</span>
+                        </button>
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              <div class="na-card__body">
+                <div class="na-card__row">
+                  <div class="na-card__info">
+                    <h3 class="na-card__title">
+                      <a href="{{ product.url }}">{{ product.title }}</a>
+                    </h3>
+                  </div>
+
+                  <div class="na-card__pricing">
+                    {%- if on_sale -%}
+                      <span class="na-price na-price--sale">{{ product.price | money }}</span>
+                      <s class="na-price na-price--compare">{{ product.compare_at_price | money }}</s>
+                    {%- else -%}
+                      <span class="na-price">{{ product.price | money }}</span>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                <div class="na-card__meta-row">
+                  {%- if show_color_swatches -%}
+                    <div class="na-swatches" role="list" aria-label="Available colors">
+                      {%- if swatch_option != nil -%}
+                        {%- for value in swatch_option.values -%}
+                          {%- liquid
+                            assign swatch_variant = nil
+                            assign swatch_main_image = nil
+                            assign swatch_thumb_image = nil
+                            assign swatch_hex = ''
+                            assign value_down = value | downcase | strip
+
+                            if value.swatch.color
+                              assign swatch_hex = value.swatch.color
+                            endif
+
+                            if value.swatch.image
+                              assign swatch_thumb_image = value.swatch.image
+                              assign swatch_main_image = value.swatch.image
+                            endif
+
+                            for variant in product.variants
+                              assign color_matches = false
+                              if swatch_option.position == 1 and variant.option1 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 2 and variant.option2 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 3 and variant.option3 == value
+                                assign color_matches = true
+                              endif
+
+                              if color_matches
+                                if swatch_variant == nil
+                                  assign swatch_variant = variant
+                                endif
+                                if variant.featured_image
+                                  assign swatch_main_image = variant.featured_image
+                                  assign swatch_variant = variant
+                                endif
+                              endif
+                            endfor
+
+                            if swatch_hex == ''
+                              for pair in color_map_pairs
+                                assign pair_parts = pair | split: ':'
+                                assign map_name = pair_parts[0]
+                                if value_down == map_name
+                                  assign swatch_hex = pair_parts[1]
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if swatch_hex == ''
+                              assign color_words = value_down | split: ' '
+                              assign hex_found = false
+                              for word in color_words
+                                unless hex_found
+                                  for pair in color_map_pairs
+                                    assign pair_parts = pair | split: ':'
+                                    assign map_name = pair_parts[0]
+                                    if word == map_name
+                                      assign swatch_hex = pair_parts[1]
+                                      assign hex_found = true
+                                      break
+                                    endif
+                                  endfor
+                                endunless
+                              endfor
+                            endif
+
+                            assign swatch_is_multi = false
+                            if value_down contains 'multi' or value_down contains 'geometric' or value_down contains 'print' or value_down contains 'pattern' or value_down contains 'floral' or value_down contains 'stripe' or value_down contains 'abstract'
+                              assign swatch_is_multi = true
+                            endif
+
+                            assign swatch_has_image = false
+                            if swatch_main_image != nil
+                              assign swatch_has_image = true
+                            endif
+                          -%}
+                          <button
+                            type="button"
+                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% if swatch_is_multi and swatch_thumb_image == nil %} na-swatch--multi{% elsif swatch_hex == '' and swatch_thumb_image == nil %} na-swatch--fallback{% endif %}"
+                            role="listitem"
+                            title="{{ value }}"
+                            data-swatch
+                            data-color-value="{{ value | escape }}"
+                            data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            data-variant-id="{{ swatch_variant.id }}"
+                            {% if swatch_main_image %}
+                              data-image-src="{{ swatch_main_image | image_url: width: 800 }}"
+                              data-image-srcset="{{ swatch_main_image | image_url: width: 400 }} 400w, {{ swatch_main_image | image_url: width: 800 }} 800w"
+                            {% endif %}
+                            {% if swatch_thumb_image %}
+                              style="background-image: url('{{ swatch_thumb_image | image_url: width: 80 }}'); background-size: cover; background-position: center;"
+                            {% elsif swatch_hex != '' and swatch_is_multi == false %}
+                              style="background-color: {{ swatch_hex }};"
+                            {% endif %}
+                          ></button>
+                        {%- endfor -%}
+                      {%- elsif mf_colors != blank -%}
+                        {%- for item in mf_colors -%}
+                          {%- liquid
+                            assign color_label = item
+                            assign color_hex = ''
+                            assign mf_thumb_image = nil
+                            assign mf_main_image = nil
+                            assign mf_swatch_image = nil
+
+                            if item.label != blank
+                              assign color_label = item.label
+                            endif
+                            if item.color != blank
+                              assign color_hex = item.color
+                            endif
+                            if item.image != blank
+                              assign mf_thumb_image = item.image
+                              assign mf_main_image = item.image
+                              assign mf_swatch_image = item.image
+                            elsif item.pattern != blank
+                              assign mf_thumb_image = item.pattern
+                              assign mf_main_image = item.pattern
+                              assign mf_swatch_image = item.pattern
+                            elsif item.swatch != blank and item.swatch.image != blank
+                              assign mf_thumb_image = item.swatch.image
+                              assign mf_main_image = item.swatch.image
+                              assign mf_swatch_image = item.swatch.image
+                            endif
+
+                            assign color_down = color_label | downcase | strip
+
+                            if mf_main_image == nil
+                              for media in product.media
+                                assign media_alt_down = media.alt | default: '' | downcase | strip
+                                if media_alt_down == color_down
+                                  assign mf_main_image = media.preview_image
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if mf_main_image == nil
+                              for variant in product.variants
+                                if variant.featured_image
+                                  assign v1 = variant.option1 | downcase
+                                  assign v2 = variant.option2 | downcase
+                                  assign v3 = variant.option3 | downcase
+                                  if v1 == color_down or v2 == color_down or v3 == color_down
+                                    assign mf_main_image = variant.featured_image
+                                    break
+                                  endif
+                                endif
+                              endfor
+                            endif
+
+                            if mf_main_image == nil
+                              assign mf_main_image = mf_thumb_image
+                            endif
+                            if mf_thumb_image == nil
+                              assign mf_thumb_image = mf_main_image
+                            endif
+
+                            if color_hex == '' 
+                              for pair in color_map_pairs
+                                assign pair_parts = pair | split: ':'
+                                assign map_name = pair_parts[0]
+                                if color_down == map_name
+                                  assign color_hex = pair_parts[1]
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if color_hex == ''
+                              assign color_words = color_down | split: ' '
+                              assign hex_found = false
+                              for word in color_words
+                                unless hex_found
+                                  for pair in color_map_pairs
+                                    assign pair_parts = pair | split: ':'
+                                    assign map_name = pair_parts[0]
+                                    if word == map_name
+                                      assign color_hex = pair_parts[1]
+                                      assign hex_found = true
+                                      break
+                                    endif
+                                  endfor
+                                endunless
+                              endfor
+                            endif
+
+                            assign swatch_is_multi = false
+                            if color_down contains 'multi' or color_down contains 'geometric' or color_down contains 'print' or color_down contains 'pattern' or color_down contains 'floral' or color_down contains 'stripe' or color_down contains 'abstract'
+                              assign swatch_is_multi = true
+                            endif
+
+                            assign swatch_has_image = false
+                            if mf_main_image != nil
+                              assign swatch_has_image = true
+                            endif
+                          -%}
+                          <button
+                            type="button"
+                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% if swatch_is_multi and mf_swatch_image == nil %} na-swatch--multi{% elsif color_hex == '' and mf_swatch_image == nil %} na-swatch--fallback{% endif %}"
+                            role="listitem"
+                            title="{{ color_label }}"
+                            data-swatch
+                            data-color-value="{{ color_label | escape }}"
+                            data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            {% if mf_main_image %}
+                              data-image-src="{{ mf_main_image | image_url: width: 800 }}"
+                              data-image-srcset="{{ mf_main_image | image_url: width: 400 }} 400w, {{ mf_main_image | image_url: width: 800 }} 800w"
+                            {% endif %}
+                            {% if mf_swatch_image %}
+                              style="background-image: url('{{ mf_swatch_image | image_url: width: 80 }}'); background-size: cover; background-position: center;"
+                            {% elsif color_hex != '' and swatch_is_multi == false %}
+                              style="background-color: {{ color_hex }};"
+                            {% endif %}
+                          ></button>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if section.settings.show_rating -%}
+                    <span
+                      class="stamped-product-reviews-badge na-stamped-source"
+                      data-id="{{ product.id }}"
+                      data-product-sku="{{ product.handle }}"
+                      data-product-title="{{ product.title | escape }}"
+                      hidden
+                      aria-hidden="true"
+                    ></span>
+                    <div
+                      class="na-rating-pill"
+                      data-na-rating-sync
+                      data-fallback-count="{{ rating_count }}"
+                      {% unless rating_count > 0 %}hidden style="display:none !important"{% endunless %}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                      <span data-na-rating-count>{% if rating_count > 0 %}{{ rating_count }}{% endif %}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <button
+                  type="button"
+                  class="na-mobile-add"
+                  data-na-mobile-add
+                  aria-label="Add {{ product.title | escape }}"
+                >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+<path d="M7.8125 8.59375V7.03125C7.8125 5.78805 8.30636 4.59576 9.18544 3.71669C10.0645 2.83761 11.2568 2.34375 12.5 2.34375C13.7432 2.34375 14.9355 2.83761 15.8146 3.71669C16.6936 4.59576 17.1875 5.78805 17.1875 7.03125V8.59375M3.90625 8.59375C3.69905 8.59375 3.50034 8.67606 3.35382 8.82257C3.20731 8.96909 3.125 9.1678 3.125 9.375V19.9219C3.125 21.3984 4.38281 22.6562 5.85938 22.6562H19.1406C20.6172 22.6562 21.875 21.4595 21.875 19.9829V9.375C21.875 9.1678 21.7927 8.96909 21.6462 8.82257C21.4997 8.67606 21.301 8.59375 21.0938 8.59375H3.90625Z" stroke="black" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M7.8125 10.9375V11.7188C7.8125 12.962 8.30636 14.1542 9.18544 15.0333C10.0645 15.9124 11.2568 16.4062 12.5 16.4062C13.7432 16.4062 14.9355 15.9124 15.8146 15.0333C16.6936 14.1542 17.1875 12.962 17.1875 11.7188V10.9375" stroke="black" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                  {% comment %} <span>Add</span> {% endcomment %}
+                </button>
+              </div>
+
+              {%- comment -%} Variant data for JS image switching {%- endcomment -%}
+              <script type="application/json" data-na-variants>
+                [
+                  {%- for variant in product.variants -%}
+                    {
+                      "id": {{ variant.id }},
+                      "available": {{ variant.available }},
+                      "option1": {{ variant.option1 | json }},
+                      "option2": {{ variant.option2 | json }},
+                      "option3": {{ variant.option3 | json }},
+                      "image": {% if variant.featured_image %}"{{ variant.featured_image | image_url: width: 800 }}"{% else %}null{% endif %},
+                      "srcset": {% if variant.featured_image %}"{{ variant.featured_image | image_url: width: 400 }} 400w, {{ variant.featured_image | image_url: width: 800 }} 800w"{% else %}null{% endif %}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+              <script type="application/json" data-na-media>
+                [
+                  {%- for media in product.media -%}
+                    {
+                      "src": "{{ media | image_url: width: 800 }}",
+                      "srcset": "{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 800 }} 800w",
+                      "alt": {{ media.alt | default: '' | json }}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+              <script type="application/json" data-na-color-map>
+                [
+                  {%- if swatch_option != nil -%}
+                    {%- for value in swatch_option.values -%}
+                      {%- liquid
+                        assign map_main = nil
+                        assign map_thumb = nil
+                        if value.swatch.image
+                          assign map_thumb = value.swatch.image
+                        endif
+                        for variant in product.variants
+                          assign color_match = false
+                          if swatch_option.position == 1 and variant.option1 == value
+                            assign color_match = true
+                          elsif swatch_option.position == 2 and variant.option2 == value
+                            assign color_match = true
+                          elsif swatch_option.position == 3 and variant.option3 == value
+                            assign color_match = true
+                          endif
+                          if color_match and variant.featured_image
+                            assign map_main = variant.featured_image
+                            break
+                          endif
+                        endfor
+                        assign value_down = value | downcase | strip
+                        if map_main == nil
+                          for media in product.media
+                            assign alt_down = media.alt | default: '' | downcase | strip
+                            if alt_down == value_down
+                              assign map_main = media.preview_image
+                              break
+                            endif
+                          endfor
+                        endif
+                        if map_thumb == nil
+                          assign map_thumb = map_main
+                        endif
+                        if map_main == nil
+                          assign map_main = map_thumb
+                        endif
+
+                        assign map_hex = ''
+                        if value.swatch.color
+                          assign map_hex = value.swatch.color
+                        endif
+                        if map_hex == ''
+                          for pair in color_map_pairs
+                            assign pair_parts = pair | split: ':'
+                            assign map_name = pair_parts[0]
+                            if value_down == map_name
+                              assign map_hex = pair_parts[1]
+                              break
+                            endif
+                          endfor
+                        endif
+
+                        assign map_is_multi = false
+                        if value_down contains 'multi' or value_down contains 'geometric' or value_down contains 'print' or value_down contains 'pattern' or value_down contains 'floral' or value_down contains 'stripe' or value_down contains 'abstract'
+                          assign map_is_multi = true
+                        endif
+                      -%}
+                      {
+                        "label": {{ value | json }},
+                        "thumb": {% if map_thumb %}"{{ map_thumb | image_url: width: 120 }}"{% elsif map_main %}"{{ map_main | image_url: width: 120 }}"{% else %}null{% endif %},
+                        "main": {% if map_main %}"{{ map_main | image_url: width: 800 }}"{% else %}null{% endif %},
+                        "mainSrcset": {% if map_main %}"{{ map_main | image_url: width: 400 }} 400w, {{ map_main | image_url: width: 800 }} 800w"{% else %}null{% endif %},
+                        "hex": {% if map_hex != '' %}{{ map_hex | json }}{% else %}null{% endif %},
+                        "isMulti": {{ map_is_multi | json }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {%- endfor -%}
+                  {%- elsif mf_colors != blank -%}
+                    {%- for item in mf_colors -%}
+                      {%- liquid
+                        assign map_label = item
+                        if item.label != blank
+                          assign map_label = item.label
+                        endif
+                        assign map_main = nil
+                        assign map_thumb = nil
+                        if item.image != blank
+                          assign map_thumb = item.image
+                          assign map_main = item.image
+                        elsif item.pattern != blank
+                          assign map_thumb = item.pattern
+                          assign map_main = item.pattern
+                        endif
+                        assign label_down = map_label | downcase | strip
+                        if map_main == nil
+                          for media in product.media
+                            assign alt_down = media.alt | default: '' | downcase | strip
+                            if alt_down == label_down
+                              assign map_main = media.preview_image
+                              break
+                            endif
+                          endfor
+                        endif
+                        if map_main == nil
+                          for variant in product.variants
+                            if variant.featured_image
+                              assign v1 = variant.option1 | downcase
+                              assign v2 = variant.option2 | downcase
+                              assign v3 = variant.option3 | downcase
+                              if v1 == label_down or v2 == label_down or v3 == label_down
+                                assign map_main = variant.featured_image
+                                break
+                              endif
+                            endif
+                          endfor
+                        endif
+                        if map_main == nil
+                          assign map_main = map_thumb
+                        endif
+                        if map_thumb == nil
+                          assign map_thumb = map_main
+                        endif
+
+                        assign map_hex = ''
+                        if item.color != blank
+                          assign map_hex = item.color
+                        endif
+                        if map_hex == ''
+                          for pair in color_map_pairs
+                            assign pair_parts = pair | split: ':'
+                            assign map_name = pair_parts[0]
+                            if label_down == map_name
+                              assign map_hex = pair_parts[1]
+                              break
+                            endif
+                          endfor
+                        endif
+
+                        assign map_is_multi = false
+                        if label_down contains 'multi' or label_down contains 'geometric' or label_down contains 'print' or label_down contains 'pattern' or label_down contains 'floral' or label_down contains 'stripe' or label_down contains 'abstract'
+                          assign map_is_multi = true
+                        endif
+                      -%}
+                      {
+                        "label": {{ map_label | json }},
+                        "thumb": {% if map_thumb %}"{{ map_thumb | image_url: width: 120 }}"{% elsif map_main %}"{{ map_main | image_url: width: 120 }}"{% else %}null{% endif %},
+                        "main": {% if map_main %}"{{ map_main | image_url: width: 800 }}"{% else %}null{% endif %},
+                        "mainSrcset": {% if map_main %}"{{ map_main | image_url: width: 400 }} 400w, {{ map_main | image_url: width: 800 }} 800w"{% else %}null{% endif %},
+                        "hex": {% if map_hex != '' %}{{ map_hex | json }}{% else %}null{% endif %},
+                        "isMulti": {{ map_is_multi | json }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {%- endfor -%}
+                  {%- endif -%}
+                ]
+              </script>
+            </article>
+          {%- endfor -%}
+        </div>
+      </div>
+
+      <div class="na-controls">
+        <div class="na-progress" aria-hidden="true">
+          <div class="na-progress__track">
+            <div class="na-progress__bar" data-na-progress-bar></div>
+          </div>
+        </div>
+
+        <div class="na-header__nav na-header__nav--mobile">
+          <button
+            type="button"
+            class="na-arrow na-arrow--prev na-arrow--mobile"
+            aria-label="Previous products"
+            data-na-prev
+          >
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M0.365985 8.83875L7.43723 15.91L9.20473 14.1425L3.01723 7.955L9.20473 1.7675L7.43723 0L0.365985 7.07125C0.131646 7.30566 1.90735e-06 7.62354 1.90735e-06 7.955C1.90735e-06 8.28646 0.131646 8.60434 0.365985 8.83875Z" fill="black"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="na-arrow na-arrow--next na-arrow--mobile"
+            aria-label="Next products"
+            data-na-next
+          >
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M8.83875 8.83875L1.7675 15.91L0 14.1425L6.1875 7.955L0 1.7675L1.7675 0L8.83875 7.07125C9.07309 7.30566 9.20473 7.62354 9.20473 7.955C9.20473 8.28646 9.07309 8.60434 8.83875 8.83875Z" fill="black"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {%- else -%}
+      <p class="na-empty">{{ section.settings.empty_message }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="na-toast" data-na-toast role="status" aria-live="polite"></div>
+  <div class="wishlist-toast" data-wishlist-toast role="status" aria-live="polite"></div>
+</div>
+
+{%- if collection != blank and collection.products_count > 0 -%}
+  <div
+    id="na-mobile-drawer-{{ section.id }}"
+    class="na-mobile-drawer"
+    data-na-mobile-drawer
+    data-na-drawer-section="{{ section.id }}"
+    aria-hidden="true"
+  >
+    <div class="na-mobile-drawer__overlay" data-na-drawer-close></div>
+    <div class="na-mobile-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="na-drawer-title-{{ section.id }}">
+      <div class="na-mobile-drawer__header">
+        <h3 class="visually-hidden" id="na-drawer-title-{{ section.id }}">Quick add</h3>
+        <button type="button" class="na-mobile-drawer__close" data-na-drawer-close aria-label="Close">
+          Close <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="na-mobile-drawer__body">
+        <div class="na-mobile-drawer__field" data-na-drawer-colors-wrap hidden>
+          <p class="na-mobile-drawer__label">
+            <span data-na-drawer-color-label>Colour</span>: <span data-na-drawer-color-value></span>
+          </p>
+          <div class="na-mobile-drawer__swatches" data-na-drawer-swatches role="list"></div>
+        </div>
+        <div class="na-mobile-drawer__field" data-na-drawer-sizes-wrap hidden>
+          <p class="na-mobile-drawer__label">
+            <span data-na-drawer-size-label>Size</span>: <span data-na-drawer-size-value></span>
+          </p>
+          <div class="na-mobile-drawer__sizes" data-na-drawer-sizes role="group"></div>
+        </div>
+        <button type="button" class="na-mobile-drawer__submit" data-na-drawer-submit disabled>Add To Cart</button>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{%- style -%}
+  #NewArrivals-{{ section.id }} {
+    --na-columns: {{ columns_desktop }};
+  }
+
+  .na-section {
+    padding-top: var(--na-padding-top);
+    padding-bottom: var(--na-padding-bottom);
+    overflow: hidden;
+  }
+
+  .na-section__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .na-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+  }
+
+  .na-header__title {
+    margin: 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .na-header__view-all {
+    padding-inline: 20px; text-decoration: underline;
+  }
+
+.na-header__nav {
+  display: flex;
+  gap: 8px;
+}
+
+.na-header__nav--desktop {
+  position: absolute;
+  z-index: 99;
+  width: 100%;
+  justify-content: space-between;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.na-header__nav--desktop button.na-arrow--prev { left: -40px; position: relative; }
+.na-header__nav--desktop button.na-arrow--next { right: -20px; position: relative; }
+
+  .na-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .na-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .na-arrow:not(:disabled):hover {
+    opacity: 0.6;
+  }
+
+  .na-carousel {
+    position: relative;
+  }
+
+  .na-track {
+    display: flex;
+    gap: var(--na-gap);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 8px 8px;
+        z-index: 5;
+    position: relative;
+  }
+
+  .na-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .na-card {
+    flex: 0 0 calc((100% - (var(--na-columns) - 1) * var(--na-gap)) / var(--na-columns));
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .na-card__media {
+    position: relative;
+    border-radius: var(--na-image-radius);
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+
+  .na-card__image-link {
+    display: block;
+    aspect-ratio: 3 / 4;
+  }
+
+  .na-card__image,
+  .na-card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .na-card__media:hover .na-card__image {
+    transform: scale(1.03);
+  }
+
+  .na-card__badges {
+    position: absolute;
+    top: 12px;
+    left: auto;
+        right: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    z-index: 2;
+  }
+
+  .na-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .na-badge--sale {
+    background: var(--na-badge-sale-bg);
+  }
+
+  .na-badge--new {
+    background: var(--na-badge-new-bg);
+  }
+
+  .na-wishlist,
+  .na-card__media .wishlist-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+  }
+
+  .na-wishlist:hover,
+  .na-card__media .wishlist-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .na-wishlist.is-active svg path,
+  .na-card__media .wishlist-btn.is-active svg path {
+    fill: #e53935;
+    stroke: #e53935;
+  }
+
+  .na-sizes {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 15px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    z-index: 3;
+       padding: 12px 5px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+    scrollbar-width: none;
+        max-width: calc(100% - 25px);
+    margin-inline: auto;
+  }
+
+  .na-card__media:hover .na-sizes,
+  .na-card__media:focus-within .na-sizes,
+  .na-sizes.has-selection {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .na-sizes__bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 2px 4px;
+  }
+
+  .na-sizes__bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .na-sizes__btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 6px;
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    color: #111;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .na-sizes__label {
+    display: block;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .na-sizes__btn:hover:not(:disabled) {
+    border-color: #000;
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .na-sizes__btn.is-selected {
+    background: #000 !important;
+    border-color: #000 !important;
+    border-width: 2px !important;
+    color: #fff !important;
+  }
+
+  .na-sizes__btn--disabled,
+  .na-sizes__btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .na-sizes__btn.is-hidden,
+  .na-swatch.is-hidden {
+    display: none !important;
+  }
+
+  .na-card__body {
+    padding-top: 14px;
+  }
+
+  .na-card__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .na-card__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .na-card__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .na-card__title a {
+    color: inherit;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .na-card__title a:hover {
+    text-decoration: underline;
+  }
+
+  .na-card__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .na-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding-left: 5px;
+  }
+
+  .na-swatch {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #ccc;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    overflow: visible;
+    flex-shrink: 0;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    box-shadow: none;
+  }
+
+  .na-swatch:hover:not(.is-active) {
+    transform: scale(1.08);
+  }
+
+  .na-swatch.is-active {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+  }
+
+  .na-swatch--multi {
+    background: linear-gradient(135deg, #e53935 0%, #4caf50 33%, #2196f3 66%, #ffeb3b 100%) !important;
+  }
+
+  .na-swatch--fallback {
+    background: #e8e8e8 !important;
+  }
+
+  .na-card__pricing {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .na-price {
+    display: block;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000;
+    line-height: 1.3;
+  }
+
+  .na-price--sale {
+    color: var(--na-sale-price-color);
+  }
+
+  .na-price--compare {
+    font-size: 13px;
+    font-weight: 400;
+    color: #000;
+    text-decoration: line-through;
+  }
+
+  .na-stamped-source { display: none !important; visibility: hidden !important; }
+
+  .na-rating-pill {
+            z-index: 8;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #F5EFE6;
+    font-family: "Neue Montreal", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    color: #111;
+    white-space: nowrap;
+  }
+
+  .na-rating-pill svg {
+    width: 12px;
+    height: 12px;
+    color: #5A3A2E;
+    flex-shrink: 0;
+  }
+
+  .na-mobile-add {
+    display: none;
+  }
+
+  .na-quick-atc {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 28px;
+    border: none;
+    border-radius: 999px;
+    background: #2e5339;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: background 0.2s ease, opacity 0.2s ease;
+  }
+
+  .na-quick-atc:hover {
+    background: #24422e;
+  }
+
+  .na-quick-atc:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  @media screen and (min-width: 990px) {
+    .na-card.na-quick-atc-visible .na-card__media:hover .na-quick-atc,
+    .na-card.na-quick-atc-visible .na-card__media:focus-within .na-quick-atc {
+      display: inline-flex;
+    }
+  }
+
+  .na-header__nav--mobile {
+    display: none;
+  }
+
+  .na-mobile-drawer {
+    display: none;
+  }
+
+  .na-controls {
+    position: relative;
+  }
+
+  .na-progress {
+    margin-top: 24px;
+    padding: 0 8px;
+  }
+
+  .na-progress__track {
+    height: 3px;
+    background: #e5e5e5;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .na-progress__bar {
+    height: 100%;
+    width: 25%;
+    background: #111;
+    border-radius: 999px;
+    transition: width 0.2s ease, margin-left 0.2s ease;
+  }
+
+  .na-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+  }
+
+  .na-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    padding: 12px 20px;
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .na-toast.is-visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  .wishlist-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    padding: 12px 20px;
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .wishlist-toast.is-visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  @media screen and (max-width: 989px) {
+section.section-new-arrivals .na-header__nav { position: absolute; z-index: 99; top: 50%; bottom: auto; left: 0; transform: translateY(-50%); }
+section.section-new-arrivals .na-controls { position: unset; }
+section.section-new-arrivals { position: relative;z-index: 2;}
+body .needsclick { display: none; }
+
+.na-rating-pill { font-size: 12px; padding: 3px 8px; position: absolute; top: -35px; left: 10px;        background: #f5e6d3;
+        border-radius: 4px; }
+.na-card__body { position: relative; }
+
+    #NewArrivals-{{ section.id }} {
+      --na-columns: 1.4;
+    }
+
+    #NewArrivals-{{ section.id }} .na-card {
+      flex: 0 0 calc((100% - var(--na-gap)) / 1.40);
+      max-width: calc((100% - var(--na-gap)) / 1.40);
+    }
+
+    #NewArrivals-{{ section.id }} .na-header__view-all--mobile {
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 400;
+      color: #111;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .na-header__title {
+      font-size: 28px;
+    }
+
+    .na-card {
+      scroll-snap-stop: always;
+    }
+
+    .na-header__nav--desktop {
+      display: none;
+    }
+
+    .na-header__nav--mobile {
+      display: flex;
+      position: static;
+      transform: none;
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 0 8px;
+      z-index: 1;
+    }
+
+    .na-header__nav--mobile .na-arrow {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: #010101;
+      color: #111;
+    }
+
+    .na-header__nav--mobile .na-arrow:disabled {
+      opacity: 0.4;
+    }
+
+    .na-controls {
+      margin-top: 4px;
+    }
+
+    .na-progress {
+      margin-top: 16px;
+    }
+
+    .na-card__row {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 5px; flex-direction: column;
+    }
+.na-card__row+.na-card__meta-row .na-swatches{ display: none; }
+    .na-card__pricing {
+      text-align: left;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .na-card__pricing .na-price {
+      display: inline;
+    font-size: 14px; font-weight: 600; color: #000;
+    }
+
+    .na-card__pricing .na-price--sale {
+      color: var(--na-sale-price-color);
+    }
+
+    .na-card__pricing .na-price--compare {
+      display: inline;
+      font-size: 16px;
+      margin-left: 6px;
+      color:#000000 !important;
+    }
+
+    .na-card__title {
+      font-size: 14px;
+      line-height: 1.35;
+      -webkit-line-clamp: 2;
+      
+    }
+
+    .na-mobile-add {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 0; padding: 0; border: 0px solid #111; border-radius: 999px; background: #fff; color: #111; font-size: 13px; font-weight: 500; cursor: pointer; line-height: 1; min-width: 30px; min-height: 30px; justify-content: end;
+    }
+
+    .na-mobile-add svg {
+      flex-shrink: 0;
+    }
+
+    .na-header__nav--mobile .na-arrow--prev,
+    .na-header__nav--mobile .na-arrow--next {
+      left: auto;
+      right: auto;
+      position: static;
+    }
+
+    .na-track {
+      padding-inline: 0;
+    }
+
+    .na-card__media .na-sizes {
+      display: none;
+    }
+
+    .na-card__body {
+      padding-top: 10px;
+              padding-bottom: 10px;
+                     position: relative;
+                     display: flex; align-items: flex-start; justify-content: space-between; gap: 15px;
+    }
+
+    .na-rating-pill {
+      font-size: 12px;
+      padding: 5px 8px;
+    }
+
+    .na-wishlist,
+    .na-card__media .wishlist-btn {
+      width: 30px;
+      height: 30px;
+      top: 8px;
+      right: 8px;
+    }
+
+    .na-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+
+    .na-card__badges {
+      top: 8px;
+      left: 8px;
+    }
+
+    .na-mobile-drawer {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .na-mobile-drawer.is-open {
+      pointer-events: auto;
+    }
+
+    .na-mobile-drawer__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .na-mobile-drawer.is-open .na-mobile-drawer__overlay {
+      opacity: 1;
+    }
+
+    .na-mobile-drawer__panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.35s ease;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .na-mobile-drawer.is-open .na-mobile-drawer__panel {
+      transform: translateY(0);
+    }
+
+    .na-mobile-drawer__header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .na-mobile-drawer__close {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 14px;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .na-mobile-drawer__field {
+      margin-bottom: 24px;
+    }
+
+    .na-mobile-drawer__field[hidden] {
+      display: none !important;
+    }
+
+    .na-mobile-drawer__label {
+      margin: 0 0 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111;
+    }
+
+    .na-mobile-drawer__swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .na-mobile-drawer__swatch {
+      width: 56px;
+      height: 72px;
+      padding: 0;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f5f5f5;
+      cursor: pointer;
+    }
+
+    .na-mobile-drawer__swatch.is-active {
+      border-color: #111;
+    }
+
+    .na-mobile-drawer__swatch img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .na-mobile-drawer__swatch-color {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #e8e8e8;
+    }
+
+    .na-mobile-drawer__swatch-color--multi {
+      background: linear-gradient(135deg, #e53935 0%, #4caf50 33%, #2196f3 66%, #ffeb3b 100%);
+    }
+
+    .na-mobile-drawer__sizes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .na-mobile-drawer__size {
+      min-width: 44px;
+      height: 44px;
+      padding: 0 12px;
+      border: 1.5px solid #111;
+      border-radius: 999px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .na-mobile-drawer__size.is-active {
+      background: #111;
+      color: #fff;
+    }
+
+    .na-mobile-drawer__size:disabled {
+      opacity: 0.35;
+      text-decoration: line-through;
+      cursor: not-allowed;
+    }
+
+    .na-mobile-drawer__submit {
+      width: 100%;
+      margin-top: 8px;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 999px;
+      background: #2e5339;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .na-mobile-drawer__submit:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    body.na-drawer-open {
+      overflow: hidden;
+    }
+  }
+{%- endstyle -%}
+
+<script>
+  (function () {
+  function initNewArrivals(section) {
+    if (!section || section.dataset.naInit === 'true') return;
+    section.dataset.naInit = 'true';
+
+    var track = section.querySelector('[data-na-track]');
+    var prevBtns = section.querySelectorAll('[data-na-prev]');
+    var nextBtns = section.querySelectorAll('[data-na-next]');
+    var progressBar = section.querySelector('[data-na-progress-bar]');
+    var toast = section.querySelector('[data-na-toast]');
+    var columns = parseFloat(section.dataset.columns) || 4;
+
+    function getScrollAmount() {
+      var card = section.querySelector('[data-na-card]');
+      if (!card || !track) return 300;
+      var style = getComputedStyle(track);
+      var gap = parseFloat(style.gap) || 16;
+      return card.offsetWidth + gap;
+    }
+
+    function updateCarousel() {
+      if (!track || !progressBar) return;
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      var visibleRatio = track.scrollWidth > 0 ? track.clientWidth / track.scrollWidth : 1;
+      var scrollRatio = maxScroll > 0 ? track.scrollLeft / maxScroll : 0;
+      progressBar.style.width = Math.max(visibleRatio * 100, 12) + '%';
+      progressBar.style.marginLeft = scrollRatio * (100 - visibleRatio * 100) + '%';
+
+      if (prevBtns.length) {
+        prevBtns.forEach(function (btn) {
+          btn.disabled = track.scrollLeft <= 2;
+        });
+      }
+      if (nextBtns.length) {
+        nextBtns.forEach(function (btn) {
+          btn.disabled = track.scrollLeft >= maxScroll - 2;
+        });
+      }
+    }
+
+    prevBtns.forEach(function (prevBtn) {
+      if (!track) return;
+      prevBtn.addEventListener('click', function () {
+        track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+      });
+    });
+
+    nextBtns.forEach(function (nextBtn) {
+      if (!track) return;
+      nextBtn.addEventListener('click', function () {
+        track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+      });
+    });
+
+    function getCards() {
+      return Array.prototype.slice.call(section.querySelectorAll('[data-na-card]'));
+    }
+
+    function getNearestCardIndex() {
+      var cards = getCards();
+      if (!cards.length || !track) return 0;
+
+      var scrollLeft = track.scrollLeft;
+      var nearestIndex = 0;
+      var minDistance = Infinity;
+
+      cards.forEach(function (card, index) {
+        var distance = Math.abs(card.offsetLeft - scrollLeft);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      return nearestIndex;
+    }
+
+    function scrollToCardIndex(index) {
+      var cards = getCards();
+      if (!cards.length || !track) return;
+
+      var targetIndex = Math.max(0, Math.min(cards.length - 1, index));
+      track.scrollTo({ left: cards[targetIndex].offsetLeft, behavior: 'smooth' });
+    }
+
+    function initMobileSwipe() {
+      if (!track) return;
+
+      var mobileQuery = window.matchMedia('(max-width: 989px)');
+      var touchStartX = 0;
+      var touchStartY = 0;
+      var gestureStartIndex = 0;
+      var touchAxis = null;
+
+      function onTouchStart(event) {
+        if (!mobileQuery.matches || !event.touches.length) return;
+
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+        touchAxis = null;
+        gestureStartIndex = getNearestCardIndex();
+      }
+
+      function onTouchMove(event) {
+        if (!mobileQuery.matches || !event.touches.length) return;
+
+        var deltaX = event.touches[0].clientX - touchStartX;
+        var deltaY = event.touches[0].clientY - touchStartY;
+
+        if (touchAxis === null && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+          touchAxis = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y';
+        }
+
+        if (touchAxis === 'x') {
+          event.preventDefault();
+        }
+      }
+
+      function onTouchEnd(event) {
+        if (!mobileQuery.matches || touchAxis !== 'x') return;
+
+        var deltaX = touchStartX - event.changedTouches[0].clientX;
+        if (Math.abs(deltaX) < 30) {
+          scrollToCardIndex(gestureStartIndex);
+          return;
+        }
+
+        scrollToCardIndex(gestureStartIndex + (deltaX > 0 ? 1 : -1));
+      }
+
+      track.addEventListener('touchstart', onTouchStart, { passive: true });
+      track.addEventListener('touchmove', onTouchMove, { passive: false });
+      track.addEventListener('touchend', onTouchEnd, { passive: true });
+      track.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    }
+
+    if (track) {
+      track.addEventListener('scroll', updateCarousel, { passive: true });
+      window.addEventListener('resize', updateCarousel);
+      initMobileSwipe();
+      updateCarousel();
+    }
+
+    function showToast(message) {
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(function () {
+        toast.classList.remove('is-visible');
+      }, 2500);
+    }
+
+  section.querySelectorAll('[data-na-card]').forEach(function (card) {
+    initCardVariantPicker(card, section, showToast);
+  });
+
+  initMobileDrawer(section, showToast);
+  }
+
+  function normValue(value) {
+    return (value || '').toString().trim().toLowerCase();
+  }
+
+  function naGetCartUrls(section) {
+    var addUrl = (section && section.dataset.cartAddUrl) || '/cart/add.js';
+    var dataUrl = /\/add\.js(?:\?.*)?$/.test(addUrl)
+      ? addUrl.replace(/\/add\.js(?:\?.*)?$/, '.js')
+      : '/cart.js';
+    return { add: addUrl, data: dataUrl };
+  }
+
+  function naGetCartDrawer() {
+    return document.querySelector('cart-drawer-component');
+  }
+
+  function naGetCartDrawerSectionId() {
+    var drawerEl = naGetCartDrawer();
+    if (!drawerEl) return null;
+    var wrap = drawerEl.closest('.shopify-section');
+    if (wrap && wrap.id && wrap.id.indexOf('shopify-section-') === 0) {
+      return wrap.id.replace('shopify-section-', '');
+    }
+    return null;
+  }
+
+  function naMonsterRefresh() {
+    if (typeof window.monster_refresh === 'function') {
+      try {
+        window.monster_refresh();
+        return true;
+      } catch (e) {}
+    }
+    return false;
+  }
+
+  function naOpenCartDrawer() {
+    if (naMonsterRefresh()) return;
+    var cartDrawer = naGetCartDrawer();
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      try { cartDrawer.open(); return; } catch (e) {}
+    }
+    document.dispatchEvent(new CustomEvent('dispatch:cart-drawer:open'));
+  }
+
+  function naDispatchPlainCartUpdate(cart) {
+    var itemCount = cart && typeof cart.item_count === 'number' ? cart.item_count : 1;
+    document.dispatchEvent(new CustomEvent('cart:update', {
+      bubbles: true,
+      detail: { data: { itemCount: itemCount, source: 'product-form-component' } }
+    }));
+    document.dispatchEvent(new CustomEvent('cart:refresh', {
+      bubbles: true,
+      detail: { source: 'new-arrivals-carousel' }
+    }));
+  }
+
+  function naSectionIdOf(el) {
+    if (!el) return null;
+    var wrap = el.closest('.shopify-section');
+    if (wrap && wrap.id && wrap.id.indexOf('shopify-section-') === 0) {
+      return wrap.id.replace('shopify-section-', '');
+    }
+    return null;
+  }
+
+  function naGetCartSectionIds() {
+    var ids = [];
+    var drawerId = naSectionIdOf(naGetCartDrawer());
+    if (drawerId) ids.push(drawerId);
+
+    var iconId = naSectionIdOf(document.querySelector('cart-icon'));
+    if (iconId && ids.indexOf(iconId) === -1) ids.push(iconId);
+
+    var bubbleId = naSectionIdOf(document.querySelector('.cart-bubble, .cart-count-bubble, [data-cart-count]'));
+    if (bubbleId && ids.indexOf(bubbleId) === -1) ids.push(bubbleId);
+
+    return ids;
+  }
+
+  function naGetSectionWrap(sectionId) {
+    if (!sectionId) return null;
+    var byId = document.getElementById('shopify-section-' + sectionId);
+    if (byId) return byId;
+    var drawerEl = naGetCartDrawer();
+    return drawerEl ? drawerEl.closest('.shopify-section') : null;
+  }
+
+  function naInjectSectionHTML(sectionId, html) {
+    if (!sectionId || typeof html !== 'string') return false;
+    var wrap = naGetSectionWrap(sectionId);
+    if (!wrap) return false;
+
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var fresh = doc.getElementById('shopify-section-' + sectionId);
+      wrap.innerHTML = fresh ? fresh.innerHTML : html;
+      return true;
+    } catch (e) {
+      try { wrap.innerHTML = html; return true; } catch (e2) { return false; }
+    }
+  }
+
+  function naUpdateHeaderCartCount(cart) {
+    if (!cart || typeof cart.item_count !== 'number') return;
+    var count = cart.item_count;
+
+    var selectors = [
+      '.cart-bubble__text',
+      '.cart-count-bubble span:not([aria-hidden])',
+      '.cart-count-bubble span',
+      '[ref="cartBubbleCount"]',
+      '[data-cart-count]',
+      '.cart-count',
+      '.header__cart-count',
+      '.cart-bubble-count',
+      '.js-cart-count'
+    ];
+
+    selectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        el.textContent = String(count);
+      });
+    });
+
+    document.querySelectorAll('.cart-bubble, .cart-count-bubble, .cart-bubble__background').forEach(function (el) {
+      el.classList.toggle('visible', count > 0);
+      el.classList.toggle('is-empty', count === 0);
+      if (count > 0) {
+        el.removeAttribute('hidden');
+        el.style.display = '';
+      } else {
+        el.setAttribute('hidden', '');
+      }
+    });
+
+    var cartIcon = document.querySelector('cart-icon');
+    if (cartIcon) {
+      try {
+        if ('currentCartCount' in cartIcon) {
+          cartIcon.currentCartCount = count;
+        }
+      } catch (e) {}
+    }
+  }
+
+  function naFireCartEvents(section, cart, openDrawer) {
+    var urls = naGetCartUrls(section);
+
+    function finish(cartData) {
+      naUpdateHeaderCartCount(cartData);
+
+      import('@theme/events')
+        .then(function (mod) {
+          if (mod && typeof mod.CartUpdateEvent === 'function') {
+            document.dispatchEvent(new mod.CartUpdateEvent(cartData, 'new-arrivals-carousel', {
+              itemCount: cartData ? cartData.item_count : undefined,
+              source: 'new-arrivals-carousel',
+              sections: {}
+            }));
+          } else {
+            naDispatchPlainCartUpdate(cartData);
+          }
+        })
+        .catch(function () { naDispatchPlainCartUpdate(cartData); })
+        .then(function () {
+          if (openDrawer) setTimeout(naOpenCartDrawer, 100);
+        });
+    }
+
+    if (cart) {
+      finish(cart);
+      return;
+    }
+
+    fetch(urls.data, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(finish)
+      .catch(function () { finish(null); });
+  }
+
+  function naAddVariantToCart(section, variantId, openDrawer, onError) {
+    var urls = naGetCartUrls(section);
+    var sectionIds = naGetCartSectionIds();
+    var body = { id: parseInt(variantId, 10), quantity: 1 };
+    if (sectionIds.length) body.sections = sectionIds.join(',');
+
+    return fetch(urls.add, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.status && data.status !== 200) {
+          if (onError) onError(data.description || 'Could not add to cart');
+          return false;
+        }
+
+        if (data.sections) {
+          sectionIds.forEach(function (id) {
+            if (data.sections[id]) {
+              naInjectSectionHTML(id, data.sections[id]);
+            }
+          });
+        }
+
+        naFireCartEvents(section, null, openDrawer);
+        return true;
+      })
+      .catch(function () {
+        if (onError) onError('Could not add to cart');
+        return false;
+      });
+  }
+
+  function getVariantOption(variant, position) {
+    if (position === '1' || position === 1) return variant.option1 || '';
+    if (position === '2' || position === 2) return variant.option2 || '';
+    if (position === '3' || position === 3) return variant.option3 || '';
+    return '';
+  }
+
+  function parseCardVariants(card) {
+    var el = card.querySelector('[data-na-variants]');
+    if (!el) return [];
+    try { return JSON.parse(el.textContent); } catch (e) { return []; }
+  }
+
+  function parseColorMap(card) {
+    var el = card.querySelector('[data-na-color-map]');
+    if (!el) return [];
+    try { return JSON.parse(el.textContent); } catch (e) { return []; }
+  }
+
+  function getDefaultCardImage(card) {
+    var img = card.querySelector('[data-na-main-image]');
+    if (!img) return null;
+    return {
+      src: img.dataset.naDefaultSrc || img.getAttribute('src') || '',
+      srcset: img.dataset.naDefaultSrcset || img.getAttribute('srcset') || ''
+    };
+  }
+
+  function setCardImage(card, imageSrc, imageSrcset) {
+    var img = card.querySelector('[data-na-main-image]');
+    if (!img || !imageSrc) return;
+
+    img.removeAttribute('srcset');
+    img.src = imageSrc;
+
+    if (imageSrcset) {
+      img.srcset = imageSrcset;
+    }
+  }
+
+  function resetCardImage(card) {
+    var def = getDefaultCardImage(card);
+    if (def && def.src) {
+      setCardImage(card, def.src, def.srcset);
+    }
+  }
+
+  function findColorMapImage(card, colorValue) {
+    var map = parseColorMap(card);
+    var needle = normValue(colorValue);
+    var entry = map.find(function (item) {
+      return normValue(item.label) === needle;
+    });
+    if (!entry) return null;
+    if (entry.main) {
+      return { src: entry.main, srcset: entry.mainSrcset || '' };
+    }
+    if (entry.thumb) {
+      return { src: entry.thumb, srcset: '' };
+    }
+    return null;
+  }
+
+  function findVariantImage(card, colorValue, sizeValue) {
+    var variants = parseCardVariants(card);
+    var sizePos = card.dataset.sizePosition;
+    var colorPos = card.dataset.colorPosition;
+    var colorNeedle = normValue(colorValue);
+    var sizeNeedle = normValue(sizeValue);
+
+    var match = variants.find(function (v) {
+      var sizeOk = !sizeValue || normValue(getVariantOption(v, sizePos)) === sizeNeedle;
+      var colorOk = !colorValue || normValue(getVariantOption(v, colorPos)) === colorNeedle;
+      return sizeOk && colorOk && v.image;
+    });
+    if (match) return { src: match.image, srcset: match.srcset || '' };
+    return null;
+  }
+
+  function findMediaImage(card, colorValue) {
+    var mediaEl = card.querySelector('[data-na-media]');
+    if (!mediaEl || !colorValue) return null;
+    try {
+      var needle = normValue(colorValue);
+      var mediaItems = JSON.parse(mediaEl.textContent);
+      var exact = mediaItems.find(function (m) {
+        return m.alt && normValue(m.alt) === needle;
+      });
+      if (exact) {
+        return { src: exact.src, srcset: exact.srcset || '' };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function resolveMainImage(card, colorValue, sizeValue, activeSwatch) {
+    activeSwatch = activeSwatch || card.querySelector('[data-swatch].is-active:not(.is-hidden)');
+
+    if (activeSwatch) {
+      if (activeSwatch.dataset.swatchHasImage === 'false') {
+        return null;
+      }
+      if (activeSwatch.dataset.imageSrc) {
+        return {
+          src: activeSwatch.dataset.imageSrc,
+          srcset: activeSwatch.dataset.imageSrcset || ''
+        };
+      }
+    }
+
+    var linked = cardHasLinkedVariants(card);
+
+    if (linked && (colorValue || sizeValue)) {
+      var fromVariant = findVariantImage(card, colorValue, sizeValue);
+      if (fromVariant) return fromVariant;
+    }
+
+    var fromMap = findColorMapImage(card, colorValue);
+    if (fromMap) return fromMap;
+
+    if (colorValue) {
+      var fromVariantColor = findVariantImage(card, colorValue, null);
+      if (fromVariantColor) return fromVariantColor;
+      var fromMedia = findMediaImage(card, colorValue);
+      if (fromMedia) return fromMedia;
+    }
+
+    return null;
+  }
+
+  function cardHasLinkedVariants(card) {
+    if (!card.dataset.sizePosition || !card.dataset.colorPosition) return false;
+    return parseCardVariants(card).some(function (v) {
+      return getVariantOption(v, card.dataset.colorPosition) && getVariantOption(v, card.dataset.sizePosition);
+    });
+  }
+
+  function shouldMatchColorAsVariant(card, colorValue) {
+    if (!colorValue) return false;
+    if (card.dataset.colorPosition) return true;
+
+    var needle = normValue(colorValue);
+    if (!needle) return false;
+
+    if (!card._naOptionValueLookup) {
+      card._naOptionValueLookup = {};
+      parseCardVariants(card).forEach(function (variant) {
+        [variant.option1, variant.option2, variant.option3].forEach(function (optionValue) {
+          var normalized = normValue(optionValue);
+          if (normalized) {
+            card._naOptionValueLookup[normalized] = true;
+          }
+        });
+      });
+    }
+
+    return !!card._naOptionValueLookup[needle];
+  }
+
+  function variantMatchesOptions(variant, card, colorValue, sizeValue) {
+    var colorPos = card.dataset.colorPosition;
+    var sizePos = card.dataset.sizePosition;
+    var optionValues = [variant.option1, variant.option2, variant.option3].map(function (value) {
+      return normValue(value);
+    });
+
+    if (colorValue && shouldMatchColorAsVariant(card, colorValue)) {
+      var colorNeedle = normValue(colorValue);
+      var colorOk = false;
+      if (colorPos) {
+        colorOk = normValue(getVariantOption(variant, colorPos)) === colorNeedle;
+      } else {
+        colorOk = optionValues.indexOf(colorNeedle) !== -1;
+      }
+      if (!colorOk) return false;
+    }
+
+    if (sizeValue) {
+      var sizeNeedle = normValue(sizeValue);
+      var sizeOk = false;
+      if (sizePos) {
+        sizeOk = normValue(getVariantOption(variant, sizePos)) === sizeNeedle;
+      } else {
+        sizeOk = optionValues.indexOf(sizeNeedle) !== -1;
+      }
+      if (!sizeOk) return false;
+    }
+
+    return true;
+  }
+
+  function findSelectedVariant(card, colorValue, sizeValue) {
+    var variants = parseCardVariants(card);
+    var availableMatch = variants.find(function (variant) {
+      return variantMatchesOptions(variant, card, colorValue, sizeValue) && variant.available;
+    });
+    if (availableMatch) return availableMatch;
+
+    return variants.find(function (variant) {
+      return variantMatchesOptions(variant, card, colorValue, sizeValue);
+    }) || null;
+  }
+
+  function isVariantAvailableForSelection(card, colorValue, sizeValue) {
+    return parseCardVariants(card).some(function (variant) {
+      return variantMatchesOptions(variant, card, colorValue, sizeValue) && variant.available;
+    });
+  }
+
+  function variantExistsForSelection(card, colorValue, sizeValue) {
+    return parseCardVariants(card).some(function (variant) {
+      return variantMatchesOptions(variant, card, colorValue, sizeValue);
+    });
+  }
+
+  function getMobileDrawer(section) {
+    if (!section) return null;
+    var sectionId = section.dataset.sectionId;
+    if (sectionId) {
+      var byId = document.getElementById('na-mobile-drawer-' + sectionId);
+      if (byId) return byId;
+    }
+    return section.querySelector('[data-na-mobile-drawer]')
+      || document.querySelector('[data-na-drawer-section="' + sectionId + '"]');
+  }
+
+  function mountMobileDrawerAfterPageWrapper(section) {
+    var drawer = getMobileDrawer(section);
+    if (!drawer || drawer.dataset.naMounted === 'true') return;
+
+    var pageWrapper = document.querySelector('.page-wrapper');
+    if (pageWrapper) {
+      pageWrapper.insertAdjacentElement('afterend', drawer);
+      drawer.dataset.naMounted = 'true';
+    }
+  }
+
+  function initMobileDrawer(section, showToast) {
+    mountMobileDrawerAfterPageWrapper(section);
+    var drawer = getMobileDrawer(section);
+    if (!drawer) return;
+
+    var mobileQuery = window.matchMedia('(max-width: 989px)');
+    var activeCard = null;
+    var drawerState = { color: null, size: null };
+
+    var colorsWrap = drawer.querySelector('[data-na-drawer-colors-wrap]');
+    var swatchesEl = drawer.querySelector('[data-na-drawer-swatches]');
+    var sizesWrap = drawer.querySelector('[data-na-drawer-sizes-wrap]');
+    var sizesEl = drawer.querySelector('[data-na-drawer-sizes]');
+    var colorLabelEl = drawer.querySelector('[data-na-drawer-color-label]');
+    var colorValueEl = drawer.querySelector('[data-na-drawer-color-value]');
+    var sizeLabelEl = drawer.querySelector('[data-na-drawer-size-label]');
+    var sizeValueEl = drawer.querySelector('[data-na-drawer-size-value]');
+    var submitBtn = drawer.querySelector('[data-na-drawer-submit]');
+
+    function closeDrawer() {
+      var active = document.activeElement;
+      if (active && drawer.contains(active) && typeof active.blur === 'function') {
+        active.blur();
+      }
+      drawer.classList.remove('is-open');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('na-drawer-open');
+      activeCard = null;
+      drawerState = { color: null, size: null };
+    }
+
+    function updateDrawerSubmit() {
+      if (!activeCard || !submitBtn) return;
+
+      var hasColors = !colorsWrap.hidden;
+      var hasSizes = !sizesWrap.hidden;
+      var variant = findSelectedVariant(activeCard, drawerState.color, drawerState.size);
+      var ready = true;
+
+      if (hasColors && !drawerState.color) ready = false;
+      if (hasSizes && !drawerState.size) ready = false;
+      if (ready && variant && !variant.available) ready = false;
+      if (ready && !hasColors && !hasSizes) {
+        variant = parseCardVariants(activeCard).find(function (item) { return item.available; }) || parseCardVariants(activeCard)[0];
+        ready = !!(variant && variant.available);
+      }
+
+      submitBtn.disabled = !ready;
+    }
+
+    function applyDrawerFilters() {
+      if (!activeCard) return;
+
+      var linked = cardHasLinkedVariants(activeCard);
+
+      swatchesEl.querySelectorAll('[data-na-drawer-swatch]').forEach(function (btn) {
+        var color = btn.dataset.colorValue;
+        var show = !drawerState.size || !linked || variantExistsForSelection(activeCard, color, drawerState.size);
+        btn.hidden = !show;
+        if (!show && btn.classList.contains('is-active')) {
+          btn.classList.remove('is-active');
+          drawerState.color = null;
+          if (colorValueEl) colorValueEl.textContent = '';
+        }
+      });
+
+      sizesEl.querySelectorAll('[data-na-drawer-size]').forEach(function (btn) {
+        var size = btn.dataset.sizeValue;
+        var show = !drawerState.color || !linked || variantExistsForSelection(activeCard, drawerState.color, size);
+        btn.hidden = !show;
+
+        var available = isVariantAvailableForSelection(activeCard, drawerState.color, size);
+        btn.disabled = !available;
+        btn.classList.toggle('is-unavailable', !available);
+
+        if (!show && btn.classList.contains('is-active')) {
+          btn.classList.remove('is-active');
+          drawerState.size = null;
+          if (sizeValueEl) sizeValueEl.textContent = '';
+        }
+      });
+
+      if (drawerState.size && !swatchesEl.querySelector('[data-na-drawer-swatch].is-active:not([hidden])')) {
+        var firstColor = swatchesEl.querySelector('[data-na-drawer-swatch]:not([hidden])');
+        if (firstColor) firstColor.click();
+      }
+
+      if (!sizesWrap.hidden) {
+        var activeSizeBtn = sizesEl.querySelector('[data-na-drawer-size].is-active:not([hidden])');
+        if (activeSizeBtn && (activeSizeBtn.disabled || activeSizeBtn.hidden)) {
+          activeSizeBtn.classList.remove('is-active');
+          drawerState.size = null;
+          if (sizeValueEl) sizeValueEl.textContent = '';
+        }
+
+        if (drawerState.color || colorsWrap.hidden) {
+          var validActiveSize = sizesEl.querySelector('[data-na-drawer-size].is-active:not([hidden]):not(:disabled)');
+          if (!validActiveSize) {
+            var firstAvailableSize = sizesEl.querySelector('[data-na-drawer-size]:not([hidden]):not(:disabled)');
+            if (firstAvailableSize) {
+              sizesEl.querySelectorAll('[data-na-drawer-size]').forEach(function (item) {
+                item.classList.remove('is-active');
+              });
+              firstAvailableSize.classList.add('is-active');
+              drawerState.size = firstAvailableSize.dataset.sizeValue;
+              if (sizeValueEl) sizeValueEl.textContent = firstAvailableSize.textContent.trim();
+            }
+          }
+        }
+      }
+
+      updateDrawerSubmit();
+    }
+
+    function getCardSwatchForColor(card, colorValue) {
+      var needle = normValue(colorValue);
+      var match = null;
+      card.querySelectorAll('[data-swatch]').forEach(function (swatch) {
+        if (!match && normValue(swatch.dataset.colorValue) === needle) {
+          match = swatch;
+        }
+      });
+      return match;
+    }
+
+    function appendDrawerSwatchVisual(btn, options) {
+      var imageSrc = options.imageSrc;
+      var hex = options.hex;
+      var isMulti = options.isMulti;
+
+      if (imageSrc) {
+        var img = document.createElement('img');
+        img.src = imageSrc;
+        img.alt = options.label || '';
+        img.loading = 'lazy';
+        btn.appendChild(img);
+        return;
+      }
+
+      var colorBlock = document.createElement('span');
+      colorBlock.className = 'na-mobile-drawer__swatch-color';
+      if (isMulti) {
+        colorBlock.classList.add('na-mobile-drawer__swatch-color--multi');
+      } else if (hex) {
+        colorBlock.style.backgroundColor = hex;
+      }
+      btn.appendChild(colorBlock);
+    }
+
+    function buildDrawerSwatchButton(entry, cardSwatch) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'na-mobile-drawer__swatch';
+      btn.dataset.naDrawerSwatch = 'true';
+      btn.dataset.colorValue = entry.label;
+      btn.setAttribute('role', 'listitem');
+      btn.setAttribute('aria-label', entry.label);
+
+      var imageSrc = entry.thumb || entry.main || (cardSwatch && cardSwatch.dataset.imageSrc) || null;
+      var hex = entry.hex || (cardSwatch && cardSwatch.style.backgroundColor) || '';
+      var isMulti = entry.isMulti || (cardSwatch && cardSwatch.classList.contains('na-swatch--multi'));
+
+      appendDrawerSwatchVisual(btn, {
+        imageSrc: imageSrc,
+        hex: hex,
+        isMulti: isMulti,
+        label: entry.label
+      });
+
+      btn.addEventListener('click', function () {
+        swatchesEl.querySelectorAll('[data-na-drawer-swatch]').forEach(function (item) {
+          item.classList.remove('is-active');
+        });
+        btn.classList.add('is-active');
+        drawerState.color = entry.label;
+        if (colorValueEl) colorValueEl.textContent = entry.label;
+        applyDrawerFilters();
+      });
+
+      return btn;
+    }
+
+    function buildDrawerContent(card) {
+      drawerState = { color: null, size: null };
+      swatchesEl.innerHTML = '';
+      sizesEl.innerHTML = '';
+
+      var colorMap = parseColorMap(card);
+      var cardSwatches = card.querySelectorAll('[data-swatch]');
+      var cardSizes = card.querySelectorAll('.na-sizes__btn');
+      var hasColors = colorMap.length > 0 || cardSwatches.length > 0;
+      var hasSizes = cardSizes.length > 0;
+
+      if (colorLabelEl) {
+        colorLabelEl.textContent = card.dataset.colorOptionName || 'Colour';
+      }
+      if (sizeLabelEl) {
+        sizeLabelEl.textContent = card.dataset.sizeOptionName || 'Size';
+      }
+      if (colorValueEl) colorValueEl.textContent = '';
+      if (sizeValueEl) sizeValueEl.textContent = '';
+
+      colorsWrap.hidden = !hasColors;
+      sizesWrap.hidden = !hasSizes;
+
+      if (hasColors) {
+        var swatchEntries = [];
+
+        if (cardSwatches.length > 0) {
+          cardSwatches.forEach(function (swatch) {
+            swatchEntries.push({
+              label: swatch.dataset.colorValue,
+              thumb: swatch.dataset.imageSrc || null,
+              main: swatch.dataset.imageSrc || null,
+              hex: swatch.style.backgroundColor || null,
+              isMulti: swatch.classList.contains('na-swatch--multi'),
+              cardSwatch: swatch
+            });
+          });
+        } else if (colorMap.length > 0) {
+          colorMap.forEach(function (entry) {
+            swatchEntries.push({
+              label: entry.label,
+              thumb: entry.thumb,
+              main: entry.main,
+              hex: entry.hex,
+              isMulti: entry.isMulti,
+              cardSwatch: getCardSwatchForColor(card, entry.label)
+            });
+          });
+        }
+
+        swatchEntries.forEach(function (entry) {
+          var btn = buildDrawerSwatchButton(entry, entry.cardSwatch);
+          swatchesEl.appendChild(btn);
+
+          var defaultColor = card.dataset.defaultColor;
+          var cardActive = entry.cardSwatch && entry.cardSwatch.classList.contains('is-active');
+          var isDefault = defaultColor && normValue(entry.label) === normValue(defaultColor);
+          if (cardActive || isDefault) {
+            btn.classList.add('is-active');
+            drawerState.color = entry.label;
+            if (colorValueEl) colorValueEl.textContent = entry.label;
+          }
+        });
+
+        if (!drawerState.color && swatchEntries.length) {
+          var firstBtn = swatchesEl.querySelector('[data-na-drawer-swatch]');
+          if (firstBtn) {
+            firstBtn.classList.add('is-active');
+            drawerState.color = firstBtn.dataset.colorValue;
+            if (colorValueEl) colorValueEl.textContent = drawerState.color;
+          }
+        }
+      }
+
+      if (hasSizes) {
+        var defaultSize = card.dataset.defaultSize;
+        var matchedDefaultSize = false;
+
+        cardSizes.forEach(function (sizeBtn) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'na-mobile-drawer__size';
+          btn.dataset.naDrawerSize = 'true';
+          btn.dataset.sizeValue = sizeBtn.dataset.sizeValue;
+          btn.textContent = sizeBtn.querySelector('.na-sizes__label')
+            ? sizeBtn.querySelector('.na-sizes__label').textContent.trim()
+            : sizeBtn.dataset.sizeValue;
+          btn.disabled = false;
+          btn.classList.remove('is-unavailable');
+
+          btn.addEventListener('click', function () {
+            if (btn.disabled || btn.hidden) return;
+            sizesEl.querySelectorAll('[data-na-drawer-size]').forEach(function (item) {
+              item.classList.remove('is-active');
+            });
+            btn.classList.add('is-active');
+            drawerState.size = sizeBtn.dataset.sizeValue;
+            if (sizeValueEl) sizeValueEl.textContent = btn.textContent;
+            applyDrawerFilters();
+          });
+
+          sizesEl.appendChild(btn);
+
+          if (defaultSize && normValue(sizeBtn.dataset.sizeValue) === normValue(defaultSize)) {
+            btn.classList.add('is-active');
+            drawerState.size = sizeBtn.dataset.sizeValue;
+            if (sizeValueEl) sizeValueEl.textContent = btn.textContent;
+            matchedDefaultSize = true;
+          }
+        });
+      }
+
+      applyDrawerFilters();
+
+      if (hasSizes && !drawerState.size) {
+        var firstAvailableSize = sizesEl.querySelector('[data-na-drawer-size]:not([hidden]):not(:disabled)');
+        if (firstAvailableSize) {
+          firstAvailableSize.classList.add('is-active');
+          drawerState.size = firstAvailableSize.dataset.sizeValue;
+          if (sizeValueEl) sizeValueEl.textContent = firstAvailableSize.textContent.trim();
+          updateDrawerSubmit();
+        }
+      }
+    }
+
+    function openDrawer(card) {
+      if (!mobileQuery.matches || !card) return;
+      activeCard = card;
+      buildDrawerContent(card);
+      drawer.classList.add('is-open');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('na-drawer-open');
+    }
+
+    section.querySelectorAll('[data-na-mobile-add]').forEach(function (btn) {
+      btn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!mobileQuery.matches) return;
+        openDrawer(btn.closest('[data-na-card]'));
+      });
+    });
+
+    drawer.querySelectorAll('[data-na-drawer-close]').forEach(function (btn) {
+      btn.addEventListener('click', closeDrawer);
+    });
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function () {
+        if (!activeCard || submitBtn.disabled) return;
+
+        var variant = findSelectedVariant(activeCard, drawerState.color, drawerState.size);
+        if (!variant) {
+          variant = parseCardVariants(activeCard).find(function (item) { return item.available; })
+            || parseCardVariants(activeCard)[0];
+        }
+        if (!variant || !variant.available) {
+          showToast('Selected option is unavailable');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        naAddVariantToCart(section, variant.id, true, function (message) {
+          showToast(message);
+          submitBtn.disabled = false;
+        }).then(function (added) {
+          if (added) {
+            showToast('Added to cart');
+            closeDrawer();
+          }
+        });
+      });
+    }
+  }
+
+  function initCardVariantPicker(card, section, showToast) {
+    var linked = cardHasLinkedVariants(card);
+    var sizePos = card.dataset.sizePosition;
+    var colorPos = card.dataset.colorPosition;
+    var sizesWrap = card.querySelector('[data-na-sizes]');
+    var hasSwatches = card.querySelector('[data-swatch]');
+    var state = { size: null, color: null };
+
+    function getVariants() { return parseCardVariants(card); }
+
+    function applyFilters() {
+      if (!linked) return;
+
+      card.querySelectorAll('[data-swatch]').forEach(function (swatch) {
+        var color = swatch.dataset.colorValue;
+        var show = !state.size || variantExistsForSelection(card, color, state.size);
+        swatch.classList.toggle('is-hidden', !show);
+        if (!show && swatch.classList.contains('is-active')) {
+          swatch.classList.remove('is-active');
+        }
+      });
+
+      if (state.size) {
+        var activeSwatch = card.querySelector('[data-swatch].is-active:not(.is-hidden)');
+        if (!activeSwatch) {
+          var firstColor = card.querySelector('[data-swatch]:not(.is-hidden)');
+          if (firstColor) selectColor(firstColor, false);
+        }
+      }
+
+      if (sizesWrap) {
+        sizesWrap.querySelectorAll('.na-sizes__btn').forEach(function (btn) {
+          var size = btn.dataset.sizeValue;
+          var show = !state.color || variantExistsForSelection(card, state.color, size);
+          btn.classList.toggle('is-hidden', !show);
+
+          var available = isVariantAvailableForSelection(card, state.color, size);
+          btn.classList.toggle('na-sizes__btn--disabled', !available);
+          btn.disabled = !available;
+          if (!show && btn.classList.contains('is-selected')) {
+            btn.classList.remove('is-selected');
+            state.size = null;
+          }
+        });
+      }
+    }
+
+    function updateImageFromSelection(activeSwatch) {
+      var image = resolveMainImage(card, state.color, state.size, activeSwatch);
+      if (image && image.src) {
+        setCardImage(card, image.src, image.srcset);
+      } else {
+        resetCardImage(card);
+      }
+    }
+
+    var quickAtcBtn = null;
+    var desktopQuery = window.matchMedia('(min-width: 990px)');
+
+    function getEffectiveColor() {
+      if (state.color) return state.color;
+      var active = card.querySelector('[data-swatch].is-active:not(.is-hidden)');
+      return active ? active.dataset.colorValue : null;
+    }
+
+    function ensureQuickAtcBtn() {
+      if (quickAtcBtn) return quickAtcBtn;
+      var media = card.querySelector('.na-card__media');
+      if (!media) return null;
+
+      quickAtcBtn = document.createElement('button');
+      quickAtcBtn.type = 'button';
+      quickAtcBtn.className = 'na-quick-atc';
+      quickAtcBtn.textContent = 'Add To Cart';
+      quickAtcBtn.setAttribute('aria-label', 'Add ' + (card.dataset.productTitle || 'product') + ' to cart');
+
+      quickAtcBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var variant = findSelectedVariant(card, getEffectiveColor(), state.size);
+        if (!variant || !variant.available) {
+          showToast('Selected option is unavailable');
+          return;
+        }
+
+        quickAtcBtn.disabled = true;
+        naAddVariantToCart(section, variant.id, true, function (message) {
+          showToast(message);
+          quickAtcBtn.disabled = false;
+        }).then(function (added) {
+          quickAtcBtn.disabled = false;
+          if (added) {
+            showToast('Added to cart');
+          }
+        });
+      });
+
+      media.appendChild(quickAtcBtn);
+      return quickAtcBtn;
+    }
+
+    function updateQuickAtc() {
+      if (!desktopQuery.matches || !hasSwatches || !sizesWrap) {
+        card.classList.remove('na-quick-atc-visible');
+        return;
+      }
+
+      var color = getEffectiveColor();
+      var show = !!(state.size && color);
+
+      if (show) {
+        var variant = findSelectedVariant(card, color, state.size);
+        show = !!(variant && variant.available);
+      }
+
+      if (show) ensureQuickAtcBtn();
+      card.classList.toggle('na-quick-atc-visible', show);
+    }
+
+    function selectColor(swatch, runFilters) {
+      card.querySelectorAll('[data-swatch]').forEach(function (s) { s.classList.remove('is-active'); });
+      swatch.classList.add('is-active');
+      state.color = swatch.dataset.colorValue;
+
+      if (runFilters !== false) applyFilters();
+
+      var activeSwatch = card.querySelector('[data-swatch].is-active:not(.is-hidden)') || swatch;
+      updateImageFromSelection(activeSwatch);
+      updateQuickAtc();
+    }
+
+    function selectSize(btn, runFilters) {
+      if (btn.disabled || btn.classList.contains('is-hidden')) return;
+      sizesWrap.querySelectorAll('.na-sizes__btn').forEach(function (b) {
+        b.classList.remove('is-selected');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('is-selected');
+      btn.setAttribute('aria-pressed', 'true');
+      sizesWrap.classList.add('has-selection');
+      state.size = btn.dataset.sizeValue;
+      if (runFilters !== false) applyFilters();
+      updateImageFromSelection(card.querySelector('[data-swatch].is-active:not(.is-hidden)'));
+      updateQuickAtc();
+    }
+
+    card.querySelectorAll('[data-swatch]').forEach(function (swatch) {
+      swatch.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (swatch.classList.contains('is-hidden')) return;
+        selectColor(swatch);
+      });
+    });
+
+    if (sizesWrap) {
+      sizesWrap.querySelectorAll('.na-sizes__btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (btn.disabled || btn.classList.contains('is-hidden')) return;
+
+          selectSize(btn);
+
+          if (hasSwatches || linked) {
+            return;
+          }
+
+          var variantId = btn.dataset.variantId;
+          if (!variantId) return;
+
+          naAddVariantToCart(section, variantId, true, function (message) {
+            showToast(message);
+          }).then(function (added) {
+            if (added) {
+              showToast('Added to cart — Size ' + (btn.getAttribute('title') || btn.dataset.sizeValue || btn.textContent.trim()));
+            }
+          });
+        });
+      });
+    }
+  }
+
+  function naInitCartCountSync() {
+    if (window._naCartCountSyncBound) return;
+    window._naCartCountSyncBound = true;
+
+    var mutationRe = /\/cart\/(add|change|update|clear)(\.js)?(\?|$)/;
+    var syncTimer = null;
+
+    function refreshHeaderCount() {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(function () {
+        fetch('/cart.js', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (cart) {
+            naUpdateHeaderCartCount(cart);
+          })
+          .catch(function () {});
+      }, 350);
+    }
+
+    if (window.fetch) {
+      var naOrigFetch = window.fetch;
+      window.fetch = function (input) {
+        var url = '';
+        try {
+          url = typeof input === 'string' ? input : String((input && input.url) || input || '');
+        } catch (e) {}
+        var result = naOrigFetch.apply(this, arguments);
+        if (mutationRe.test(url)) {
+          result.then(refreshHeaderCount, function () {});
+        }
+        return result;
+      };
+    }
+
+    if (window.XMLHttpRequest) {
+      var naOrigXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url) {
+        try {
+          if (url && mutationRe.test(String(url))) {
+            this.addEventListener('load', refreshHeaderCount);
+          }
+        } catch (e) {}
+        return naOrigXhrOpen.apply(this, arguments);
+      };
+    }
+  }
+
+  document.querySelectorAll('.na-section').forEach(initNewArrivals);
+  naInitCartCountSync();
+
+  document.addEventListener('shopify:section:load', function (e) {
+    var section = e.target.querySelector('.na-section') || e.target;
+    if (section.classList && section.classList.contains('na-section')) {
+      section.dataset.naInit = '';
+      initNewArrivals(section);
+    }
+  });
+  })();
+</script>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'heritage_wishlist';
+
+    function readWishlist() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function writeWishlist(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (e) {}
+      document.dispatchEvent(
+        new CustomEvent('heritage:wishlist:update', {
+          detail: { items: items, count: items.length }
+        })
+      );
+      syncWishlistUI();
+    }
+
+    function syncWishlistUI() {
+      var items = readWishlist();
+      var ids = items.map(function (item) { return String(item.id); });
+
+      document.querySelectorAll('[data-wishlist-btn]').forEach(function (btn) {
+        var productId = btn.dataset.productId;
+        if (!productId) return;
+        var active = ids.indexOf(String(productId)) !== -1;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
+      });
+
+      document.querySelectorAll('[data-wishlist-count]').forEach(function (el) {
+        el.textContent = items.length;
+        el.classList.toggle('is-empty', items.length === 0);
+      });
+    }
+
+    function getProductFromBtn(btn) {
+      return {
+        id: String(btn.dataset.productId || ''),
+        handle: btn.dataset.productHandle || '',
+        title: btn.dataset.productTitle || '',
+        image: btn.dataset.productImage || '',
+        price: btn.dataset.productPrice || '',
+        url: btn.dataset.productUrl || ''
+      };
+    }
+
+    function showWishlistToast(added) {
+      var toast = document.querySelector('[data-wishlist-toast]');
+      if (!toast) return;
+      toast.textContent = added ? 'Added to wishlist' : 'Removed from wishlist';
+      toast.classList.add('is-visible');
+      clearTimeout(window._heritageWishlistToastTimer);
+      window._heritageWishlistToastTimer = setTimeout(function () {
+        toast.classList.remove('is-visible');
+      }, 2200);
+    }
+
+    if (!window.HeritageWishlist) {
+      window.HeritageWishlist = {
+        getAll: readWishlist,
+        count: function () { return readWishlist().length; },
+        has: function (id) {
+          return readWishlist().some(function (item) {
+            return String(item.id) === String(id);
+          });
+        },
+        add: function (product) {
+          if (!product || !product.id) return false;
+          if (this.has(product.id)) return false;
+          var items = readWishlist();
+          items.push(Object.assign({}, product, { id: String(product.id), addedAt: Date.now() }));
+          writeWishlist(items);
+          return true;
+        },
+        remove: function (id) {
+          writeWishlist(readWishlist().filter(function (item) {
+            return String(item.id) !== String(id);
+          }));
+        },
+        toggle: function (product) {
+          if (!product || !product.id) return false;
+          if (this.has(product.id)) {
+            this.remove(product.id);
+            return false;
+          }
+          return this.add(product);
+        },
+        clear: function () { writeWishlist([]); },
+        sync: syncWishlistUI
+      };
+    } else if (!window.HeritageWishlist.sync) {
+      window.HeritageWishlist.sync = syncWishlistUI;
+    }
+
+    if (!window._heritageWishlistClickBound) {
+      window._heritageWishlistClickBound = true;
+
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-wishlist-btn]');
+        if (!btn || !window.HeritageWishlist) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var product = getProductFromBtn(btn);
+        if (!product.id) return;
+
+        var added = window.HeritageWishlist.toggle(product);
+        syncWishlistUI();
+        showWishlistToast(added);
+      });
+    }
+
+    syncWishlistUI();
+    document.addEventListener('shopify:section:load', syncWishlistUI);
+    document.addEventListener('heritage:wishlist:update', syncWishlistUI);
+  })();
+</script>
+
+<script>
+  (function () {
+    if (window.__naStampedRatingReady) {
+      if (typeof window.naBootStampedRatings === 'function') window.naBootStampedRatings();
+      return;
+    }
+    window.__naStampedRatingReady = true;
+
+    function parseCount(value) {
+      var n = parseInt(String(value || '').trim(), 10);
+      return isNaN(n) ? null : n;
+    }
+
+    function getStampedCount(source) {
+      if (!source) return null;
+      var caption = source.querySelector('.stamped-badge-caption[data-reviews]');
+      if (caption) {
+        var fromAttr = parseCount(caption.getAttribute('data-reviews'));
+        if (fromAttr !== null) return fromAttr;
+      }
+      var badge = source.querySelector('.stamped-badge[aria-label]');
+      if (badge) {
+        var match = String(badge.getAttribute('aria-label') || '').match(/(\d+)\s*reviews?/i);
+        if (match) return parseCount(match[1]);
+      }
+      return null;
+    }
+
+    function getFallbackCount(container) {
+      if (container.hasAttribute('data-fallback-count')) {
+        return parseCount(container.getAttribute('data-fallback-count')) || 0;
+      }
+      var pill = container.querySelector('[data-na-rating-sync]');
+      if (pill && pill.hasAttribute('data-fallback-count')) {
+        return parseCount(pill.getAttribute('data-fallback-count')) || 0;
+      }
+      if (container.hasAttribute('data-rating-count')) {
+        return parseCount(container.getAttribute('data-rating-count')) || 0;
+      }
+      return 0;
+    }
+
+    function applyCount(container, count) {
+      if (count === null || count === undefined) return;
+
+      if (container.classList.contains('cg-card-wrap')) {
+        container.setAttribute('data-rating-count', String(count));
+      }
+
+      container.querySelectorAll('.na-rating-pill, .na-rating').forEach(function (el) {
+        var span = el.querySelector('[data-na-rating-count]') || el.querySelector('span:last-of-type') || el.querySelector('span');
+        if (count <= 0) {
+          el.style.setProperty('display', 'none', 'important');
+          el.setAttribute('hidden', '');
+          return;
+        }
+        el.removeAttribute('hidden');
+        el.style.removeProperty('display');
+        if (span) span.textContent = String(count);
+      });
+    }
+
+    function syncContainer(container, allowFallback) {
+      var stamped = container.querySelector('.na-stamped-source');
+      var stampedCount = getStampedCount(stamped);
+      if (stampedCount !== null) {
+        container.setAttribute('data-stamped-synced', 'true');
+        applyCount(container, stampedCount);
+        return;
+      }
+      if (allowFallback && !container.getAttribute('data-stamped-synced')) {
+        applyCount(container, getFallbackCount(container));
+      }
+    }
+
+    function loadStampedBadges() {
+      if (!window.StampedFn) return;
+      try {
+        if (typeof StampedFn.loadBadges === 'function') StampedFn.loadBadges();
+      } catch (e) {}
+    }
+
+    function observeContainer(container) {
+      if (container.__naStampedObserved) return;
+      container.__naStampedObserved = true;
+      var stamped = container.querySelector('.na-stamped-source');
+      if (!stamped || !window.MutationObserver) return;
+      var observer = new MutationObserver(function () {
+        syncContainer(container, false);
+      });
+      observer.observe(stamped, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['data-reviews', 'aria-label', 'class']
+      });
+    }
+
+    function init(scope) {
+      var root = scope && scope.querySelector ? scope : document;
+      loadStampedBadges();
+      root.querySelectorAll('.cg-card-wrap, [data-na-card]').forEach(function (container) {
+        if (!container.querySelector('.na-stamped-source')) return;
+        observeContainer(container);
+        syncContainer(container, false);
+      });
+    }
+
+    function boot(scope) {
+      init(scope);
+      window.setTimeout(function () { init(scope); }, 500);
+      window.setTimeout(function () { init(scope); }, 1500);
+      window.setTimeout(function () { init(scope); }, 3000);
+      window.setTimeout(function () {
+        var root = scope && scope.querySelector ? scope : document;
+        root.querySelectorAll('.cg-card-wrap, [data-na-card]').forEach(function (container) {
+          if (!container.querySelector('.na-stamped-source')) return;
+          if (!container.getAttribute('data-stamped-synced')) {
+            syncContainer(container, true);
+          }
+        });
+      }, 4500);
+    }
+
+    window.naBootStampedRatings = boot;
+
+    var stampedPoll = window.setInterval(function () {
+      if (window.StampedFn) {
+        window.clearInterval(stampedPoll);
+        boot();
+      }
+    }, 200);
+
+    window.setTimeout(function () { window.clearInterval(stampedPoll); }, 12000);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { boot(); });
+    } else {
+      boot();
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      boot(event.target);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "New Arrivals Carousel",
+  "tag": "section",
+  "class": "section-new-arrivals",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "New Arrivals"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all_mobile",
+      "label": "Show View All link on mobile",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View All link label",
+      "default": "View All"
+    },
+    {
+      "type": "url",
+      "id": "view_all_url",
+      "label": "View All link",
+      "info": "Optional. Defaults to the selected collection page if empty."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "default": 12,
+      "label": "Products to show"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4,
+      "label": "Products per row (desktop)"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "label": "Gap between cards"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "label": "Image corner radius"
+    },
+    {
+      "type": "header",
+      "content": "Badges"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "label": "Show sale badge",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_new_badge",
+      "label": "Show new badge (products tagged \"new\")",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "badge_sale_color",
+      "label": "Sale badge color",
+      "default": "#E86C3A"
+    },
+    {
+      "type": "color",
+      "id": "badge_new_color",
+      "label": "New badge color",
+      "default": "#4CAF50"
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "Show wishlist button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_size_selector",
+      "label": "Show size selector on hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatches",
+      "label": "Show color swatches",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show review count badge",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "sale_price_color",
+      "label": "Sale price color",
+      "default": "#D32F2F"
+    },
+    {
+      "type": "color",
+      "id": "rating_bg_color",
+      "label": "Rating badge background",
+      "default": "#F5E6D3",
+      "info": "Currently unused — reserved for future rating-badge styling."
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty collection message",
+      "default": "Select a collection to display products."
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48,
+      "label": "Top padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48,
+      "label": "Bottom padding"
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Arrivals Carousel",
+      "category": "Products"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

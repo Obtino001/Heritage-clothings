@@ -1,0 +1,514 @@
+/* Predictive search — Derma Space dropdown panel (below header) */
+
+.search-modal--dropdown .predictive-search-form__content {
+  padding: 0;
+}
+
+.search-modal--dropdown .predictive-search-results__inner,
+.search-modal--dropdown .predictive-search-empty-state,
+.search-modal--dropdown .predictive-search-active-state {
+  width: 100%;
+}
+
+/* Full-width panel; inner content constrained like Derma Space */
+.search-modal--dropdown .predictive-search-empty-state__layout,
+.search-modal--dropdown .predictive-search-active-state__layout {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.search-modal--dropdown .predictive-search-trending__heading,
+.search-modal--dropdown .predictive-search-sidebar__heading {
+  text-align: left;
+  font-family: var(--font-body-family, inherit);
+}
+
+/* Search form — full width; search bar row is containerized inside header */
+.search-modal--dropdown .predictive-search-form {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.search-modal--dropdown .predictive-search-form .predictive-search-empty-state__sidebar,
+.search-modal--dropdown .predictive-search-form .predictive-search-active-state__sidebar {
+  padding-left: 0;
+}
+
+/* Search bar row — Derma Space match */
+.search-modal--dropdown .predictive-search-form__header {
+  max-width: 1280px !important;
+  width: 100% !important;
+  padding: 6px 20px !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+}
+
+@media screen and (min-width: 768px) {
+  .search-modal--dropdown .predictive-search-form__header {
+    padding: 10px 20px !important;
+  }
+}
+
+body .search-modal--dropdown .predictive-search-form__header-inner {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+body .search-modal--dropdown input.search-input {
+  background-color: #faf9f7 !important;
+  border: 1px solid #e6e6e6 !important;
+  border-radius: 6px !important;
+  padding: 16px 16px 16px 40px !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  line-height: 1.5 !important;
+  color: #212121 !important;
+  min-height: 48px !important;
+}
+
+body .search-modal--dropdown input.search-input::placeholder {
+  color: #757575 !important;
+  font-weight: 300 !important;
+  opacity: 1 !important;
+}
+
+body .search-modal--dropdown input.search-input:focus,
+body .search-modal--dropdown input.search-input:focus-visible {
+  border-color: #212121 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+body .search-modal--dropdown .predictive-search__icon {
+  left: 12px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: #212121 !important;
+}
+
+body .search-modal--dropdown .predictive-search__icon > svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+body .search-modal--dropdown .predictive-search__close-modal-button {
+  padding: 6px !important;
+  min-width: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+body .search-modal--dropdown .predictive-search__close-modal-button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Hide "Clear" reset inside search input */
+.search-modal--dropdown .predictive-search__reset-button {
+  display: none !important;
+}
+
+/* Product / trending cards */
+.predictive-search-results__card .resource-card .resource-card__media img.resource-card__image {
+  height: 230px;
+}
+
+.predictive-search-results__list li.predictive-search-results__card {
+  padding: 6px !important;
+  margin: 0 !important;
+  background: #f2f2f2;
+}
+
+.search-modal--dropdown .predictive-search-trending__grid {
+  width: 100%;
+}
+
+/* Hide bottom "View all" button — link is in products header instead */
+.search-modal--dropdown .predictive-search-form__footer {
+  display: none !important;
+}
+
+.search-modal--dropdown
+  .predictive-search-form__content-wrapper:has([data-search-results])
+  > .predictive-search-form__content {
+  padding-block-end: 0;
+}
+
+/* Hide default horizontal query pills from theme CSS */
+.search-modal--dropdown .predictive-search-dropdown--active-custom .predictive-search-results__list-queries,
+.search-modal--dropdown .predictive-search-dropdown--active-custom [class*='queries'] > .predictive-search-results__list:not(.predictive-search-results__grid-products) {
+  display: none !important;
+}
+
+/* Header anchor — search lives under sticky header */
+#header-group {
+  position: relative;
+  z-index: 1001;
+}
+
+.search-modal--dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Full-width panel fixed below visible header (announcement + sticky nav) */
+html:root {
+  --search-panel-top: var(--header-group-height, var(--header-height, 135px));
+}
+
+body dialog.search-modal__content.dialog-modal,
+body .search-modal--dropdown .search-modal__content {
+  position: fixed !important;
+  top: var(--search-panel-top, var(--header-group-height, var(--header-height, 135px))) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  height: calc(100dvh - var(--search-panel-top, var(--header-group-height, var(--header-height, 135px)))) !important;
+  max-height: calc(100dvh - var(--search-panel-top, var(--header-group-height, var(--header-height, 135px)))) !important;
+}
+
+/* Keep sticky header above search panel + backdrop */
+body:has(.search-modal--dropdown .search-modal__content[open]) #header-group,
+body:has(.search-modal--dropdown .search-modal__content[open]) #header-group .header-section,
+body:has(.search-modal--dropdown .search-modal__content[open]) #header-group .shopify-section,
+body:has(.search-modal--dropdown .search-modal__content[open]) #header-component {
+  z-index: 1002;
+}
+
+html.search-overlay-open {
+  overflow: hidden;
+}
+
+html.search-overlay-open body {
+  overflow: hidden;
+}
+
+/* Mobile — Derma Space layout (stacked sections + trending carousel) */
+@media screen and (max-width: 989px) {
+  body dialog.search-modal__content.dialog-modal,
+  body .search-modal--dropdown .search-modal__content {
+    height: calc(100dvh - var(--search-panel-top, var(--header-group-height, var(--header-height, 135px)))) !important;
+    max-height: calc(100dvh - var(--search-panel-top, var(--header-group-height, var(--header-height, 135px)))) !important;
+  }
+
+  .search-modal--dropdown .predictive-search-form__header {
+    padding: 10px 20px !important;
+    flex-shrink: 0;
+  }
+
+  .search-modal--dropdown .predictive-search-form__content-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-modal--dropdown .predictive-search-form__content {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .search-modal--dropdown .predictive-search-empty-state__layout,
+  .search-modal--dropdown .predictive-search-active-state__layout {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px 20px 24px !important;
+  }
+
+  .search-modal--dropdown .predictive-search-empty-state__sidebar,
+  .search-modal--dropdown .predictive-search-active-state__sidebar,
+  .search-modal--dropdown .predictive-search-empty-state__trending,
+  .search-modal--dropdown .predictive-search-active-state__main {
+    grid-column: 1 / -1 !important;
+    padding: 0 !important;
+    width: 100%;
+  }
+
+  .search-modal--dropdown .predictive-search-sidebar {
+    gap: 12px !important;
+  }
+
+  .search-modal--dropdown .predictive-search-trending {
+    padding-bottom: 4px;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__grid {
+    display: flex !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .search-modal--dropdown .predictive-search-trending__item {
+    flex: 0 0 calc(50% - 4px);
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+}
+
+/* Empty + active search — 12-col grid (4 sidebar + 8 main) */
+.search-modal--dropdown .predictive-search-empty-state__layout,
+.search-modal--dropdown .predictive-search-active-state__layout,
+.predictive-search-empty-state__layout,
+.predictive-search-active-state__layout {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+  min-height: 0;
+  width: 100%;
+  align-items: start;
+}
+
+.search-modal--dropdown .predictive-search-empty-state__sidebar,
+.search-modal--dropdown .predictive-search-active-state__sidebar,
+.predictive-search-empty-state__sidebar,
+.predictive-search-active-state__sidebar {
+  grid-column: span 12;
+  padding: 0;
+  border: 0;
+}
+
+.search-modal--dropdown .predictive-search-empty-state__trending,
+.search-modal--dropdown .predictive-search-active-state__main,
+.predictive-search-empty-state__trending,
+.predictive-search-active-state__main {
+  grid-column: span 12;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+@media screen and (min-width: 990px) {
+  .search-modal--dropdown .predictive-search-empty-state__sidebar,
+  .search-modal--dropdown .predictive-search-active-state__sidebar,
+  .predictive-search-empty-state__sidebar,
+  .predictive-search-active-state__sidebar {
+    grid-column: span 4;
+  }
+
+  .search-modal--dropdown .predictive-search-empty-state__trending,
+  .search-modal--dropdown .predictive-search-active-state__main,
+  .predictive-search-empty-state__trending,
+  .predictive-search-active-state__main {
+    grid-column: span 8;
+  }
+}
+
+/* Derma Space sidebar typography — override theme defaults */
+.search-modal--dropdown .predictive-search-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__section + .predictive-search-sidebar__section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__heading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__heading,
+.search-modal--dropdown .predictive-search-trending__heading {
+  margin: 0;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-align: left;
+  color: #000 !important;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__heading-line {
+  flex: 1 1 auto;
+  display: block;
+  min-width: 24px;
+  height: 1px;
+  border: 0;
+  border-bottom: 1px solid #e6e6e6;
+  align-self: center;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__link {
+  padding: 4px 0 !important;
+  border-radius: 0 !important;
+  gap: 8px !important;
+  grid-template-columns: 20px 1fr auto !important;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__link--brand,
+.search-modal--dropdown .predictive-search-sidebar__link--blog {
+  grid-template-columns: 20px 1fr !important;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__link:hover {
+  background: transparent !important;
+}
+
+body .search-modal--dropdown .predictive-search-sidebar__text {
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  line-height: 1.5 !important;
+  color: #818181 !important;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__link:hover .predictive-search-sidebar__text {
+  color: #000 !important;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__icon,
+.search-modal--dropdown .predictive-search-sidebar__arrow {
+  width: 20px;
+  height: 20px;
+  color: #212121;
+}
+
+.search-modal--dropdown .predictive-search-sidebar__icon svg,
+.search-modal--dropdown .predictive-search-sidebar__arrow svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.search-modal--dropdown .predictive-search-trending__grid {
+  gap: 8px !important;
+}
+
+.search-modal--dropdown .predictive-search-trending__label {
+  margin-top: 8px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  color: #212121 !important;
+}
+
+.search-modal--dropdown .predictive-search-trending__media {
+  border-radius: 4px;
+  aspect-ratio: 658 / 955;
+}
+
+.search-modal--dropdown .predictive-search-trending__image {
+  transition: transform 0.3s ease;
+}
+
+.search-modal--dropdown .predictive-search-trending__card:hover .predictive-search-trending__image {
+  transform: scale(1.1);
+}
+
+/* Products header */
+.predictive-search-results__products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.predictive-search-results__title--products {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  font-family: var(--font-body-family, inherit);
+}
+
+.predictive-search-results__view-all {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: rgb(var(--color-foreground-rgb, 28, 27, 26));
+}
+
+.predictive-search-results__view-all:hover {
+  opacity: 0.7;
+}
+
+/* Product grid — 4 columns */
+.predictive-search-results__products--grid .predictive-search-results__grid-products {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  flex-wrap: unset;
+  scroll-snap-type: none;
+}
+
+.predictive-search-results__products--grid .predictive-search-results__card--product {
+  width: 100% !important;
+  flex: unset !important;
+  scroll-snap-align: unset;
+}
+
+body .search-modal--dropdown .search-modal__content::backdrop {
+  background: transparent !important;
+}
+
+.search-modal--dropdown .search-modal__content[open]::backdrop {
+  opacity: 1;
+}
+
+@media screen and (max-width: 989px) {
+  .search-modal--dropdown .predictive-search-empty-state__layout,
+  .search-modal--dropdown .predictive-search-active-state__layout,
+  .predictive-search-empty-state__layout,
+  .predictive-search-active-state__layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .predictive-search-results__products--grid .predictive-search-results__grid-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .search-modal--dropdown .predictive-search-empty-state__sidebar,
+  .search-modal--dropdown .predictive-search-active-state__sidebar,
+  .search-modal--dropdown .predictive-search-empty-state__trending,
+  .search-modal--dropdown .predictive-search-active-state__main {
+    padding: 0;
+  }
+}

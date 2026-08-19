@@ -1,0 +1,162 @@
+{%- liquid
+  assign heading = section.settings.heading | default: 'About Us'
+  assign bg_image = section.settings.background_image
+  assign mobile_bg_image = section.settings.mobile_background_image
+
+  if mobile_bg_image == blank
+    assign mobile_bg_image = bg_image
+  endif
+  if bg_image == blank
+    assign bg_image = mobile_bg_image
+  endif
+-%}
+
+{% style %}
+  #AboutBannerSection-{{ section.id }} .about-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 439px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 40px;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__image-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 439px;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__image-wrap img,
+  #AboutBannerSection-{{ section.id }} .about-banner__image {
+    width: 100%;
+    height: 439px;
+    object-fit: cover;
+    display: block;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__image--mobile {
+    display: none;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__heading {
+    margin: 0;
+    color: #000;
+    font-family: Lora, serif;
+    font-weight: 500;
+    font-size: 65px;
+    line-height: 120%;
+    letter-spacing: 0;
+    vertical-align: middle;
+  }
+
+  @media screen and (max-width: 749px) {
+    .about-banner__image--desktop {
+      display: none !important;
+    }
+
+    .about-banner__image--mobile {
+      display: block !important;
+    }
+
+ #AboutBannerSection-{{ section.id }} .about-banner {
+    height: 349px;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__image-wrap {
+    height: 349px;
+  }
+
+  #AboutBannerSection-{{ section.id }} .about-banner__image-wrap img,
+  #AboutBannerSection-{{ section.id }} .about-banner__image {
+    height: 349px;
+  }
+
+
+  }
+{% endstyle %}
+
+<div class="about-banner-section" id="AboutBannerSection-{{ section.id }}">
+  <div class="page-width">
+    <div class="about-banner">
+      {%- if bg_image != blank or mobile_bg_image != blank -%}
+        <div class="about-banner__image-wrap image-wrap">
+          {%- if bg_image != blank -%}
+            {{
+              bg_image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'about-banner__image about-banner__image--desktop',
+                loading: 'lazy',
+                alt: heading,
+                widths: '750, 1100, 1500, 1780, 2000, 2400',
+                sizes: '(min-width: 750px) 1200px, 0px'
+            }}
+          {%- endif -%}
+          {%- if mobile_bg_image != blank -%}
+            {{
+              mobile_bg_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'about-banner__image about-banner__image--mobile',
+                loading: 'lazy',
+                alt: heading,
+                widths: '375, 550, 750, 1100',
+                sizes: '(max-width: 749px) 100vw, 0px'
+            }}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      <div class="about-banner__content">
+        {%- if heading != blank -%}
+          <h2 class="about-banner__heading">{{ heading }}</h2>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "About banner",
+  "tag": "section",
+  "class": "section-about-banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile background image",
+      "info": "Optional. Used on mobile only. Falls back to background image if empty."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "About Us"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About banner"
+    }
+  ]
+}
+{% endschema %}

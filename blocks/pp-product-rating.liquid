@@ -1,0 +1,309 @@
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product | default: product
+
+  assign rating_value = nil
+  assign rating_count = nil
+  assign rating_is_dynamic = false
+
+  assign reviews_rating_mf = product.metafields.reviews.rating
+  assign reviews_count_mf = product.metafields.reviews.rating_count
+
+  if reviews_rating_mf != blank
+    if reviews_rating_mf.value.rating != blank
+      assign rating_value = reviews_rating_mf.value.rating
+      assign rating_is_dynamic = true
+    elsif reviews_rating_mf.value != blank
+      assign rating_value = reviews_rating_mf.value
+      assign rating_is_dynamic = true
+    endif
+  endif
+
+  if rating_value == nil and product.metafields.custom.rating != blank
+    assign custom_rating_mf = product.metafields.custom.rating
+    if custom_rating_mf.value != blank
+      assign rating_value = custom_rating_mf.value
+    else
+      assign rating_value = custom_rating_mf
+    endif
+    assign rating_is_dynamic = true
+  endif
+
+  if reviews_count_mf != blank
+    if reviews_count_mf.value != blank
+      assign rating_count = reviews_count_mf.value
+    else
+      assign rating_count = reviews_count_mf
+    endif
+    assign rating_is_dynamic = true
+  endif
+
+  if rating_count == nil and product.metafields.custom.review_count != blank
+    assign custom_count_mf = product.metafields.custom.review_count
+    if custom_count_mf.value != blank
+      assign rating_count = custom_count_mf.value
+    else
+      assign rating_count = custom_count_mf
+    endif
+    assign rating_is_dynamic = true
+  endif
+
+  if rating_count == nil and product.metafields.custom.rating_count != blank
+    assign custom_count_mf = product.metafields.custom.rating_count
+    if custom_count_mf.value != blank
+      assign rating_count = custom_count_mf.value
+    else
+      assign rating_count = custom_count_mf
+    endif
+    assign rating_is_dynamic = true
+  endif
+
+  if rating_is_dynamic == false and block_settings.use_fallback
+    if block_settings.fallback_rating != blank
+      assign rating_value = block_settings.fallback_rating
+    endif
+    if block_settings.fallback_count != blank
+      assign rating_count = block_settings.fallback_count
+    endif
+  endif
+
+  assign show_rating = false
+  if rating_value != nil and rating_value != blank
+    assign show_rating = true
+  endif
+
+  assign rating_number = rating_value | plus: 0
+  assign rating_max = 5
+
+  if reviews_rating_mf != blank and reviews_rating_mf.value.scale_max != blank
+    assign rating_scale_max = reviews_rating_mf.value.scale_max | plus: 0
+    if rating_scale_max > 0 and rating_scale_max != 5
+      assign rating_number = rating_value | times: 5.0 | divided_by: rating_scale_max
+    endif
+  endif
+
+  assign rating_floor = rating_number | floor
+  assign rating_rounded = rating_number | round
+  assign star_size = block_settings.star_size
+  assign star_gap = block_settings.star_gap
+-%}
+
+{%- if show_rating -%}
+  <div
+    class="pp-product-rating"
+    style="
+      --pp-rating-color: {{ block_settings.star_color }};
+      --pp-rating-star-size: {{ star_size }}px;
+      --pp-rating-star-gap: {{ star_gap }}px;
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div
+      class="pp-product-rating__stars"
+      role="img"
+      aria-label="Rated {{ rating_number | round: 1 }} out of {{ rating_max }} stars{% if rating_count != blank and block_settings.show_count %}. {{ rating_count }} reviews{% endif %}"
+    >
+      {%- for i in (1..5) -%}
+        {%- liquid
+          assign star_num = i
+          assign is_full = false
+          assign is_half = false
+          assign half_threshold = star_num | minus: 0.5
+
+          if block_settings.star_style == 'round'
+            if star_num <= rating_rounded
+              assign is_full = true
+            endif
+          elsif block_settings.star_style == 'half'
+            if rating_number >= star_num
+              assign is_full = true
+            elsif rating_number >= half_threshold
+              assign is_half = true
+            endif
+          else
+            if star_num <= rating_floor
+              assign is_full = true
+            endif
+          endif
+        -%}
+
+        <span class="pp-product-rating__star{% if is_full %} pp-product-rating__star--full{% elsif is_half %} pp-product-rating__star--half{% else %} pp-product-rating__star--empty{% endif %}">
+          {%- if is_half -%}
+            <svg class="pp-product-rating__icon pp-product-rating__icon--half" width="{{ star_size }}" height="{{ star_size }}" viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <clipPath id="pp-rating-half-{{ block.id }}-{{ i }}">
+                  <rect x="0" y="0" width="12" height="24"/>
+                </clipPath>
+              </defs>
+              <path class="pp-product-rating__shape pp-product-rating__shape--empty" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              <path class="pp-product-rating__shape pp-product-rating__shape--full" clip-path="url(#pp-rating-half-{{ block.id }}-{{ i }})" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          {%- else -%}
+            <svg class="pp-product-rating__icon" width="{{ star_size }}" height="{{ star_size }}" viewBox="0 0 24 24" aria-hidden="true">
+              <path class="pp-product-rating__shape{% if is_full %} pp-product-rating__shape--full{% else %} pp-product-rating__shape--empty{% endif %}" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          {%- endif -%}
+        </span>
+      {%- endfor -%}
+    </div>
+
+    {%- if block_settings.show_count and rating_count != blank -%}
+      <span class="pp-product-rating__count">({{ rating_count }})</span>
+    {%- endif -%}
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="pp-product-rating pp-product-rating--empty" {{ block.shopify_attributes }}>
+    <p class="pp-product-rating__empty-text">
+      No reviews for <strong>{{ product.title }}</strong> yet.
+      Ratings load automatically from each product's <code>reviews.rating</code> and <code>reviews.rating_count</code> metafields (Shopify Product Reviews / compatible apps).
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .pp-product-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .pp-product-rating--empty {
+    padding: 10px 12px;
+    border: 1px dashed #cccccc;
+    border-radius: 6px;
+    background: #fafafa;
+  }
+
+  .pp-product-rating__empty-text {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #555555;
+  }
+
+  .pp-product-rating__empty-text code {
+    font-size: 11px;
+    background: #eeeeee;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  .pp-product-rating__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pp-rating-star-gap, 2px);
+    line-height: 0;
+  }
+
+  .pp-product-rating__star {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .pp-product-rating__icon {
+    display: block;
+  }
+
+  .pp-product-rating__shape--full {
+    fill: var(--pp-rating-color, #5d4037);
+    stroke: none;
+  }
+
+  .pp-product-rating__shape--empty {
+    fill: none;
+    stroke: var(--pp-rating-color, #5d4037);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .pp-product-rating__count {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--pp-rating-color, #5d4037);
+    font-weight: 400;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product rating",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Automatically shows each product's own rating from reviews.rating and reviews.rating_count metafields. No setup needed per product."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show review count",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "star_style",
+      "label": "Star display",
+      "default": "half",
+      "options": [
+        { "value": "floor", "label": "Full stars only (4.8 = 4 stars)" },
+        { "value": "round", "label": "Rounded (4.8 = 5 stars)" },
+        { "value": "half", "label": "Half stars (4.5 = 4.5 stars)" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star and count color",
+      "default": "#5d4037"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 12,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "star_gap",
+      "label": "Gap between stars",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Fallback (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_fallback",
+      "label": "Use fallback when product has no reviews",
+      "default": false,
+      "info": "Leave off to hide rating on products without reviews."
+    },
+    {
+      "type": "text",
+      "id": "fallback_rating",
+      "label": "Fallback rating (1–5)"
+    },
+    {
+      "type": "text",
+      "id": "fallback_count",
+      "label": "Fallback review count"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product rating",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

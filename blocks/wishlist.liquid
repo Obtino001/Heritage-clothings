@@ -1,0 +1,147 @@
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product | default: product
+  assign icon_size = block_settings.icon_size | default: 22
+-%}
+
+{{ 'heritage-wishlist.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'heritage-wishlist.js' | asset_url }}" defer="defer"></script>
+
+{%- if product != blank -%}
+  <div
+    class="pp-wishlist-block pp-wishlist-block--align-{{ block_settings.alignment | default: 'right' }}"
+    {{ block.shopify_attributes }}
+  >
+    <button
+      type="button"
+      class="wishlist-btn pp-wishlist-block__btn{% unless block_settings.show_background %} pp-wishlist-block__btn--plain{% endunless %}"
+      style="--pp-wishlist-size: {{ icon_size }}px;"
+      aria-label="Add to wishlist"
+      aria-pressed="false"
+      data-wishlist-btn
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-image="{{ product.featured_media | image_url: width: 800 }}"
+      data-product-price="{{ product.price | money }}"
+      data-product-url="{{ product.url }}"
+    >
+      <svg width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      {%- if block_settings.show_label -%}
+        <span class="pp-wishlist-block__label">{{ block_settings.label | default: 'Wishlist' }}</span>
+      {%- endif -%}
+    </button>
+  </div>
+
+  {%- if block_settings.show_toast -%}
+    <div class="wishlist-toast" data-wishlist-toast role="status" aria-live="polite"></div>
+  {%- endif -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .pp-wishlist-block {
+    display: flex;
+    width: 100%;
+  }
+
+  .pp-wishlist-block--align-left {
+    justify-content: flex-start;
+  }
+
+  .pp-wishlist-block--align-center {
+    justify-content: center;
+  }
+
+  .pp-wishlist-block--align-right {
+    justify-content: flex-end;
+  }
+
+  .pp-wishlist-block__btn {
+    width: auto;
+    min-width: var(--pp-wishlist-size, 22px);
+    height: auto;
+    min-height: var(--pp-wishlist-size, 22px);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .pp-wishlist-block__btn--plain {
+    background: transparent;
+    box-shadow: none;
+    padding: 4px;
+  }
+
+  .pp-wishlist-block__btn--plain:hover {
+    transform: scale(1.08);
+  }
+
+  .pp-wishlist-block__label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    color: inherit;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 18,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "checkbox",
+      "id": "show_background",
+      "label": "Show circle background",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_label",
+      "label": "Show text label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label text",
+      "default": "Wishlist",
+      "visible_if": "{{ block.settings.show_label }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toast",
+      "label": "Show saved toast message",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Wishlist",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

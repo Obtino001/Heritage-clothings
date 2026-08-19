@@ -1,0 +1,407 @@
+<section class="paylater_hero">
+  <div class="bg_img">
+    {% if section.settings.image != blank %}
+      <img class="desktop" src="{{ section.settings.image | img_url: 'master' }}" alt="">
+    {% endif %}
+
+     {% if section.settings.image_mob != blank %}
+      <img class="mob" src="{{ section.settings.image_mob | img_url: 'master' }}" alt="">
+    {% endif %}
+
+  </div>
+  <div class="page-width">
+    <div class="paylater_hero_content">
+      <!-- LEFT CONTENT -->
+      <div class="paylater_hero_left">
+        <h1 class="paylater_hero_heading">
+          {{ section.settings.heading }}
+        </h1>
+
+        <p class="paylater_hero_text">
+     {{ section.settings.text }}  <span><img src="{{ section.settings.img | img_url: 'master' }}"></span>
+        </p>
+
+        <!-- ICON ROW -->
+        <div class="paylater_hero_icons">
+          {% for block in section.blocks %}
+            <div class="paylater_hero_icon_item">
+              {% if block.settings.icon != blank %}
+                <img src="{{ block.settings.icon | img_url: 'master' }}" alt="">
+              {% endif %}
+              <span>{{ block.settings.label }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="paylater_hero_buttons">
+          <a href="{{ section.settings.btn1_link }}" class="btn_primary">
+            {{ section.settings.btn1 }}
+          </a>
+
+          <a href="{{ section.settings.btn2_link }}" class="btn_secondary">
+            {{ section.settings.btn2 }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+
+   .paylater_hero {
+    position: relative;
+
+    overflow: hidden;
+  }
+
+.paylater_hero .page-width{
+   position: absolute;
+   inset: 0;
+   display: flex; 
+   align-items: center;
+   justify-content: start;
+
+}
+.paylater_hero .bg_img .mob{
+   display: none;
+}
+
+.paylater_hero_text{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+font-weight: 500;
+margin: 0;
+font-size: 16px;
+line-height: 100%;
+letter-spacing: 2%;
+
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 9px;
+
+}
+
+.paylater_hero .paylater_hero_heading{
+  font-family: Lora;
+font-weight: 500;
+font-size: 65px;    font-style: italic;
+line-height: 120%;
+letter-spacing: 0%;
+
+}
+
+  /* ICONS */
+  .paylater_hero .paylater_hero_icons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 45px 0;
+  }
+
+  .paylater_hero .paylater_hero_icon_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    height: 100%;
+  }
+
+  .paylater_hero .paylater_hero_icon_item span{
+    font-family: Neue Montreal;
+font-weight: 500;
+font-size: 16px;
+line-height: 100%;
+letter-spacing: 2%;
+color: #000000;
+  }
+
+  .paylater_hero .paylater_hero_icon_item img {
+    width: 58px;
+
+  }
+  
+
+  /* BUTTONS */
+  .paylater_hero .paylater_hero_buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* PRIMARY BUTTON */
+  .paylater_hero .btn_primary {
+    padding: 12px 20px;
+    height: 43px;
+    background: #2F4A36;
+    color: #fff;
+    min-width:180px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+  }
+
+  .paylater_hero .btn_primary:hover {
+    opacity: 0.9;
+  }
+
+  /* SECONDARY BUTTON */
+  .paylater_hero .btn_secondary {
+    padding: 12px 22px;
+    border: 1px solid #000;
+    border-radius: 999px;
+     height: 43px;
+    text-decoration: none;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+  }
+
+  .paylater_hero .btn_secondary:hover {
+   background: #2F4A36;
+    color: #fff;
+  }
+
+  /* RIGHT IMAGE */
+  .paylater_hero .paylater_hero_right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  /* IMPORTANT IMAGE FIX */
+  .paylater_hero .paylater_hero_right img {
+    width: 100%;
+    max-width: 520px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* =======================
+     RESPONSIVE
+  ======================= */
+
+    @media (max-width: 1280px) {
+.paylater_hero .paylater_hero_heading {
+  margin-bottom: 20px;
+    font-size: 55px;
+}
+
+.paylater_hero .paylater_hero_icons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 25px 0;
+}
+}
+
+    @media (max-width: 1200px) {
+.paylater_hero .bg_img img{
+    height: 620px;
+    object-fit: cover;
+
+}
+}
+  @media (max-width: 768px) {
+    .paylater_hero .paylater_hero_content {
+      flex-direction: column;
+      text-align: center;
+      gap: 40px;
+    }
+
+
+
+       
+    .paylater_hero .paylater_hero_right {
+      justify-content: center;
+    }
+
+    .paylater_hero .paylater_hero_text {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .paylater_hero .paylater_hero_icons {
+      align-items: center;
+    }
+
+    .paylater_hero .paylater_hero_buttons {
+      justify-content: center;
+    }
+
+ 
+
+    .paylater_hero .paylater_hero_heading {
+      font-size: 40px;
+    }
+
+    .paylater_hero .paylater_hero_right img {
+      max-width: 100%;
+    }
+
+    .paylater_hero .bg_img .mob{
+   display: block;
+}
+.paylater_hero .desktop{
+  display: none;
+}
+ .paylater_hero .page-width {
+       
+        align-items: start;
+        justify-content: start;
+        top: 60px;
+    }
+
+        .paylater_hero .paylater_hero_icons {
+        align-items: center;
+        flex-direction: row;
+        justify-content: center;
+    }
+.paylater_hero .bg_img img {
+        height: 930px;
+        object-fit: cover;
+        object-position: 0 -390px;
+    }
+
+  }
+  @media (max-width: 750px) {
+  .paylater_hero .bg_img img {
+        height: 930px;
+        object-fit: cover;
+        object-position: 0 ;
+    }
+  }
+  @media (max-width: 500px) {
+    .paylater_hero .bg_img img {
+        height: auto;
+        object-fit: cover;
+        object-position: unset;
+    }
+    .paylater_hero .paylater_hero_buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.paylater_hero .btn_primary{
+   min-width: 220px;
+}
+.paylater_hero .btn_secondary{
+   min-width: 210px;
+}
+.paylater_hero .paylater_hero_icon_item {
+
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    flex-direction: column;
+}
+.paylater_hero .paylater_hero_icons{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+    .paylater_hero .paylater_hero_heading {
+        font-size: 32px;
+    }
+
+    .paylater_hero .page-width {
+        top: 35px;
+    }
+    .paylater_hero .paylater_hero_icon_item span {
+    
+    font-size: 12px;
+    }
+    .paylater_hero .paylater_hero_icons {
+    
+        margin: 25px 0 16px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Pay Later Hero",
+  "settings": [
+      {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Backgorund Image"
+    },
+ {
+      "type": "image_picker",
+      "id": "image_mob",
+      "label": "Backgorund Image(Mobile)"
+    },
+    
+    {
+      "type": "html",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop Now, Pay Later."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text"
+    },
+      {
+      "type": "image_picker",
+      "id": "img",
+      "label": "Payment Label"
+    },
+  
+    {
+      "type": "text",
+      "id": "btn1",
+      "label": "Button 1 Label"
+    },
+    {
+      "type": "url",
+      "id": "btn1_link",
+      "label": "Button 1 Link"
+    },
+    {
+      "type": "text",
+      "id": "btn2",
+      "label": "Button 2 Label"
+    },
+    {
+      "type": "url",
+      "id": "btn2_link",
+      "label": "Button 2 Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "icon",
+      "name": "Feature Icon",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pay Later Hero"
+    }
+  ]
+}
+{% endschema %}

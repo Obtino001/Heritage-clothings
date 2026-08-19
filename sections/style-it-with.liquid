@@ -1,0 +1,148 @@
+{% assign siw_products = '' | split: '' %}
+{% for i in (1..3) %}
+  {% assign pid_key = 'product_' | append: i %}
+  {% assign p = section.settings[pid_key] %}
+  {% if p != blank %}
+    {% assign siw_products = siw_products | push: p %}
+  {% endif %}
+{% endfor %}
+
+{% if siw_products.size > 0 %}
+<div class="style-it-with-section" id="style-it-with-{{ section.id }}">
+  <h2 class="siw-heading">{{ section.settings.heading }}</h2>
+  <div class="siw-wrapper">
+    {% if section.settings.show_savings and section.settings.savings_amount > 0 %}
+    <div class="siw-savings-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Save <strong>{{ section.settings.savings_amount | money }}</strong> when bought together
+    </div>
+    {% endif %}
+    <div class="siw-products-list" id="siw-list-{{ section.id }}">
+      {% for product in siw_products %}
+        <div class="siw-product-item" data-product-id="{{ product.id }}" data-product-price="{{ product.price }}">
+          <div class="siw-product-inner">
+            <a href="{{ product.url }}" class="siw-product-image-link">
+              <img src="{{ product.featured_image | image_url: width: 200 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="120" height="120" loading="lazy" class="siw-product-img">
+            </a>
+            <div class="siw-product-info">
+              <a href="{{ product.url }}" class="siw-product-title">{{ product.title }}</a>
+              <div class="siw-product-price">
+                {% if product.compare_at_price > product.price %}
+                  <span class="siw-price-original">{{ product.compare_at_price | money }}</span>
+                {% endif %}
+                <span class="siw-price">{{ product.price | money }}</span>
+              </div>
+            </div>
+          </div>
+          <label class="siw-checkbox-label" aria-label="Add {{ product.title | escape }} to cart">
+            <input type="checkbox" class="siw-checkbox" checked data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-price="{{ product.price }}">
+            <span class="siw-checkmark">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </label>
+        </div>
+        {% unless forloop.last %}
+        <div class="siw-plus-divider">+</div>
+        {% endunless %}
+      {% endfor %}
+    </div>
+    <div class="siw-footer">
+      <button class="siw-add-to-cart-btn" id="siw-add-btn-{{ section.id }}" type="button" onclick="siwAddToCart('{{ section.id }}')">
+        <span class="siw-btn-label">{{ section.settings.button_label }}</span>
+        <span class="siw-btn-total" id="siw-total-{{ section.id }}"></span>
+        {% if section.settings.show_original_total %}
+          <span class="siw-btn-original" id="siw-original-{{ section.id }}"></span>
+        {% endif %}
+      </button>
+    </div>
+  </div>
+</div>
+<style>
+  .style-it-with-section{padding:32px 0;font-family:inherit}
+  .siw-heading{font-size:20px;font-weight:600;margin-bottom:16px;color:#1a1a1a;border-bottom:1px solid #e5e5e5;padding-bottom:12px}
+  .siw-wrapper{background:#f5ede4;border-radius:16px;padding:20px}
+  .siw-savings-bar{display:flex;align-items:center;gap:6px;font-size:14px;color:#333;margin-bottom:18px}
+  .siw-savings-bar strong{font-weight:700}
+  .siw-products-list{display:flex;flex-direction:column;gap:0}
+  .siw-product-item{display:flex;align-items:center;justify-content:space-between;background:transparent;padding:10px 0}
+  .siw-product-inner{display:flex;align-items:center;gap:14px;flex:1}
+  .siw-product-image-link{flex-shrink:0}
+  .siw-product-img{width:110px;height:110px;object-fit:cover;border-radius:8px;background:#fff}
+  .siw-product-info{flex:1}
+  .siw-product-title{display:block;font-size:15px;font-weight:500;color:#1a1a1a;text-decoration:none;margin-bottom:4px;line-height:1.3}
+  .siw-product-title:hover{text-decoration:underline}
+  .siw-product-price{display:flex;align-items:center;gap:6px}
+  .siw-price{font-size:16px;font-weight:600;color:#1a1a1a}
+  .siw-price-original{font-size:13px;color:#888;text-decoration:line-through}
+  .siw-checkbox-label{position:relative;cursor:pointer;flex-shrink:0;margin-left:12px}
+  .siw-checkbox-label input{position:absolute;opacity:0;width:0;height:0}
+  .siw-checkmark{width:32px;height:32px;background:#2d5a4f;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+  .siw-checkbox-label input:not(:checked)+.siw-checkmark{background:#fff;border:2px solid #d1d1d1}
+  .siw-checkbox-label input:not(:checked)+.siw-checkmark svg{opacity:0}
+  .siw-plus-divider{text-align:center;font-size:20px;color:#666;padding:4px 0;line-height:1}
+  .siw-footer{margin-top:18px}
+  .siw-add-to-cart-btn{width:100%;background:transparent;border:2px solid #1a1a1a;border-radius:50px;padding:14px 24px;font-size:15px;font-weight:600;color:#1a1a1a;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .2s,color .2s}
+  .siw-add-to-cart-btn:hover{background:#1a1a1a;color:#fff}
+  .siw-btn-label{font-weight:600}
+  .siw-btn-total{font-weight:700}
+  .siw-btn-original{font-size:13px;color:#888;text-decoration:line-through;font-weight:400}
+  @media(max-width:480px){.siw-product-img{width:80px;height:80px}}
+</style>
+<script>
+(function(){
+  function siwInit(sid){
+    var list=document.getElementById('siw-list-'+sid);
+    if(!list)return;
+    var cbs=list.querySelectorAll('.siw-checkbox');
+    function upd(){
+      var t=0,ot=0;
+      cbs.forEach(function(c){if(c.checked)t+=parseInt(c.dataset.price,10);ot+=parseInt(c.dataset.price,10);});
+      var te=document.getElementById('siw-total-'+sid),oe=document.getElementById('siw-original-'+sid);
+      if(te)te.textContent='- £'+(t/100).toFixed(2);
+      if(oe){if(t<ot){oe.textContent='£'+(ot/100).toFixed(2);oe.style.display='';}else oe.style.display='none';}
+    }
+    cbs.forEach(function(c){c.addEventListener('change',upd);});
+    upd();
+  }
+  window.siwAddToCart=function(sid){
+    var list=document.getElementById('siw-list-'+sid);
+    if(!list)return;
+    var cbs=list.querySelectorAll('.siw-checkbox:checked'),items=[];
+    cbs.forEach(function(c){items.push({id:c.dataset.variantId,quantity:1});});
+    if(!items.length)return;
+    var btn=document.getElementById('siw-add-btn-'+sid);
+    if(btn){btn.disabled=true;btn.style.opacity='0.7';}
+    fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:items})})
+      .then(function(r){return r.json();})
+      .then(function(){
+        if(btn){btn.disabled=false;btn.style.opacity='1';}
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        var t=document.querySelector('[data-cart-drawer],#cart-drawer,.cart-drawer-toggle');
+        if(t)t.click();
+      }).catch(function(e){console.error(e);if(btn){btn.disabled=false;btn.style.opacity='1';}});
+  };
+  function run(){document.querySelectorAll('[id^="siw-list-"]').forEach(function(el){siwInit(el.id.replace('siw-list-',''));});}
+  if(document.readyState!=='loading')run();
+  else document.addEventListener('DOMContentLoaded',run);
+})();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Style It With",
+  "tag": "section",
+  "class": "style-it-with",
+  "settings": [
+    {"type":"text","id":"heading","label":"Section Heading","default":"Style It With"},
+    {"type":"checkbox","id":"show_savings","label":"Show savings message","default":true},
+    {"type":"number","id":"savings_amount","label":"Savings amount (pence)","default":8000,"info":"Savings in smallest currency unit (e.g. 8000 = £80.00)"},
+    {"type":"text","id":"button_label","label":"Button label","default":"Add Entire Look To Cart"},
+    {"type":"checkbox","id":"show_original_total","label":"Show original total (strikethrough)","default":true},
+    {"type":"product","id":"product_1","label":"Product 1"},
+    {"type":"product","id":"product_2","label":"Product 2"},
+    {"type":"product","id":"product_3","label":"Product 3"}
+  ],
+  "presets": [{"name":"Style It With","category":"Product"}]
+}
+{% endschema %}

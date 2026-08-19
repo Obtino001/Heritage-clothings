@@ -1,0 +1,304 @@
+{% comment %}
+  Section: Rating / Trustpilot Hero
+{% endcomment %}
+
+<div class="page-width">
+<div class="heritage_hero_rating_" data-mobile-align="{{ section.settings.mobile_alignment }}" style="
+  --hrr-bg-color: {{ section.settings.star_bg_color }};
+  --hrr-star-color: {{ section.settings.star_icon_color }};
+  --hrr-text-color: {{ section.settings.text_color }};
+  --hrr-font-size: {{ section.settings.font_size }}px;
+  --hrr-gap: {{ section.settings.stars_gap }}px;
+">
+<div class="mobi_trustpolot">
+  <span class="trust_pilot_icon_txt">
+    <span class="trust_pilot_icon">
+      {% comment %} Trustpilot logo — kept as static brand asset, do not recolor {% endcomment %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="92" height="22" viewBox="0 0 92 22" fill="none">
+        <g clip-path="url(#clip0_326_1830)">
+          <path d="M24.1731 7.74531H33.4868V9.42572H29.8252V18.8741H27.8104V9.42572H24.1646V7.74466H24.1724L24.1731 7.74531ZM33.0892 10.8156H34.8109V12.3711H34.8431C34.9003 12.1511 35.0054 11.9389 35.1599 11.7344C35.4901 11.2962 35.937 10.9564 36.4512 10.7528C36.7123 10.6509 36.9904 10.5976 37.2713 10.5956C37.4816 10.5956 37.6366 10.6034 37.7181 10.6118C37.799 10.6195 37.8798 10.6351 37.9692 10.6428V12.355C37.8373 12.3322 37.7047 12.3139 37.5716 12.3C37.4394 12.2846 37.3064 12.2768 37.1734 12.2767C36.8645 12.2767 36.5727 12.3394 36.2967 12.4578C36.0207 12.575 35.7848 12.7555 35.5824 12.9839C35.3665 13.2393 35.2011 13.5323 35.0948 13.8477C34.9732 14.1932 34.9161 14.5854 34.9161 15.0338V18.8663H33.0813V10.8156H33.0892ZM46.4062 18.8747H44.6037V17.7514H44.5708C44.3434 18.1604 44.0109 18.4826 43.5641 18.7259C43.1172 18.9692 42.6625 19.0947 42.1998 19.0947C41.1037 19.0947 40.3073 18.8359 39.821 18.3092C39.3334 17.7831 39.0896 16.9898 39.0896 15.9293V10.8162H40.925V15.7565C40.925 16.4638 41.063 16.9665 41.3475 17.2571C41.6235 17.5476 42.0211 17.6971 42.5245 17.6971C42.9142 17.6971 43.2309 17.6421 43.4905 17.5237C43.7507 17.4059 43.9616 17.2571 44.1161 17.0604C44.2784 16.8721 44.3921 16.6365 44.4657 16.3693C44.538 16.1021 44.5708 15.8115 44.5708 15.4977V10.824H46.4062V18.8747ZM49.5322 16.291C49.5894 16.8087 49.7918 17.171 50.1414 17.3826C50.4982 17.5871 50.9208 17.6971 51.4163 17.6971C51.5871 17.6971 51.7816 17.6809 52.0011 17.6576C52.22 17.6337 52.4309 17.5787 52.6182 17.5088C52.8127 17.4376 52.9665 17.3276 53.0966 17.1865C53.2188 17.0442 53.2753 16.8643 53.2674 16.6365C53.2664 16.5308 53.2427 16.4265 53.198 16.3304C53.1533 16.2343 53.0885 16.1486 53.0079 16.0788C52.8449 15.93 52.6425 15.82 52.3902 15.7255C52.109 15.6296 51.8214 15.5535 51.5293 15.4977C51.2047 15.435 50.88 15.3638 50.5475 15.2932C50.2125 15.2219 49.8817 15.1327 49.5566 15.026C49.2516 14.9298 48.9639 14.7867 48.7042 14.6022C48.4512 14.4283 48.2448 14.1965 48.1029 13.9267C47.9492 13.6517 47.8756 13.3139 47.8756 12.9056C47.8756 12.4656 47.9893 12.1045 48.2088 11.8056C48.4301 11.5092 48.7159 11.2651 49.0453 11.0912C49.3993 10.907 49.7798 10.7772 50.1736 10.7062C50.5876 10.6357 50.9858 10.5962 51.3591 10.5962C51.7895 10.5962 52.2035 10.6435 52.5939 10.7302C52.9718 10.8099 53.332 10.9561 53.6571 11.1618C53.9739 11.3585 54.2334 11.6173 54.445 11.9318C54.656 12.2456 54.7861 12.6306 54.8426 13.0784H52.9264C52.837 12.6545 52.6418 12.364 52.3258 12.2223C52.009 12.0735 51.6436 12.0023 51.2375 12.0023C51.1074 12.0023 50.953 12.0101 50.7749 12.034C50.6033 12.0565 50.4344 12.0959 50.2709 12.1518C50.1214 12.206 49.9857 12.2917 49.8733 12.4028C49.8187 12.4608 49.7763 12.5289 49.7485 12.603C49.7206 12.6772 49.7079 12.7561 49.711 12.8351C49.711 13.0551 49.7918 13.2278 49.9462 13.3611C50.1007 13.4944 50.3037 13.6044 50.5554 13.6989C50.8071 13.7856 51.0916 13.8639 51.4163 13.9267C51.7409 13.9894 52.0734 14.06 52.4151 14.1311C52.7476 14.2017 53.0723 14.2961 53.3976 14.3977C53.7222 14.5 54.0061 14.6417 54.2584 14.8222C54.5101 15.0027 54.7132 15.2227 54.8669 15.49C55.0213 15.7565 55.1028 16.0943 55.1028 16.4871C55.1028 16.9659 54.9892 17.3671 54.7611 17.7048C54.5344 18.0348 54.242 18.3092 53.8845 18.5137C53.5103 18.7259 53.1048 18.8796 52.6826 18.9692C52.2531 19.0622 51.8146 19.1095 51.3749 19.1102C50.8824 19.1157 50.3912 19.0576 49.914 18.9375C49.4672 18.8197 49.0775 18.647 48.7529 18.4198C48.432 18.1903 48.1682 17.8921 47.9814 17.5476C47.7948 17.2021 47.6968 16.7854 47.6811 16.3065H49.5322V16.291ZM55.5898 10.8169H56.9783V8.39689H58.8137V10.8169H60.4697V12.1434H58.8144V16.4482C58.8144 16.6359 58.8223 16.7938 58.8387 16.9348C58.8545 17.0688 58.8952 17.1865 58.9524 17.2804C59.0145 17.3789 59.1088 17.4538 59.2198 17.4926C59.3421 17.5398 59.4958 17.5638 59.7074 17.5638C59.8369 17.5638 59.967 17.5638 60.0971 17.5554C60.2272 17.5476 60.3567 17.5321 60.4868 17.5004V18.8747C60.2838 18.8987 60.0807 18.9142 59.8941 18.9375C59.6973 18.96 59.4994 18.9706 59.3013 18.9692C58.8144 18.9692 58.4247 18.922 58.1316 18.8359C57.8398 18.7492 57.6039 18.6159 57.4416 18.4431C57.2708 18.2704 57.1656 18.0581 57.1006 17.7987C57.0373 17.5069 57.0021 17.2098 56.9954 16.9115V12.1582H55.6069V10.815H55.5904L55.5898 10.8169ZM61.7689 10.8169H63.507V11.9078H63.5399C63.7988 11.4368 64.1563 11.1068 64.6189 10.903C65.0918 10.6959 65.6043 10.5913 66.1218 10.5962C66.779 10.5962 67.3474 10.7062 67.835 10.934C68.3219 11.154 68.728 11.4607 69.0527 11.8528C69.3773 12.2456 69.6132 12.7011 69.7755 13.2201C69.9409 13.7599 70.0231 14.3211 70.0193 14.885C70.0193 15.4265 69.9464 15.9526 69.7998 16.456C69.6653 16.9416 69.4424 17.3991 69.142 17.8064C68.8469 18.1991 68.4634 18.5191 68.0216 18.7414C67.5669 18.977 67.0392 19.0947 66.4221 19.0947C66.1524 19.0944 65.8832 19.0706 65.6178 19.0235C65.353 18.9766 65.0944 18.9004 64.847 18.7964C64.6011 18.6954 64.3712 18.5603 64.1642 18.3952C63.9599 18.2348 63.7819 18.0442 63.6365 17.8304H63.6036V21.8518H61.7689V10.8156V10.8169ZM68.1839 14.8532C68.1843 14.4951 68.1352 14.1385 68.038 13.7934C67.9481 13.4663 67.7994 13.1578 67.5991 12.8823C67.409 12.6202 67.1623 12.4028 66.8769 12.2456C66.5702 12.0825 66.2265 11.9987 65.878 12.0023C65.1065 12.0023 64.5217 12.2611 64.132 12.7801C63.7423 13.2984 63.5471 13.9901 63.5471 14.8532C63.5471 15.2615 63.5964 15.6388 63.7015 15.9843C63.8067 16.3298 63.9532 16.6288 64.1642 16.8798C64.3679 17.1315 64.611 17.3276 64.8956 17.4687C65.1795 17.6181 65.5126 17.6887 65.8859 17.6887C66.3084 17.6887 66.6574 17.6026 66.9498 17.4376C67.233 17.2772 67.4769 17.0574 67.6641 16.7938C67.8508 16.5265 67.9894 16.2276 68.0702 15.8905C68.145 15.5496 68.1831 15.202 68.1839 14.8532ZM71.4236 7.74531H73.259V9.42637H71.4236V7.74531ZM71.4236 10.8162H73.259V18.8747H71.4236V10.8162ZM74.8993 7.74531H76.7347V18.8747H74.8993V7.74531ZM82.3618 19.0947C81.6954 19.0947 81.1027 18.9847 80.5835 18.7731C80.0858 18.5721 79.6354 18.2726 79.2601 17.8931C78.8952 17.506 78.6157 17.0486 78.4393 16.5498C78.2461 15.9993 78.1501 15.4202 78.1554 14.8377C78.1554 14.225 78.2527 13.6601 78.4393 13.1411C78.6158 12.6426 78.8953 12.1854 79.2601 11.7985C79.6169 11.4212 80.0638 11.1307 80.5835 10.9185C81.1027 10.7062 81.6954 10.5962 82.3618 10.5962C83.0275 10.5962 83.6202 10.7062 84.14 10.9185C84.6598 11.1307 85.0981 11.4297 85.4635 11.7985C85.8283 12.1853 86.1076 12.6425 86.2836 13.1411C86.4702 13.6594 86.5675 14.225 86.5675 14.8377C86.5675 15.4589 86.4702 16.0315 86.2836 16.5498C86.1077 17.0487 85.8284 17.5061 85.4635 17.8931C85.106 18.2704 84.6598 18.5609 84.14 18.7731C83.6202 18.9847 83.0275 19.0947 82.3618 19.0947ZM82.3618 17.6887C82.7679 17.6887 83.1247 17.6026 83.425 17.4376C83.7178 17.2772 83.9703 17.0543 84.1643 16.7854C84.3588 16.5188 84.4968 16.2121 84.5948 15.8743C84.6841 15.5365 84.7327 15.191 84.7327 14.8377C84.7327 14.4922 84.6841 14.1544 84.5948 13.8089C84.5111 13.4811 84.365 13.172 84.1643 12.8978C83.9699 12.6314 83.7173 12.4114 83.425 12.254C83.1247 12.089 82.7679 12.0023 82.3618 12.0023C81.9557 12.0023 81.5982 12.089 81.2979 12.254C81.0075 12.4138 80.7556 12.6334 80.5592 12.8978C80.3614 13.1736 80.2156 13.4822 80.1288 13.8089C80.0389 14.1447 79.9923 14.4904 79.9902 14.8377C79.9902 15.191 80.0394 15.5365 80.1288 15.8743C80.2182 16.2121 80.3641 16.5188 80.5592 16.7854C80.7537 17.0526 80.9976 17.2726 81.2979 17.4376C81.5982 17.6104 81.9557 17.6887 82.3618 17.6887ZM87.1037 10.8169H88.4923V8.39689H90.3277V10.8169H91.9837V12.1434H90.3277V16.4482C90.3277 16.6359 90.3355 16.7938 90.3513 16.9348C90.3678 17.0688 90.4085 17.1865 90.4657 17.2804C90.5276 17.379 90.622 17.4539 90.7331 17.4926C90.8554 17.5398 91.0091 17.5638 91.2207 17.5638C91.3502 17.5638 91.4803 17.5638 91.6104 17.5554C91.7405 17.5476 91.87 17.5321 92.0001 17.5004V18.8747C91.797 18.8987 91.594 18.9142 91.4074 18.9375C91.2106 18.96 91.0127 18.9706 90.8146 18.9692C90.3277 18.9692 89.9373 18.922 89.6449 18.8359C89.3531 18.7492 89.1172 18.6159 88.9549 18.4431C88.7847 18.2704 88.6789 18.0581 88.6138 17.7987C88.5507 17.5068 88.5155 17.2098 88.5087 16.9115V12.1582H87.1202V10.815H87.1037V10.8169Z" fill="{{ section.settings.trustpilot_text_color }}"/>
+          <path d="M22.0294 7.74465H13.6173L11.019 0L8.41143 7.74529L0 7.73688L6.8126 12.5277L4.20637 20.2639L11.019 15.4809L17.8237 20.2639L15.2253 12.5277L22.0294 7.74465Z" fill="{{ section.settings.trustpilot_star_color }}"/>
+          <path d="M15.8096 14.2799L15.2248 12.5284L11.019 15.4815L15.8096 14.2799Z" fill="{{ section.settings.trustpilot_star_shadow_color }}"/>
+        </g>
+        <defs>
+          <clipPath id="clip0_326_1830">
+            <rect width="92" height="22" fill="white"/>
+          </clipPath>
+        </defs>
+      </svg>
+    </span>
+  </span>
+
+  <span class="heritage_hero_stars_">
+    <svg xmlns="http://www.w3.org/2000/svg" width="102" height="18" viewBox="0 0 102 18" fill="none">
+      {% for i in (1..section.settings.star_count) %}
+        {% assign x_offset = forloop.index0 | times: 21 %}
+        <rect x="{{ x_offset }}" width="18" height="18" rx="1.5" fill="var(--hrr-bg-color)"/>
+        <g clip-path="url(#clip{{ forloop.index0 }}_hrr)">
+          <path d="M{{ x_offset | plus: 11.7444 }} 11.4523L{{ x_offset | plus: 12.8941 }} 14.9918L{{ x_offset | plus: 9.0023 }} 12.1631L{{ x_offset | plus: 11.7444 }} 11.4523ZM{{ x_offset | plus: 15.3002 }} 7.58829H{{ x_offset | plus: 10.4886 }}L{{ x_offset | plus: 9.00282 }} 3.00977L{{ x_offset | plus: 7.51182 }} 7.58934L{{ x_offset | plus: 2.7002 }} 7.58304L{{ x_offset | plus: 6.59675 }} 10.4165L{{ x_offset | plus: 5.10575 }} 14.9913L{{ x_offset | plus: 9.0023 }} 12.1631L{{ x_offset | plus: 11.4084 }} 10.4165L{{ x_offset | plus: 15.3002 }} 7.58829Z" fill="var(--hrr-star-color)"/>
+        </g>
+      {% endfor %}
+      <defs>
+        {% for i in (1..section.settings.star_count) %}
+          <clipPath id="clip{{ forloop.index0 }}_hrr">
+            <rect width="12.6" height="12.6" fill="white" transform="translate({{ forloop.index0 | times: 21 | plus: 2.7002 }} 2.7002)"/>
+          </clipPath>
+        {% endfor %}
+      </defs>
+    </svg>
+  </span>
+</div>
+
+  <span class="hrr-rating-text">{{ section.settings.rating_text }}</span>
+</div>
+</div>
+
+
+<style>
+  .heritage_hero_rating_ {
+    display: flex;
+    align-items: center;
+    gap: var(--hrr-gap, 8px);
+    flex-wrap: wrap;
+    /* Default (desktop) source order: stars -> text -> trustpilot logo */
+  }
+
+  /* ---- DESKTOP: the mobile-only wrapper is transparent to layout ----
+     display: contents removes .mobi_trustpolot's own box entirely, so
+     .trust_pilot_icon_txt and .heritage_hero_stars_ act as if they were
+     direct flex children of .heritage_hero_rating_ — exactly like before
+     this wrapper was added. Their `order` values below control desktop
+     positioning independently of the markup / of each other. */
+  .mobi_trustpolot {
+    display: contents;
+  }
+
+  /* ---- Icon wrappers: fixed size, never stretch/shrink ---- */
+  .heritage_hero_stars_,
+  .trust_pilot_icon_txt {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .heritage_hero_stars_ {
+    order: 1;
+  }
+
+  /* Lock SVG dimensions explicitly — overrides any theme-wide
+     `svg { width: 100% }` / `max-width: 100%` reset that would
+     otherwise stretch these to the full container width and
+     force each icon onto its own line. */
+  .heritage_hero_stars_ svg {
+    display: block;
+    width: 102px !important;
+    height: 18px !important;
+    max-width: none !important;
+    flex-shrink: 0;
+  }
+
+  .hrr-rating-text {
+    order: 2;
+    color: var(--hrr-text-color);
+    font-size: var(--hrr-font-size);
+  }
+
+  .trust_pilot_icon_txt {
+    order: 3;
+  }
+
+  .trust_pilot_icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .trust_pilot_icon svg {
+    display: block;
+    width: 92px !important;
+    height: 22px !important;
+    max-width: none !important;
+    flex-shrink: 0;
+  }
+
+  /* Mobile layout control */
+  @media screen and (max-width: 749px) {
+    .heritage_hero_rating_ {
+      justify-content: var(--hrr-mobile-justify, center);
+      text-align: var(--hrr-mobile-align, center);
+      row-gap: 8px;
+      gap: 6px;
+    }
+    .heritage_hero_rating_[data-mobile-align="left"] {
+      justify-content: flex-start;
+      text-align: left;
+    }
+    .heritage_hero_rating_[data-mobile-align="center"] {
+      justify-content: center;
+      text-align: center;
+    }
+    .heritage_hero_rating_[data-mobile-align="right"] {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    /* ---- MOBILE ONLY: .mobi_trustpolot becomes a real flex row ----
+       It now groups the Trustpilot logo + star badges together as a
+       single flex item of .heritage_hero_rating_, so they render on
+       one shared line regardless of each child's own width. */
+    .mobi_trustpolot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      order: 1;
+      flex: 0 0 auto;
+    }
+
+    /* Inside the wrapper: logo first, then stars (left to right) */
+    .trust_pilot_icon_txt {
+      order: 1;
+    }
+    .heritage_hero_stars_ {
+      order: 2;
+    }
+
+    /* Line 2: rating text, own row below the wrapper
+       (flex-basis 100% forces the wrap onto a new line) */
+    .hrr-rating-text {
+      order: 2;
+      flex: 1 0 100%;
+      margin-top: 4px;
+    }
+
+    .heritage_hero_rating_[data-mobile-align="center"] .hrr-rating-text {
+      text-align: center;
+    }
+    .heritage_hero_rating_[data-mobile-align="left"] .hrr-rating-text {
+      text-align: left;
+    }
+    .heritage_hero_rating_[data-mobile-align="right"] .hrr-rating-text {
+      text-align: right;
+    }
+
+    /* Slightly smaller icons on narrow screens so both comfortably
+       share the first row */
+    .trust_pilot_icon svg {
+      width: 78px !important;
+      height: 19px !important;
+    }
+    .heritage_hero_stars_ svg {
+      width: 90px !important;
+      height: 16px !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero Rating (Trustpilot)",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "rating_text",
+      "label": "Rating text",
+      "default": "Excellent 4.9 out of 5 based on 500+ reviews"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Text font size (px)",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Rating text color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Stars"
+    },
+    {
+      "type": "range",
+      "id": "star_count",
+      "label": "Number of star icons",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "color",
+      "id": "star_bg_color",
+      "label": "Star badge background color",
+      "default": "#02B67A"
+    },
+    {
+      "type": "color",
+      "id": "star_icon_color",
+      "label": "Star icon color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "stars_gap",
+      "label": "Gap between stars and text (px)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Mobile Layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_alignment",
+      "label": "Mobile alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Trustpilot Logo"
+    },
+    {
+      "type": "color",
+      "id": "trustpilot_text_color",
+      "label": "'Trustpilot' wordmark color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "trustpilot_star_color",
+      "label": "Trustpilot star color",
+      "default": "#04DA8D"
+    },
+    {
+      "type": "color",
+      "id": "trustpilot_star_shadow_color",
+      "label": "Trustpilot star shadow color",
+      "default": "#126849"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Rating (Trustpilot)"
+    }
+  ]
+}
+{% endschema %}

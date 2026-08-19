@@ -1,0 +1,698 @@
+{%- comment -%}
+  Collection / carousel product card
+  Usage: {% render 'pp-collection-product-card', product: product, section: section, card_index: forloop.index, columns_desktop: columns_desktop %}
+{%- endcomment -%}
+
+{%- liquid
+  assign color_map = 'dark green:#2e7d32,light blue:#87ceeb,sky blue:#87ceeb,dark brown:#5d4037,purple multi:#9c27b0,black:#111111,white:#ffffff,red:#e53935,blue:#2196f3,green:#4caf50,yellow:#ffeb3b,orange:#ff9800,pink:#e91e63,purple:#9c27b0,magenta:#e040fb,brown:#795548,beige:#f5f5dc,grey:#9e9e9e,gray:#9e9e9e,navy:#1a237e,teal:#009688,cream:#fffdd0,gold:#d4af37,silver:#c0c0c0,burgundy:#800020,maroon:#800000,coral:#ff7f50,mint:#98ff98,olive:#808000,khaki:#f0e68c,ivory:#fffff0,tan:#d2b48c,charcoal:#36454f,wine:#722f37,bronze:#cd7f32,copper:#b87333,lilac:#c8a2c8,lavender:#e6e6fa,peach:#ffcba4,rose:#ff007f,nude:#e3bc9a'
+  assign color_map_pairs = color_map | split: ','
+  assign card_index = card_index | default: 1
+  assign columns_desktop = columns_desktop | default: 4
+
+  assign collection_handles = ''
+  for coll in product.collections
+    if collection_handles != ''
+      assign collection_handles = collection_handles | append: ','
+    endif
+    assign collection_handles = collection_handles | append: coll.handle
+  endfor
+
+  assign on_sale = false
+              if product.compare_at_price > product.price
+                assign on_sale = true
+                assign discount_pct = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round
+              endif
+
+              assign is_new = false
+              if product.tags contains 'new' or product.tags contains 'New'
+                assign is_new = true
+              endif
+
+              assign size_option = nil
+              assign swatch_option = nil
+              assign mf_colors = nil
+
+              for option in product.options_with_values
+                assign option_down = option.name | downcase
+                if option_down == 'size'
+                  assign size_option = option
+                endif
+              endfor
+
+              for option in product.options_with_values
+                assign option_down = option.name | downcase
+                assign option_has_swatches = false
+                for value in option.values
+                  if value.swatch.color != blank or value.swatch.image != blank
+                    assign option_has_swatches = true
+                  endif
+                endfor
+                if option_down == 'color' or option_down == 'colour' or option_down == 'colors' or option_down == 'colours'
+                  assign swatch_option = option
+                  break
+                elsif option_has_swatches and swatch_option == nil
+                  assign swatch_option = option
+                endif
+              endfor
+
+              if swatch_option == nil and size_option != nil
+                for option in product.options_with_values
+                  if option.position != size_option.position
+                    assign option_down = option.name | downcase
+                    assign option_has_swatches = false
+                    for value in option.values
+                      if value.swatch.color != blank or value.swatch.image != blank
+                        assign option_has_swatches = true
+                      endif
+                    endfor
+                    if option_down == 'color' or option_down == 'colour' or option_down == 'colors' or option_down == 'colours' or option_has_swatches
+                      assign swatch_option = option
+                      break
+                    endif
+                  endif
+                endfor
+              endif
+
+              if product.metafields.shopify['color-pattern'].value != blank
+                assign mf_colors = product.metafields.shopify['color-pattern'].value
+              elsif product.metafields.shopify.color.value != blank
+                assign mf_colors = product.metafields.shopify.color.value
+              elsif product.metafields.custom.colors.value != blank
+                assign mf_colors = product.metafields.custom.colors.value
+              endif
+
+              assign show_color_swatches = false
+              if section.settings.show_color_swatches
+                if swatch_option != nil or mf_colors != blank
+                  assign show_color_swatches = true
+                endif
+              endif
+
+              assign rating_count = 0
+              if product.metafields.reviews.rating_count != blank
+                assign rating_count = product.metafields.reviews.rating_count | plus: 0 | round
+              elsif product.metafields.custom.review_count != blank
+                assign rating_count = product.metafields.custom.review_count | plus: 0 | round
+              endif
+
+              assign featured_variant = product.selected_or_first_available_variant
+-%}
+
+<article
+  class="na-card cg-grid__item"
+  data-na-card
+  data-cg-product
+  data-product-id="{{ product.id }}"
+  data-product-title="{{ product.title | escape }}"
+  data-collection-handles="{{ collection_handles }}"
+  {% if size_option %}
+    data-size-option-name="{{ size_option.name | escape }}"
+    data-size-position="{{ size_option.position }}"
+  {% endif %}
+  {% if swatch_option %}
+    data-color-option-name="{{ swatch_option.name | escape }}"
+    data-color-position="{{ swatch_option.position }}"
+  {% endif %}
+  {% if size_option and swatch_option %}
+    data-na-linked-variants="true"
+  {% endif %}
+  {% if featured_variant %}
+    data-default-variant-id="{{ featured_variant.id }}"
+    {% if swatch_option %}
+      {% if swatch_option.position == 1 %}
+        data-default-color="{{ featured_variant.option1 | escape }}"
+      {% elsif swatch_option.position == 2 %}
+        data-default-color="{{ featured_variant.option2 | escape }}"
+      {% else %}
+        data-default-color="{{ featured_variant.option3 | escape }}"
+      {% endif %}
+    {% endif %}
+    {% if size_option %}
+      {% if size_option.position == 1 %}
+        data-default-size="{{ featured_variant.option1 | escape }}"
+      {% elsif size_option.position == 2 %}
+        data-default-size="{{ featured_variant.option2 | escape }}"
+      {% else %}
+        data-default-size="{{ featured_variant.option3 | escape }}"
+      {% endif %}
+    {% endif %}
+  {% endif %}
+>
+              <div class="na-card__media">
+                <a href="{{ product.url }}" class="na-card__image-link" aria-label="{{ product.title | escape }}">
+                  {%- if product.featured_media -%}
+                    <img
+                      class="na-card__image"
+                      src="{{ product.featured_media | image_url: width: 800 }}"
+                      srcset="
+                        {{ product.featured_media | image_url: width: 400 }} 400w,
+                        {{ product.featured_media | image_url: width: 600 }} 600w,
+                        {{ product.featured_media | image_url: width: 800 }} 800w
+                      "
+                      sizes="(max-width: 749px) 85vw, (max-width: 989px) 45vw, 25vw"
+                      alt="{{ product.featured_media.alt | default: product.title | escape }}"
+                      width="{{ product.featured_media.width }}"
+                      height="{{ product.featured_media.height }}"
+                      loading="{% if card_index <= columns_desktop %}eager{% else %}lazy{% endif %}"
+                      data-na-main-image
+                      data-na-default-src="{{ product.featured_media | image_url: width: 800 }}"
+                      data-na-default-srcset="{{ product.featured_media | image_url: width: 400 }} 400w, {{ product.featured_media | image_url: width: 600 }} 600w, {{ product.featured_media | image_url: width: 800 }} 800w"
+                    >
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'na-card__placeholder' }}
+                  {%- endif -%}
+                </a>
+
+                <div class="na-card__badges">
+                  {%- if on_sale and section.settings.show_sale_badge -%}
+                    <span class="na-badge na-badge--sale">{{ discount_pct }}% Off</span>
+                  {%- endif -%}
+                  {%- if is_new and section.settings.show_new_badge -%}
+                    <span class="na-badge na-badge--new">New</span>
+                  {%- endif -%}
+                </div>
+
+                {% comment %} {%- if section.settings.show_wishlist -%}
+                  <button
+                    type="button"
+                    class="wishlist-btn na-wishlist"
+                    aria-label="Add to wishlist"
+                    aria-pressed="false"
+                    data-wishlist-btn
+                    data-product-id="{{ product.id }}"
+                    data-product-handle="{{ product.handle }}"
+                    data-product-title="{{ product.title | escape }}"
+                    data-product-image="{{ product.featured_media | image_url: width: 800 }}"
+                    data-product-price="{{ product.price | money }}"
+                    data-product-url="{{ product.url }}"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                  </button>
+                {%- endif -%} {% endcomment %}
+
+                {%- if size_option != nil and section.settings.show_size_selector -%}
+                  <div class="na-sizes" data-na-sizes>
+                    <div class="na-sizes__bar" role="group" aria-label="Select size">
+                      {%- for value in size_option.values -%}
+                        {%- liquid
+                          assign size_variant = nil
+                          assign size_available = false
+                          assign size_display = value
+                          assign size_norm = value | downcase | strip
+
+                          if size_norm == 'extra small' or size_norm == 'x-small' or size_norm == 'xsmall' or size_norm == 'xs'
+                            assign size_display = 'XS'
+                          elsif size_norm == 'small' or size_norm == 's'
+                            assign size_display = 'S'
+                          elsif size_norm == 'medium' or size_norm == 'm'
+                            assign size_display = 'M'
+                          elsif size_norm == 'large' or size_norm == 'l'
+                            assign size_display = 'L'
+                          elsif size_norm == 'x-large' or size_norm == 'xlarge' or size_norm == 'x large' or size_norm == 'xl'
+                            assign size_display = 'XL'
+                          elsif size_norm == 'xx-large' or size_norm == 'xxlarge' or size_norm == 'xx large' or size_norm == '2x-large' or size_norm == '2x large' or size_norm == '2xlarge' or size_norm == '2xl'
+                            assign size_display = '2XL'
+                          elsif size_norm == 'xxx-large' or size_norm == 'xxxlarge' or size_norm == 'xxx large' or size_norm == '3x-large' or size_norm == '3x large' or size_norm == '3xlarge' or size_norm == '3xl'
+                            assign size_display = '3XL'
+                          elsif size_norm == 'xxxx-large' or size_norm == 'xxxxlarge' or size_norm == '4x-large' or size_norm == '4x large' or size_norm == '4xlarge' or size_norm == '4xl'
+                            assign size_display = '4XL'
+                          elsif size_norm == '5x-large' or size_norm == '5x large' or size_norm == '5xlarge' or size_norm == '5xl'
+                            assign size_display = '5XL'
+                          endif
+
+                          for variant in product.variants
+                            if size_option.position == 1 and variant.option1 == value
+                              assign size_variant = variant
+                            elsif size_option.position == 2 and variant.option2 == value
+                              assign size_variant = variant
+                            elsif size_option.position == 3 and variant.option3 == value
+                              assign size_variant = variant
+                            endif
+                          endfor
+                          if size_variant != nil and size_variant.available
+                            assign size_available = true
+                          endif
+                        -%}
+                        <button
+                          type="button"
+                          class="na-sizes__btn{% unless size_available %} na-sizes__btn--disabled{% endunless %}"
+                          data-size-value="{{ value | escape }}"
+                          data-variant-id="{{ size_variant.id }}"
+                          data-available="{{ size_available }}"
+                          {% unless size_available %}disabled{% endunless %}
+                          aria-label="Size {{ value }}"
+                          aria-pressed="false"
+                          title="{{ value }}"
+                        >
+                          <span class="na-sizes__label">{{ size_display }}</span>
+                        </button>
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              <div class="na-card__body">
+                <div class="na-card__row">
+                  <div class="na-card__info">
+                    <h3 class="na-card__title">
+                      <a href="{{ product.url }}">{{ product.title }}</a>
+                    </h3>
+                  </div>
+
+                  <div class="na-card__pricing">
+                    {%- if on_sale -%}
+                      <span class="na-price na-price--sale">{{ product.price | money }}</span>
+                      <s class="na-price na-price--compare">{{ product.compare_at_price | money }}</s>
+                    {%- else -%}
+                      <span class="na-price">{{ product.price | money }}</span>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                <div class="na-card__meta-row">
+                  {%- if show_color_swatches -%}
+                    <div class="na-swatches" role="list" aria-label="Available colors">
+                      {%- if swatch_option != nil -%}
+                        {%- for value in swatch_option.values -%}
+                          {%- liquid
+                            assign swatch_variant = nil
+                            assign swatch_main_image = nil
+                            assign swatch_thumb_image = nil
+                            assign swatch_hex = ''
+                            assign value_down = value | downcase | strip
+
+                            if value.swatch.color
+                              assign swatch_hex = value.swatch.color
+                            endif
+
+                            if value.swatch.image
+                              assign swatch_thumb_image = value.swatch.image
+                              assign swatch_main_image = value.swatch.image
+                            endif
+
+                            for variant in product.variants
+                              assign color_matches = false
+                              if swatch_option.position == 1 and variant.option1 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 2 and variant.option2 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 3 and variant.option3 == value
+                                assign color_matches = true
+                              endif
+
+                              if color_matches
+                                if swatch_variant == nil
+                                  assign swatch_variant = variant
+                                endif
+                                if variant.featured_image
+                                  assign swatch_main_image = variant.featured_image
+                                  assign swatch_variant = variant
+                                endif
+                              endif
+                            endfor
+
+                            if swatch_hex == ''
+                              for pair in color_map_pairs
+                                assign pair_parts = pair | split: ':'
+                                assign map_name = pair_parts[0]
+                                if value_down == map_name
+                                  assign swatch_hex = pair_parts[1]
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if swatch_hex == ''
+                              assign color_words = value_down | split: ' '
+                              assign hex_found = false
+                              for word in color_words
+                                unless hex_found
+                                  for pair in color_map_pairs
+                                    assign pair_parts = pair | split: ':'
+                                    assign map_name = pair_parts[0]
+                                    if word == map_name
+                                      assign swatch_hex = pair_parts[1]
+                                      assign hex_found = true
+                                      break
+                                    endif
+                                  endfor
+                                endunless
+                              endfor
+                            endif
+
+                            assign swatch_is_multi = false
+                            if value_down contains 'multi' or value_down contains 'geometric' or value_down contains 'print' or value_down contains 'pattern' or value_down contains 'floral' or value_down contains 'stripe' or value_down contains 'abstract'
+                              assign swatch_is_multi = true
+                            endif
+
+                            assign swatch_has_image = false
+                            if swatch_main_image != nil
+                              assign swatch_has_image = true
+                            endif
+                          -%}
+                          <button
+                            type="button"
+                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% if swatch_is_multi and swatch_thumb_image == nil %} na-swatch--multi{% elsif swatch_hex == '' and swatch_thumb_image == nil %} na-swatch--fallback{% endif %}"
+                            role="listitem"
+                            title="{{ value }}"
+                            data-swatch
+                            data-color-value="{{ value | escape }}"
+                            data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            data-variant-id="{{ swatch_variant.id }}"
+                            {% if swatch_main_image %}
+                              data-image-src="{{ swatch_main_image | image_url: width: 800 }}"
+                              data-image-srcset="{{ swatch_main_image | image_url: width: 400 }} 400w, {{ swatch_main_image | image_url: width: 800 }} 800w"
+                            {% endif %}
+                            {% if swatch_thumb_image %}
+                              style="background-image: url('{{ swatch_thumb_image | image_url: width: 80 }}'); background-size: cover; background-position: center;"
+                            {% elsif swatch_hex != '' and swatch_is_multi == false %}
+                              style="background-color: {{ swatch_hex }};"
+                            {% endif %}
+                          ></button>
+                        {%- endfor -%}
+                      {%- elsif mf_colors != blank -%}
+                        {%- for item in mf_colors -%}
+                          {%- liquid
+                            assign color_label = item
+                            assign color_hex = ''
+                            assign mf_thumb_image = nil
+                            assign mf_main_image = nil
+                            assign mf_swatch_image = nil
+
+                            if item.label != blank
+                              assign color_label = item.label
+                            endif
+                            if item.color != blank
+                              assign color_hex = item.color
+                            endif
+                            if item.image != blank
+                              assign mf_thumb_image = item.image
+                              assign mf_main_image = item.image
+                              assign mf_swatch_image = item.image
+                            elsif item.pattern != blank
+                              assign mf_thumb_image = item.pattern
+                              assign mf_main_image = item.pattern
+                              assign mf_swatch_image = item.pattern
+                            elsif item.swatch != blank and item.swatch.image != blank
+                              assign mf_thumb_image = item.swatch.image
+                              assign mf_main_image = item.swatch.image
+                              assign mf_swatch_image = item.swatch.image
+                            endif
+
+                            assign color_down = color_label | downcase | strip
+
+                            if mf_main_image == nil
+                              for media in product.media
+                                assign media_alt_down = media.alt | default: '' | downcase | strip
+                                if media_alt_down == color_down
+                                  assign mf_main_image = media.preview_image
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if mf_main_image == nil
+                              for variant in product.variants
+                                if variant.featured_image
+                                  assign v1 = variant.option1 | downcase
+                                  assign v2 = variant.option2 | downcase
+                                  assign v3 = variant.option3 | downcase
+                                  if v1 == color_down or v2 == color_down or v3 == color_down
+                                    assign mf_main_image = variant.featured_image
+                                    break
+                                  endif
+                                endif
+                              endfor
+                            endif
+
+                            if mf_main_image == nil
+                              assign mf_main_image = mf_thumb_image
+                            endif
+                            if mf_thumb_image == nil
+                              assign mf_thumb_image = mf_main_image
+                            endif
+
+                            if color_hex == '' 
+                              for pair in color_map_pairs
+                                assign pair_parts = pair | split: ':'
+                                assign map_name = pair_parts[0]
+                                if color_down == map_name
+                                  assign color_hex = pair_parts[1]
+                                  break
+                                endif
+                              endfor
+                            endif
+
+                            if color_hex == ''
+                              assign color_words = color_down | split: ' '
+                              assign hex_found = false
+                              for word in color_words
+                                unless hex_found
+                                  for pair in color_map_pairs
+                                    assign pair_parts = pair | split: ':'
+                                    assign map_name = pair_parts[0]
+                                    if word == map_name
+                                      assign color_hex = pair_parts[1]
+                                      assign hex_found = true
+                                      break
+                                    endif
+                                  endfor
+                                endunless
+                              endfor
+                            endif
+
+                            assign swatch_is_multi = false
+                            if color_down contains 'multi' or color_down contains 'geometric' or color_down contains 'print' or color_down contains 'pattern' or color_down contains 'floral' or color_down contains 'stripe' or color_down contains 'abstract'
+                              assign swatch_is_multi = true
+                            endif
+
+                            assign swatch_has_image = false
+                            if mf_main_image != nil
+                              assign swatch_has_image = true
+                            endif
+                          -%}
+                          <button
+                            type="button"
+                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% if swatch_is_multi and mf_swatch_image == nil %} na-swatch--multi{% elsif color_hex == '' and mf_swatch_image == nil %} na-swatch--fallback{% endif %}"
+                            role="listitem"
+                            title="{{ color_label }}"
+                            data-swatch
+                            data-color-value="{{ color_label | escape }}"
+                            data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            {% if mf_main_image %}
+                              data-image-src="{{ mf_main_image | image_url: width: 800 }}"
+                              data-image-srcset="{{ mf_main_image | image_url: width: 400 }} 400w, {{ mf_main_image | image_url: width: 800 }} 800w"
+                            {% endif %}
+                            {% if mf_swatch_image %}
+                              style="background-image: url('{{ mf_swatch_image | image_url: width: 80 }}'); background-size: cover; background-position: center;"
+                            {% elsif color_hex != '' and swatch_is_multi == false %}
+                              style="background-color: {{ color_hex }};"
+                            {% endif %}
+                          ></button>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if section.settings.show_rating -%}
+                    <div class="na-rating-pill">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                      <span>{{ rating_count }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <button
+                  type="button"
+                  class="na-mobile-add"
+                  data-na-mobile-add
+                  aria-label="Add {{ product.title | escape }}"
+                >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+<path d="M7.8125 8.59375V7.03125C7.8125 5.78805 8.30636 4.59576 9.18544 3.71669C10.0645 2.83761 11.2568 2.34375 12.5 2.34375C13.7432 2.34375 14.9355 2.83761 15.8146 3.71669C16.6936 4.59576 17.1875 5.78805 17.1875 7.03125V8.59375M3.90625 8.59375C3.69905 8.59375 3.50034 8.67606 3.35382 8.82257C3.20731 8.96909 3.125 9.1678 3.125 9.375V19.9219C3.125 21.3984 4.38281 22.6562 5.85938 22.6562H19.1406C20.6172 22.6562 21.875 21.4595 21.875 19.9829V9.375C21.875 9.1678 21.7927 8.96909 21.6462 8.82257C21.4997 8.67606 21.301 8.59375 21.0938 8.59375H3.90625Z" stroke="black" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M7.8125 10.9375V11.7188C7.8125 12.962 8.30636 14.1542 9.18544 15.0333C10.0645 15.9124 11.2568 16.4062 12.5 16.4062C13.7432 16.4062 14.9355 15.9124 15.8146 15.0333C16.6936 14.1542 17.1875 12.962 17.1875 11.7188V10.9375" stroke="black" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                </button>
+              </div>
+
+              {%- comment -%} Variant data for JS image switching {%- endcomment -%}
+              <script type="application/json" data-na-variants>
+                [
+                  {%- for variant in product.variants -%}
+                    {
+                      "id": {{ variant.id }},
+                      "available": {{ variant.available }},
+                      "option1": {{ variant.option1 | json }},
+                      "option2": {{ variant.option2 | json }},
+                      "option3": {{ variant.option3 | json }},
+                      "image": {% if variant.featured_image %}"{{ variant.featured_image | image_url: width: 800 }}"{% else %}null{% endif %},
+                      "srcset": {% if variant.featured_image %}"{{ variant.featured_image | image_url: width: 400 }} 400w, {{ variant.featured_image | image_url: width: 800 }} 800w"{% else %}null{% endif %}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+              <script type="application/json" data-na-media>
+                [
+                  {%- for media in product.media -%}
+                    {
+                      "src": "{{ media | image_url: width: 800 }}",
+                      "srcset": "{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 800 }} 800w",
+                      "alt": {{ media.alt | default: '' | json }}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+              <script type="application/json" data-na-color-map>
+                [
+                  {%- if swatch_option != nil -%}
+                    {%- for value in swatch_option.values -%}
+                      {%- liquid
+                        assign map_main = nil
+                        assign map_thumb = nil
+                        if value.swatch.image
+                          assign map_thumb = value.swatch.image
+                        endif
+                        for variant in product.variants
+                          assign color_match = false
+                          if swatch_option.position == 1 and variant.option1 == value
+                            assign color_match = true
+                          elsif swatch_option.position == 2 and variant.option2 == value
+                            assign color_match = true
+                          elsif swatch_option.position == 3 and variant.option3 == value
+                            assign color_match = true
+                          endif
+                          if color_match and variant.featured_image
+                            assign map_main = variant.featured_image
+                            break
+                          endif
+                        endfor
+                        assign value_down = value | downcase | strip
+                        if map_main == nil
+                          for media in product.media
+                            assign alt_down = media.alt | default: '' | downcase | strip
+                            if alt_down == value_down
+                              assign map_main = media.preview_image
+                              break
+                            endif
+                          endfor
+                        endif
+                        if map_thumb == nil
+                          assign map_thumb = map_main
+                        endif
+                        if map_main == nil
+                          assign map_main = map_thumb
+                        endif
+
+                        assign map_hex = ''
+                        if value.swatch.color
+                          assign map_hex = value.swatch.color
+                        endif
+                        if map_hex == ''
+                          for pair in color_map_pairs
+                            assign pair_parts = pair | split: ':'
+                            assign map_name = pair_parts[0]
+                            if value_down == map_name
+                              assign map_hex = pair_parts[1]
+                              break
+                            endif
+                          endfor
+                        endif
+
+                        assign map_is_multi = false
+                        if value_down contains 'multi' or value_down contains 'geometric' or value_down contains 'print' or value_down contains 'pattern' or value_down contains 'floral' or value_down contains 'stripe' or value_down contains 'abstract'
+                          assign map_is_multi = true
+                        endif
+                      -%}
+                      {
+                        "label": {{ value | json }},
+                        "thumb": {% if map_thumb %}"{{ map_thumb | image_url: width: 120 }}"{% elsif map_main %}"{{ map_main | image_url: width: 120 }}"{% else %}null{% endif %},
+                        "main": {% if map_main %}"{{ map_main | image_url: width: 800 }}"{% else %}null{% endif %},
+                        "mainSrcset": {% if map_main %}"{{ map_main | image_url: width: 400 }} 400w, {{ map_main | image_url: width: 800 }} 800w"{% else %}null{% endif %},
+                        "hex": {% if map_hex != '' %}{{ map_hex | json }}{% else %}null{% endif %},
+                        "isMulti": {{ map_is_multi | json }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {%- endfor -%}
+                  {%- elsif mf_colors != blank -%}
+                    {%- for item in mf_colors -%}
+                      {%- liquid
+                        assign map_label = item
+                        if item.label != blank
+                          assign map_label = item.label
+                        endif
+                        assign map_main = nil
+                        assign map_thumb = nil
+                        if item.image != blank
+                          assign map_thumb = item.image
+                          assign map_main = item.image
+                        elsif item.pattern != blank
+                          assign map_thumb = item.pattern
+                          assign map_main = item.pattern
+                        endif
+                        assign label_down = map_label | downcase | strip
+                        if map_main == nil
+                          for media in product.media
+                            assign alt_down = media.alt | default: '' | downcase | strip
+                            if alt_down == label_down
+                              assign map_main = media.preview_image
+                              break
+                            endif
+                          endfor
+                        endif
+                        if map_main == nil
+                          for variant in product.variants
+                            if variant.featured_image
+                              assign v1 = variant.option1 | downcase
+                              assign v2 = variant.option2 | downcase
+                              assign v3 = variant.option3 | downcase
+                              if v1 == label_down or v2 == label_down or v3 == label_down
+                                assign map_main = variant.featured_image
+                                break
+                              endif
+                            endif
+                          endfor
+                        endif
+                        if map_main == nil
+                          assign map_main = map_thumb
+                        endif
+                        if map_thumb == nil
+                          assign map_thumb = map_main
+                        endif
+
+                        assign map_hex = ''
+                        if item.color != blank
+                          assign map_hex = item.color
+                        endif
+                        if map_hex == ''
+                          for pair in color_map_pairs
+                            assign pair_parts = pair | split: ':'
+                            assign map_name = pair_parts[0]
+                            if label_down == map_name
+                              assign map_hex = pair_parts[1]
+                              break
+                            endif
+                          endfor
+                        endif
+
+                        assign map_is_multi = false
+                        if label_down contains 'multi' or label_down contains 'geometric' or label_down contains 'print' or label_down contains 'pattern' or label_down contains 'floral' or label_down contains 'stripe' or label_down contains 'abstract'
+                          assign map_is_multi = true
+                        endif
+                      -%}
+                      {
+                        "label": {{ map_label | json }},
+                        "thumb": {% if map_thumb %}"{{ map_thumb | image_url: width: 120 }}"{% elsif map_main %}"{{ map_main | image_url: width: 120 }}"{% else %}null{% endif %},
+                        "main": {% if map_main %}"{{ map_main | image_url: width: 800 }}"{% else %}null{% endif %},
+                        "mainSrcset": {% if map_main %}"{{ map_main | image_url: width: 400 }} 400w, {{ map_main | image_url: width: 800 }} 800w"{% else %}null{% endif %},
+                        "hex": {% if map_hex != '' %}{{ map_hex | json }}{% else %}null{% endif %},
+                        "isMulti": {{ map_is_multi | json }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {%- endfor -%}
+                  {%- endif -%}
+                ]
+              </script>
+            </article>

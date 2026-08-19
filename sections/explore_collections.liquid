@@ -1,0 +1,454 @@
+{%- liquid
+  assign parent_collection = section.settings.parent_collection
+  assign on_parent_collection = false
+  if parent_collection != blank and collection != blank and parent_collection.handle == collection.handle
+    assign on_parent_collection = true
+  endif
+-%}
+
+<section class="explore_collections_">
+  <div class="page-width">
+    {% if section.settings.heading != blank %}
+      <h2 class="explore_collections_heading_">
+        {{ section.settings.heading }}
+      </h2>
+    {% endif %}
+
+    {%- comment -%} Desktop only — Swiper slider {%- endcomment -%}
+    <div class="explore_collections_desktop_">
+      <div class="slider_wrapper">
+        <div class="explore_collections_prev_" role="button" tabindex="0" aria-label="Previous slide">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M0.366084 8.83875L7.43733 15.91L9.20483 14.1425L3.01733 7.955L9.20483 1.7675L7.43733 0L0.366084 7.07125C0.131745 7.30566 0.000101089 7.62354 0.000101089 7.955C0.000101089 8.28646 0.131745 8.60434 0.366084 8.83875Z" fill="black"/>
+          </svg>
+        </div>
+
+        <div class="explore_collections_slider_ swiper">
+          <div class="swiper-wrapper">
+            {% for block in section.blocks %}
+              {% assign collection_item = block.settings.collection %}
+
+              <div class="explore_collections_item_ swiper-slide" {{ block.shopify_attributes }}>
+                <a href="{{ collection_item.url }}" class="explore_collections_link_">
+                  <div class="explore_collections_image_wrap_">
+                    {% if block.settings.image != blank %}
+                      {{ block.settings.image | image_url: width: 300 | image_tag: loading: 'lazy', class: 'explore_collections_image_' }}
+                    {% elsif collection_item.featured_image %}
+                      {{ collection_item.featured_image | image_url: width: 300 | image_tag: loading: 'lazy', class: 'explore_collections_image_' }}
+                    {% endif %}
+                  </div>
+
+                  <div class="explore_collections_title_">
+                    {{ collection_item.title }}
+                  </div>
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="explore_collections_next_" role="button" tabindex="0" aria-label="Next slide">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M8.83875 8.83875L1.7675 15.91L0 14.1425L6.1875 7.955L0 1.7675L1.7675 0L8.83875 7.07125C9.07309 7.30566 9.20473 7.62354 9.20473 7.955C9.20473 8.28646 9.07309 8.60434 8.83875 8.83875Z" fill="black"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Mobile only — subcategory nav {%- endcomment -%}
+    <div class="explore_collections_mobile_">
+      <nav class="cg-subcats" aria-label="Subcategories">
+        <ul class="cg-subcats__list" role="list">
+          {%- if parent_collection != blank -%}
+            <li class="cg-subcats__item">
+              <a
+                href="{{ parent_collection.url }}"
+                class="cg-subcats__btn{% if on_parent_collection %} is-active{% endif %}"
+                {% if on_parent_collection %}aria-current="page"{% endif %}
+              >
+                <span class="cg-subcats__circle cg-subcats__circle--all">
+                  <span class="cg-subcats__all-text">{{ section.settings.all_subcategory_label | default: 'All' }}</span>
+                  <span class="cg-subcats__check" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </span>
+                <span class="cg-subcats__label">{{ section.settings.all_subcategory_label | default: 'All' }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'collection' -%}
+              {%- liquid
+                assign sub_collection = block.settings.collection
+                assign sub_label = sub_collection.title
+                assign sub_image = block.settings.image
+                if sub_image == blank and sub_collection != blank and sub_collection.featured_image != blank
+                  assign sub_image = sub_collection.featured_image
+                endif
+                assign sub_is_active = false
+                if sub_collection != blank and collection != blank and sub_collection.handle == collection.handle
+                  assign sub_is_active = true
+                endif
+              -%}
+              {%- if sub_collection != blank -%}
+                <li class="cg-subcats__item" {{ block.shopify_attributes }}>
+                  <a
+                    href="{{ sub_collection.url }}"
+                    class="cg-subcats__btn{% if sub_is_active %} is-active{% endif %}"
+                    {% if sub_is_active %}aria-current="page"{% endif %}
+                    aria-label="{{ sub_label | escape }}"
+                  >
+                    <span class="cg-subcats__circle">
+                      {%- if sub_image != blank -%}
+                        {{
+                          sub_image
+                          | image_url: width: 200
+                          | image_tag:
+                            class: 'cg-subcats__img',
+                            loading: 'lazy',
+                            widths: '100, 150, 200',
+                            sizes: '80px',
+                            alt: sub_label
+                        }}
+                      {%- else -%}
+                        <span class="cg-subcats__placeholder">{{ sub_label | slice: 0, 1 }}</span>
+                      {%- endif -%}
+                      <span class="cg-subcats__check" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </span>
+                    </span>
+                    <span class="cg-subcats__label">{{ sub_label | escape }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<style>
+  .explore_collections_ {
+    position: relative;
+    padding: 38px 0 55px;
+  }
+
+  .explore_collections_ .page-width {
+    max-width: 1400px;
+  }
+
+  .explore_collections_desktop_ {
+    display: block;
+  }
+
+  .explore_collections_mobile_ {
+    display: none;
+  }
+
+  .explore_collections_ .slider_wrapper {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .explore_collections_heading_ {
+    text-align: center;
+    margin: 0 0 35px;
+    color: #000000;
+    font-family: Lora;
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+
+  .explore_collections_slider_ {
+    position: relative;
+    padding: 0 40px;
+  }
+
+  .explore_collections_item_ {
+    text-align: center;
+  }
+
+  .explore_collections_link_ {
+    text-decoration: none;
+    display: block;
+  }
+
+  .explore_collections_image_wrap_ {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 21px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .explore_collections_image_ {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .explore_collections_title_ {
+    color: #000000;
+    font-family: "Neue Montreal";
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+  }
+
+  .explore_collections_prev_,
+  .explore_collections_next_ {
+    width: 15px;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .explore_collections_prev_ {
+    left: 0;
+  }
+
+  .explore_collections_next_ {
+    right: 0;
+  }
+
+  .explore_collections_prev_.swiper-button-disabled,
+  .explore_collections_next_.swiper-button-disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Mobile subcategory nav */
+  .explore_collections_mobile_ .cg-subcats__list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 8px;
+    scrollbar-width: none;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__item {
+    flex: 0 0 auto;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #000;
+    min-width: 72px;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__circle--all {
+    background: #000;
+    color: #fff;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__btn.is-active .cg-subcats__circle {
+    border-color: #000;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__placeholder {
+    font-size: 24px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__all-text {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__check {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__btn.is-active .cg-subcats__check {
+    display: flex;
+  }
+
+  .explore_collections_mobile_ .cg-subcats__label {
+    font-family: "Neue Montreal", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    max-width: 80px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .explore_collections_ {
+      padding: 60px 0 25px;
+    }
+
+    .explore_collections_desktop_ {
+      display: none;
+    }
+
+    .explore_collections_mobile_ {
+      display: block;
+    }
+
+    .explore_collections_heading_ {
+      font-size: 28px;
+      margin: 0 0 30px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var DESKTOP_MIN = 750;
+
+    function setupSwiperInstance(sliderEl) {
+      if (!sliderEl || sliderEl.classList.contains('swiper-initialized')) return;
+      if (window.innerWidth < DESKTOP_MIN) return;
+
+      var wrap = sliderEl.closest('.slider_wrapper');
+      if (!wrap) return;
+
+      new Swiper(sliderEl, {
+        slidesPerView: 5,
+        spaceBetween: 40,
+        navigation: {
+          nextEl: wrap.querySelector('.explore_collections_next_'),
+          prevEl: wrap.querySelector('.explore_collections_prev_'),
+        },
+        breakpoints: {
+          750: {
+            slidesPerView: 5,
+            spaceBetween: 40,
+          },
+          1200: {
+            slidesPerView: 6,
+            spaceBetween: 65,
+          },
+        },
+      });
+    }
+
+    function initAll() {
+      document
+        .querySelectorAll('.explore_collections_desktop_ .explore_collections_slider_:not(.swiper-initialized)')
+        .forEach(setupSwiperInstance);
+    }
+
+    function bootWhenReady() {
+      if (typeof Swiper === 'undefined') {
+        setTimeout(bootWhenReady, 100);
+        return;
+      }
+      initAll();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootWhenReady);
+    } else {
+      bootWhenReady();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Explore Collections",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore Collections"
+    },
+    {
+      "type": "collection",
+      "id": "parent_collection",
+      "label": "Parent collection (mobile All button)"
+    },
+    {
+      "type": "text",
+      "id": "all_subcategory_label",
+      "label": "All subcategory label",
+      "default": "All"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Explore Collections",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

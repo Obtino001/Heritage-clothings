@@ -1,0 +1,102 @@
+[
+  {
+    "type": "text",
+    "id": "predictive_search_placeholder",
+    "label": "Search placeholder text",
+    "default": "Search products..."
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_suggestions_title",
+    "label": "Search suggestions heading",
+    "default": "Popular searches"
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_view_all_label",
+    "label": "View all products link text",
+    "default": "View all"
+  },
+  {
+    "type": "header",
+    "content": "Predictive search empty state"
+  },
+  {
+    "type": "paragraph",
+    "content": "Configure the search dropdown shown before a customer types. Create menus in Online Store > Navigation for popular searches, brands, and blog articles."
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_hide_recently_viewed",
+    "label": "Hide recently viewed products in search",
+    "default": true
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_searches_title",
+    "label": "Popular searches heading",
+    "default": "Popular searches"
+  },
+  {
+    "type": "link_list",
+    "id": "predictive_search_popular_searches",
+    "label": "Popular searches menu"
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_brands_title",
+    "label": "Popular brands heading",
+    "default": "Popular brands"
+  },
+  {
+    "type": "link_list",
+    "id": "predictive_search_popular_brands",
+    "label": "Popular brands menu"
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_blogs_title",
+    "label": "Featured blogs heading",
+    "default": "Stories"
+  },
+  {
+    "type": "link_list",
+    "id": "predictive_search_popular_blogs",
+    "label": "Featured blogs menu",
+    "info": "Add links to blog articles (recommended). Used first if set."
+  },
+  {
+    "type": "blog",
+    "id": "predictive_search_featured_blog",
+    "label": "Blog for featured articles",
+    "info": "Select your Stories blog. Falls back to handle \"blog\" if empty."
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_featured_blog_handle",
+    "label": "Blog handle fallback",
+    "default": "blog",
+    "info": "Used when no blog is selected above. Your Stories blog URL is /blogs/blog"
+  },
+  {
+    "type": "range",
+    "id": "predictive_search_blogs_limit",
+    "label": "Number of blog articles",
+    "min": 2,
+    "max": 6,
+    "step": 1,
+    "default": 2
+  },
+  {
+    "type": "text",
+    "id": "predictive_search_trending_title",
+    "label": "Trending heading",
+    "default": "Trending"
+  },
+  {
+    "type": "collection_list",
+    "id": "predictive_search_trending_collections",
+    "label": "Trending collections",
+    "limit": 4
+  }
+]

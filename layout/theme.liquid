@@ -1,0 +1,235 @@
+<!doctype html>
+<html
+  {% if request.design_mode %}
+    class="shopify-design-mode"
+  {% endif %}
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>{% render 'yoast-seo' %}
+    
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
+    {% if settings.transition_to_main_product or settings.page_transition_enabled %}
+      <link
+        rel="expect"
+        href="#MainContent"
+        blocking="render"
+        id="view-transition-render-blocker"
+      >
+    {% endif %}
+
+    {%- render 'meta-tags' -%}
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-palette' -%}
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+
+   {{ content_for_header }}
+
+   {{ 'custom.css' | asset_url | stylesheet_tag }}
+   {{ 'predictive-search-custom.css' | asset_url | stylesheet_tag }}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+  </head>
+
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    <script>
+      (function () {
+        fetch('/browsing_context_suggestions.json')
+          .then(function (response) { return response.json(); })
+          .then(function (data) {
+            var country = data && data.detected_values && data.detected_values.country;
+            var code = ((country && (country.handle || country.iso_code)) || '').toUpperCase();
+            if (code === 'GB' || code === 'UK') {
+              document.body.classList.add('country_uk');
+            }
+          })
+          .catch(function () {});
+      })();
+    </script>
+
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+
+    {% render 'chat-drawer' %}
+
+    <div class="page-wrapper">
+      <div id="header-group">
+        {% sections 'header-group' %}
+        {% render 'search-modal' %}
+      </div>
+
+      <script>
+        // Inline header height and menu style calculations to prevent layout shift
+        // Note: Updates in calculateHeaderGroupHeight(), updateTransparentHeaderOffset() and setHeaderMenuStyle() utilities.js should be kept in sync with this function
+        (function setHeaderHeighCustomProperties() {
+          /*
+           * Header calculation functions for maintaining CSS variables
+           * Mimic calculateHeaderGroupHeight() in utilities.js
+           */
+          const header = document.querySelector('header-component');
+          const headerGroup = document.querySelector('#header-group');
+          const hasHeaderSection = headerGroup?.querySelector('.header-section');
+
+          if (!header || !headerGroup) return;
+
+          const headerTopRow = header.querySelector('.header__row--top');
+          const headerHeight = header.offsetHeight;
+
+          // Calculate the total height of the header group
+          let headerGroupHeight = 0;
+          const children = headerGroup.children;
+          for (let i = 0; i < children.length; i++) {
+            const element = children[i];
+            if (element === header || !(element instanceof HTMLElement)) continue;
+            if (element.id === 'search-modal' || element.matches('#search-modal, .search-modal, dialog-component.search-modal')) continue;
+            headerGroupHeight += element.offsetHeight;
+          }
+
+          // Check for transparent header special case
+          if (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling) {
+            headerGroupHeight += headerHeight;
+          }
+
+          // Set CSS variables
+          document.body.style.setProperty('--header-height', `${headerHeight}px`);
+          document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
+
+          let panelTop = 0;
+          for (let i = 0; i < children.length; i++) {
+            const element = children[i];
+            if (!(element instanceof HTMLElement)) continue;
+            if (element.id === 'search-modal' || element.matches('#search-modal, .search-modal, dialog-component.search-modal')) continue;
+            const bottom = element.getBoundingClientRect().bottom;
+            if (bottom > panelTop) panelTop = bottom;
+          }
+          document.documentElement.style.setProperty(
+            '--search-panel-top',
+            `${panelTop || headerGroupHeight}px`
+          );
+
+          if (headerTopRow) {
+            window.requestAnimationFrame(function () {
+              document.body.style.setProperty('--top-row-height', `${headerTopRow.offsetHeight}px`);
+            });
+          }
+
+          /**
+           * Updates CSS custom properties for transparent header offset calculation
+           * Mimic updateTransparentHeaderOffset() in utilities.js
+           */
+
+          if (!hasHeaderSection || !header?.hasAttribute('transparent')) {
+            document.body.style.setProperty('--transparent-header-offset-boolean', '0');
+            return;
+          }
+
+          const hasImmediateSection = hasHeaderSection.nextElementSibling?.classList.contains('shopify-section');
+
+          const shouldApplyOffset = !hasImmediateSection ? '1' : '0';
+          document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
+        })();
+
+        (function setHeaderMenuStyle() {
+          const headerComponent = document.querySelector('#header-component');
+          if (headerComponent) {
+            const isTouchDevice = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
+            const overflowList = headerComponent?.querySelector('overflow-list');
+            const hasReachedMinimum = overflowList && overflowList.hasAttribute('minimum-reached');
+            headerComponent.dataset.menuStyle = isTouchDevice || hasReachedMinimum ? 'drawer' : 'menu';
+          }
+        })();
+
+        (function syncFixedHeaderClass() {
+          let observer;
+
+          function bindFixedHeaderClass() {
+            const headerComponent = document.querySelector('#header-component');
+            if (!headerComponent) return;
+
+            function updateFixedHeaderClass() {
+              var direction = headerComponent.getAttribute('data-scroll-direction');
+              if (direction === 'down' || direction === 'up') {
+                document.body.classList.add('fixed_header');
+              } else {
+                document.body.classList.remove('fixed_header');
+              }
+            }
+
+            updateFixedHeaderClass();
+
+            if (observer) observer.disconnect();
+            observer = new MutationObserver(updateFixedHeaderClass);
+            observer.observe(headerComponent, {
+              attributes: true,
+              attributeFilter: ['data-scroll-direction'],
+            });
+          }
+
+          bindFixedHeaderClass();
+          document.addEventListener('shopify:section:load', bindFixedHeaderClass);
+        })();
+      </script>
+
+      <main
+        id="MainContent"
+        class="content-for-layout"
+        role="main"
+        data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+        data-product-transition="{{ settings.transition_to_main_product }}"
+        data-template="{{ template }}"
+      >
+        {{ content_for_layout }}
+      </main>
+
+      <footer>
+        {% sections 'footer-group' %}
+      </footer>
+<!-- Made by Obtino · 03 Soft chip · dark: see commented values -->
+<style>
+  body.country_uk div#monster-upsell-cart .mu-atu-banner { display: none; }
+  body.country_uk div#monster-upsell-cart .mu-frequently-header>div:first-child { visibility: hidden; }
+  .ob-chip{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    color:#231F20;font-family:'Hanken Grotesk',system-ui,sans-serif;
+    padding:8px 13px;background:#F1EDE6;border-radius:0px;transition:background .18s;}
+  .ob-chip:hover{background:#e8e2d8;}
+  /* On dark: color:#fff; background:rgba(255,255,255,.08);
+     :hover -> background:rgba(255,255,255,.15) */
+</style>
+<a href="https://obtino.com" target="_blank" rel="noopener" class="ob-chip">
+  <svg width="15" height="13" viewBox="0 0 102 92" fill="currentColor" aria-hidden="true"><path d="M43.5993 87C37.1618 87 31.264 85.8686 25.9016 83.6142C20.5391 81.3599 15.9271 78.2443 12.0655 74.2717C8.20384 70.2991 5.22753 65.6806 3.13652 60.4162C1.04551 55.156 0 49.5159 0 43.5C0 37.4841 1.0708 31.8482 3.21662 26.5838C5.36243 21.3194 8.36404 16.7009 12.2257 12.7283C16.0873 8.75572 20.674 5.64015 25.9817 3.38578C31.2893 1.12719 37.1618 0 43.5993 0C50.0367 0 55.7448 1.12719 61.0567 3.38578C66.3643 5.64015 70.951 8.75572 74.8127 12.7283C78.6743 16.7051 81.6759 21.3236 83.8217 26.5838C85.9675 31.8482 87.0383 37.4841 87.0383 43.5C87.0383 49.5159 85.9633 55.156 83.8217 60.4162C81.6759 65.6806 78.6743 70.2991 74.8127 74.2717C70.951 78.2443 66.3685 81.3599 61.0567 83.6142C55.749 85.8686 49.9271 87 43.5993 87ZM43.5993 14.1763C39.5226 14.1763 35.7411 14.9573 32.2547 16.5151C28.7683 18.0729 25.7371 20.2218 23.1655 22.9616C20.5897 25.7015 18.5788 28.8424 17.1328 32.3844C15.6868 35.9263 14.9617 39.7427 14.9617 43.8251C14.9617 47.9074 15.7374 51.7196 17.293 55.2658C18.8444 58.812 20.9396 61.8727 23.566 64.4479C26.1924 67.0273 29.2236 69.0664 32.6552 70.5693C36.0868 72.0764 39.7334 72.8279 43.595 72.8279C47.4567 72.8279 51.0991 72.0764 54.5349 70.5693C57.9665 69.0664 60.9934 67.0273 63.6241 64.4479C66.2505 61.8685 68.3162 58.812 69.817 55.2658C71.3178 51.7238 72.0682 47.9117 72.0682 43.8251C72.0682 39.7385 71.3178 35.9052 69.817 32.3084C68.312 28.7115 66.2505 25.5706 63.6241 22.8814C60.9934 20.1964 57.9665 18.0772 54.5349 16.5194C51.0991 14.9658 47.4567 14.1806 43.595 14.1806L43.5993 14.1763ZM102 72.0173H87.0383V87H102V72.0173Z"/></svg>
+  <span style="font-size:12.5px;font-weight:400;">
+    <span style="opacity:.6;">Made by</span> <span style="font-weight:600;">Obtino</span>
+  </span>
+</a>
+
+    </div>
+
+    {% render 'cart-drawer', render_wrapper: true %}
+    {% render 'theme-drawer' %}
+
+    {% if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add-modal' %}
+    {% endif %}
+  </body>
+</html>

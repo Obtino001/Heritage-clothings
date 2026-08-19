@@ -1,0 +1,296 @@
+{%- liquid
+  assign product = closest.product | default: product
+  assign home_label = section.settings.home_label | default: 'Home'
+  assign show_home = section.settings.show_home
+  assign show_collection = section.settings.show_collection
+
+  assign on_collection_page = false
+  if template.name == 'collection' and collection != blank
+    assign on_collection_page = true
+  endif
+
+  assign crumb_collection = blank
+  assign current_title = blank
+
+  if product != blank
+    assign current_title = product.title
+
+    assign crumb_collection = collection
+    if crumb_collection == blank and section.settings.collection != blank
+      assign crumb_collection = section.settings.collection
+    endif
+
+    if crumb_collection == blank
+      assign preferred_handle = section.settings.preferred_collection_handle | strip
+      if preferred_handle != blank
+        for coll in product.collections
+          assign coll_handle = coll.handle
+          if coll_handle == preferred_handle
+            assign crumb_collection = coll
+            break
+          endif
+        endfor
+      endif
+    endif
+
+    if crumb_collection == blank
+      assign crumb_collection = product.collections.first
+    endif
+  elsif on_collection_page
+    assign current_title = collection.title
+  elsif page != blank
+    assign current_title = page.title
+  elsif article != blank
+    assign current_title = article.title
+  elsif blog != blank
+    assign current_title = blog.title
+  endif
+
+  assign has_trail = false
+  if show_home
+    assign has_trail = true
+  endif
+  if show_collection and crumb_collection != blank
+    assign has_trail = true
+  endif
+  if current_title != blank
+    assign has_trail = true
+  endif
+-%}
+
+{%- if has_trail -%}
+  <nav
+    class="pp-breadcrumbs"
+    id="pp-breadcrumbs-{{ section.id }}"
+    aria-label="{{ 'general.breadcrumbs' | t | default: 'Breadcrumb' | escape }}"
+    {{ section.shopify_attributes }}
+    style="
+      --pp-bc-link: {{ section.settings.link_color }};
+      --pp-bc-current: {{ section.settings.current_color }};
+      --pp-bc-separator: {{ section.settings.separator_color }};
+      --pp-bc-padding-top: {{ section.settings.padding_top }}px;
+      --pp-bc-padding-bottom: {{ section.settings.padding_bottom }}px;
+    "
+  >
+    <div class="pp-breadcrumbs__inner">
+      <ol class="pp-breadcrumbs__list">
+        {%- if show_home -%}
+          <li class="pp-breadcrumbs__item">
+            <a class="pp-breadcrumbs__link" href="{{ routes.root_url }}">{{ home_label | escape }}</a>
+          </li>
+        {%- endif -%}
+
+        {%- if show_collection and crumb_collection != blank -%}
+          <li class="pp-breadcrumbs__item">
+            <a class="pp-breadcrumbs__link" href="{{ crumb_collection.url }}">{{ crumb_collection.title | escape }}</a>
+          </li>
+        {%- endif -%}
+
+        {%- if current_title != blank -%}
+          <li class="pp-breadcrumbs__item pp-breadcrumbs__item--current" aria-current="page">
+            <span class="pp-breadcrumbs__current">{{ current_title | escape }}</span>
+          </li>
+        {%- endif -%}
+      </ol>
+    </div>
+  </nav>
+{%- elsif request.design_mode -%}
+  <div class="pp-breadcrumbs pp-breadcrumbs--placeholder" {{ section.shopify_attributes }}>
+    <div class="pp-breadcrumbs__inner">
+      <p class="pp-breadcrumbs__placeholder-text">Breadcrumbs will appear on product and collection pages.</p>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .pp-breadcrumbs {
+    width: 100%;
+    padding-top: var(--pp-bc-padding-top, 16px);
+    padding-bottom: var(--pp-bc-padding-bottom, 16px);
+    background: #ffffff;
+  }
+
+  .pp-breadcrumbs__inner {
+max-width: 1340px; padding: 0 20px; margin: 0 auto;
+  }
+
+  .pp-breadcrumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pp-breadcrumbs__item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .pp-breadcrumbs__item:not(:first-child)::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin: 0 12px;
+    border-right: 1.5px solid var(--pp-bc-separator, #bdbdbd);
+    border-bottom: 1.5px solid var(--pp-bc-separator, #bdbdbd);
+    transform: rotate(-45deg);
+    flex-shrink: 0;
+  }
+
+  .pp-breadcrumbs__link,
+  .pp-breadcrumbs__current {
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  .pp-breadcrumbs__link {
+    color: var(--pp-bc-link, #9a9a9a);
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .pp-breadcrumbs__link:hover {
+    opacity: 0.75;
+  }
+
+  .pp-breadcrumbs__current {
+    color: var(--pp-bc-current, #111111);
+    font-weight: 400;
+  }
+
+  .pp-breadcrumbs__item--current {
+    min-width: 0;
+  }
+
+  .pp-breadcrumbs__item--current .pp-breadcrumbs__current {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pp-breadcrumbs--placeholder {
+    padding: 16px 0;
+  }
+
+  .pp-breadcrumbs__placeholder-text {
+    margin: 0;
+    font-size: 13px;
+    color: #888888;
+  }
+
+
+
+  @media (max-width: 749px) {
+    .pp-breadcrumbs__link,
+    .pp-breadcrumbs__current {
+      font-size: 13px;
+    }
+
+    .pp-breadcrumbs__item--current .pp-breadcrumbs__current {
+      white-space: normal;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Breadcrumbs",
+  "tag": "section",
+  "class": "pp-breadcrumbs-section",
+  "enabled_on": {
+    "templates": ["product", "collection", "page", "blog", "article"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_home",
+      "label": "Show Home link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "home_label",
+      "label": "Home label",
+      "default": "Home"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection",
+      "label": "Show collection link",
+      "default": true,
+      "info": "On product pages, uses the collection from the URL when available, otherwise the product's first collection."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Preferred collection",
+      "info": "Optional. Force a specific collection in the trail (e.g. Best Sellers)."
+    },
+    {
+      "type": "text",
+      "id": "preferred_collection_handle",
+      "label": "Or collection handle",
+      "info": "Optional. e.g. best-sellers — used if the product belongs to that collection."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#9a9a9a"
+    },
+    {
+      "type": "color",
+      "id": "current_color",
+      "label": "Current page color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "separator_color",
+      "label": "Separator color",
+      "default": "#bdbdbd"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Breadcrumbs",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
