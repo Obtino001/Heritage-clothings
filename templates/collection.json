@@ -1,1 +1,336 @@
-{"sections":{"section":{"type":"section","blocks":{"text_tqQTNE":{"type":"text","name":"Title","settings":{"text":"<h1>{{ closest.collection.title }}<\/h1>","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"h2","font":"var(--font-primary--family)","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","text_color":"","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"text_twGGkJ":{"type":"text","name":"Description","settings":{"text":"{{ closest.collection.description }}","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-primary--family)","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","text_color":"","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}}},"block_order":["text_tqQTNE","text_twGGkJ"],"disabled":true,"name":"Collection heading","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":12,"section_width":"page-width","section_height":"","section_height_custom":50,"background_media":"none","background_color":"{{ settings.color_palette.background }}","video_position":"cover","background_image_position":"cover","toggle_overlay":false,"overlay_color":"#00000026","overlay_style":"solid","gradient_direction":"to top","border":"none","border_width":1,"border_opacity":100,"border_color":"","border_radius":0,"padding-block-start":48,"padding-block-end":48}},"main":{"type":"main-collection","blocks":{"filters":{"type":"filters","static":true,"settings":{"enable_filtering":true,"filter_style":"horizontal","filter_width":"centered","text_label_case":"default","show_swatch_label":false,"show_filter_label":false,"enable_sorting":true,"enable_grid_density":true,"background_color":"","text_color":"","padding-block-start":8,"padding-block-end":8,"padding-inline-start":0,"padding-inline-end":0,"facets_margin_bottom":8,"facets_margin_right":20},"blocks":{}},"product-card":{"type":"_product-card","static":true,"settings":{"product_card_gap":4,"background_color":"","border":"none","border_width":1,"border_opacity":100,"border_color":"","border_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{"card-gallery":{"type":"_product-card-gallery","settings":{"image_ratio":"adapt","border":"none","border_width":1,"border_opacity":100,"border_color":"","border_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"product_title_4nY4eT":{"type":"product-title","name":"t:names.product_title","settings":{"width":"100%","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-body--family)","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","text_color":"","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":4,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"price_EzJzMm":{"type":"price","settings":{"show_sale_price_first":true,"show_installments":false,"show_tax_info":false,"type_preset":"h6","width":"100%","alignment":"left","font":"var(--font-body--family)","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","text_color":"","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}}},"block_order":["card-gallery","product_title_4nY4eT","price_EzJzMm"]}},"disabled":true,"settings":{"layout_type":"grid","product_card_size":"medium","mobile_product_card_size":"small","enable_infinite_scroll":true,"products_per_page":24,"product_grid_width":"centered","full_width_on_mobile":true,"columns_gap_horizontal":16,"columns_gap_vertical":24,"padding-inline-start":0,"padding-inline-end":0,"background_color":"{{ settings.color_palette.background }}","padding-block-start":0,"padding-block-end":32}},"collection_product_grid_eFD9XM":{"type":"collection-product-grid","blocks":{"subcategory_XHMJNU":{"type":"subcategory","settings":{"collection":"headwraps","label":""}},"subcategory_aFxHMW":{"type":"subcategory","settings":{"collection":"earrings","label":"Earrings"}},"subcategory_kz73pi":{"type":"subcategory","settings":{"collection":"socks","label":""}},"subcategory_pR7yjW":{"type":"subcategory","settings":{"collection":"umbrellas","label":""}},"promo_banner_ahwrxJ":{"type":"promo_banner","settings":{"insert_after":7,"heading":"Shop Now, Pay Later.","text":"Get what you love today and pay in 3 interest-free instalments with the following:","show_payment_icons":true,"payment_icons_image":"shopify:\/\/shop_images\/payment.svg","feature_1":"0% Interest","feature_1_icon":"shopify:\/\/shop_images\/Frame_55.svg","feature_2":"Secure Checkout","feature_2_icon":"shopify:\/\/shop_images\/Frame_56.svg","feature_3":"Flexible Payments","feature_3_icon":"shopify:\/\/shop_images\/Frame_57.svg","button_text":"","button_link":"","image":"shopify:\/\/shop_images\/bgbox.webp","mobile_image":"shopify:\/\/shop_images\/bg_collection.webp"}}},"block_order":["subcategory_XHMJNU","subcategory_aFxHMW","subcategory_kz73pi","subcategory_pR7yjW","promo_banner_ahwrxJ"],"name":"Collection product grid","settings":{"show_description":true,"show_subcategories":true,"parent_collection":"","all_subcategory_label":"All","show_toolbar":true,"show_filters":true,"filters_label":"Filters","show_sort":true,"products_per_page":14,"columns_desktop":4,"columns_tablet":2,"columns_mobile":2,"card_gap":16,"image_radius":12,"show_sale_badge":true,"show_new_badge":true,"badge_sale_color":"#e86c3a","badge_new_color":"#2e7d32","show_wishlist":true,"show_size_selector":true,"show_color_swatches":true,"show_rating":true,"default_rating":"4.5","sale_price_color":"#d32f2f","rating_bg_color":"#f5e6d3","empty_message":"No products found in this collection.","pagination_active_color":"#9f532a","pagination_text_color":"#111111","padding_top":40,"padding_bottom":48}},"custom_customer_reviews_DEPyxK":{"type":"custom_customer_reviews","blocks":{"review_gexWDD":{"type":"review","settings":{"star_rating":5,"review_date":"07\/20\/2026","review_title":"Beautifully made and Comfortable","review_body":"The colors and quality of this dress is outstanding. It’s a show stopper","reviewer_name":"","product_image":"shopify:\/\/shop_images\/108044_7934261035220.jpg","product_title":"Marlena D.","product_url":"https:\/\/www.heritageclothings.com\/products\/tendai-multicoloured-kente-dress"}},"review_bnYWnr":{"type":"review","settings":{"star_rating":5,"review_date":"07\/20\/2026","review_title":"Fabulous","review_body":"The dress fitted well I’m 5.4 so it was abit long Easily corrected with a heel \nGreat quality The colour is bright red and absolutely beautiful","reviewer_name":"","product_image":"shopify:\/\/shop_images\/108044_15904038322558.jpg","product_title":"Kaye B.","product_url":"https:\/\/www.heritageclothings.com\/products\/anan-red-and-yellow-off-shoulder-dress"}},"review_URTc6R":{"type":"review","settings":{"star_rating":5,"review_date":"07\/15\/2026","review_title":"Very lovely","review_body":"This is a beautiful dress and I just love the feel with the puffy sleeves.","reviewer_name":"","product_image":"shopify:\/\/shop_images\/108044_7815280689364.jpg","product_title":"Guy F.","product_url":"https:\/\/www.heritageclothings.com\/products\/olori-multicoloured-dress"}},"review_mXQUNn":{"type":"review","settings":{"star_rating":5,"review_date":"06\/08\/2025","review_title":"dress review","review_body":"This is a well made dress - very eye catching and unique. Made from a very thick heavy cotton that is perhaps a little too warm but apart from that, it's beautiful.","reviewer_name":"","product_image":"shopify:\/\/shop_images\/108044_7731222937812.jpg","product_title":"Olivia R.","product_url":"https:\/\/www.heritageclothings.com\/products\/anan-green-and-blue-off-shoulder-maxi-dress"}},"review_pPHgtQ":{"type":"review","settings":{"star_rating":5,"review_date":"06\/30\/2026","review_title":"Absolutely stunning","review_body":"Absolutely stunning dress, excellent quality and a really nice fit (I am a size 18-20, I usually go for 4XL on the more fitted dresses, I could have probably gotten away with a 3XL on this one).","reviewer_name":"","product_image":"shopify:\/\/shop_images\/108044_14867096207742.jpg","product_title":"Jo S.","product_url":"https:\/\/www.heritageclothings.com\/products\/nala-royal-blue-and-green-wrap-dress"}}},"block_order":["review_gexWDD","review_bnYWnr","review_URTc6R","review_mXQUNn","review_pPHgtQ"],"custom_css":["p.review-card__body {min-height: 90px;}",".reviews-summary-card {height: 100%;}"],"name":"Customer Reviews","settings":{"heading":"Why Our Customers Love Us","overall_rating":"4.7\/5","review_count":"2117","feature_1":"100% Heavy Cotton","feature_2":"Made to Last","feature_3":"Flattering Fits","feature_4":"Designed for Every Occasion","button_label":"Read All Reviews","button_url":"\/pages\/reviews"}}},"order":["section","main","collection_product_grid_eFD9XM","custom_customer_reviews_DEPyxK"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+    "sections": {
+        "main": {
+            "type": "main-collection",
+            "blocks": {
+                "filters": {
+                    "type": "filters",
+                    "static": true,
+                    "settings": {
+                        "enable_filtering": true,
+                        "filter_style": "horizontal",
+                        "filter_width": "centered",
+                        "text_label_case": "default",
+                        "show_swatch_label": false,
+                        "show_filter_label": false,
+                        "enable_sorting": true,
+                        "enable_grid_density": true,
+                        "background_color": "",
+                        "text_color": "",
+                        "padding-block-start": 8,
+                        "padding-block-end": 8,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0,
+                        "facets_margin_bottom": 8,
+                        "facets_margin_right": 20
+                    },
+                    "blocks": {}
+                },
+                "product-card": {
+                    "type": "_product-card",
+                    "static": true,
+                    "settings": {
+                        "product_card_gap": 4,
+                        "background_color": "",
+                        "border": "none",
+                        "border_width": 1,
+                        "border_opacity": 100,
+                        "border_color": "",
+                        "border_radius": 0,
+                        "padding-block-start": 0,
+                        "padding-block-end": 0,
+                        "padding-inline-start": 0,
+                        "padding-inline-end": 0
+                    },
+                    "blocks": {
+                        "card-gallery": {
+                            "type": "_product-card-gallery",
+                            "settings": {
+                                "image_ratio": "adapt",
+                                "border": "none",
+                                "border_width": 1,
+                                "border_opacity": 100,
+                                "border_color": "",
+                                "border_radius": 0,
+                                "padding-block-start": 0,
+                                "padding-block-end": 0,
+                                "padding-inline-start": 0,
+                                "padding-inline-end": 0
+                            },
+                            "blocks": {}
+                        },
+                        "product_title_4nY4eT": {
+                            "type": "product-title",
+                            "name": "t:names.product_title",
+                            "settings": {
+                                "width": "100%",
+                                "max_width": "normal",
+                                "alignment": "left",
+                                "type_preset": "rte",
+                                "font": "var(--font-body--family)",
+                                "font_size": "1rem",
+                                "line_height": "normal",
+                                "letter_spacing": "normal",
+                                "case": "none",
+                                "wrap": "pretty",
+                                "text_color": "",
+                                "background": false,
+                                "background_color": "#00000026",
+                                "corner_radius": 0,
+                                "padding-block-start": 4,
+                                "padding-block-end": 0,
+                                "padding-inline-start": 0,
+                                "padding-inline-end": 0
+                            },
+                            "blocks": {}
+                        },
+                        "price_EzJzMm": {
+                            "type": "price",
+                            "settings": {
+                                "show_sale_price_first": true,
+                                "show_installments": false,
+                                "show_tax_info": false,
+                                "type_preset": "h6",
+                                "width": "100%",
+                                "alignment": "left",
+                                "font": "var(--font-body--family)",
+                                "font_size": "1rem",
+                                "line_height": "normal",
+                                "letter_spacing": "normal",
+                                "case": "none",
+                                "text_color": "",
+                                "padding-block-start": 0,
+                                "padding-block-end": 0,
+                                "padding-inline-start": 0,
+                                "padding-inline-end": 0
+                            },
+                            "blocks": {}
+                        }
+                    },
+                    "block_order": [
+                        "card-gallery",
+                        "product_title_4nY4eT",
+                        "price_EzJzMm"
+                    ]
+                }
+            },
+            "disabled": true,
+            "settings": {
+                "layout_type": "grid",
+                "product_card_size": "medium",
+                "mobile_product_card_size": "small",
+                "enable_infinite_scroll": true,
+                "products_per_page": 24,
+                "product_grid_width": "centered",
+                "full_width_on_mobile": true,
+                "columns_gap_horizontal": 16,
+                "columns_gap_vertical": 24,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "background_color": "{{ settings.color_palette.background }}",
+                "padding-block-start": 0,
+                "padding-block-end": 32
+            }
+        },
+        "collection_product_grid_eFD9XM": {
+            "type": "collection-product-grid",
+            "blocks": {
+                "subcategory_XHMJNU": {
+                    "type": "subcategory",
+                    "settings": {
+                        "collection": "headwraps",
+                        "label": ""
+                    }
+                },
+                "subcategory_aFxHMW": {
+                    "type": "subcategory",
+                    "settings": {
+                        "collection": "earrings",
+                        "label": "Earrings"
+                    }
+                },
+                "subcategory_kz73pi": {
+                    "type": "subcategory",
+                    "settings": {
+                        "collection": "socks",
+                        "label": ""
+                    }
+                },
+                "subcategory_pR7yjW": {
+                    "type": "subcategory",
+                    "settings": {
+                        "collection": "umbrellas",
+                        "label": ""
+                    }
+                },
+                "promo_banner_ahwrxJ": {
+                    "type": "promo_banner",
+                    "settings": {
+                        "insert_after": 7,
+                        "heading": "Shop Now, Pay Later.",
+                        "text": "Get what you love today and pay in 3 interest-free instalments with the following:",
+                        "show_payment_icons": true,
+                        "payment_icons_image": "shopify:\/\/shop_images\/payment.svg",
+                        "feature_1": "0% Interest",
+                        "feature_1_icon": "shopify:\/\/shop_images\/Frame_55.svg",
+                        "feature_2": "Secure Checkout",
+                        "feature_2_icon": "shopify:\/\/shop_images\/Frame_56.svg",
+                        "feature_3": "Flexible Payments",
+                        "feature_3_icon": "shopify:\/\/shop_images\/Frame_57.svg",
+                        "button_text": "",
+                        "button_link": "",
+                        "image": "shopify:\/\/shop_images\/bgbox.webp",
+                        "mobile_image": "shopify:\/\/shop_images\/bg_collection.webp"
+                    }
+                }
+            },
+            "block_order": [
+                "subcategory_XHMJNU",
+                "subcategory_aFxHMW",
+                "subcategory_kz73pi",
+                "subcategory_pR7yjW",
+                "promo_banner_ahwrxJ"
+            ],
+            "name": "Collection product grid",
+            "settings": {
+                "show_description": true,
+                "show_subcategories": true,
+                "parent_collection": "",
+                "all_subcategory_label": "All",
+                "show_toolbar": true,
+                "show_filters": true,
+                "filters_label": "Filters",
+                "show_sort": true,
+                "products_per_page": 14,
+                "columns_desktop": 4,
+                "columns_tablet": 2,
+                "columns_mobile": 2,
+                "card_gap": 16,
+                "image_radius": 12,
+                "show_sale_badge": true,
+                "show_new_badge": true,
+                "badge_sale_color": "#e86c3a",
+                "badge_new_color": "#2e7d32",
+                "show_wishlist": true,
+                "show_size_selector": true,
+                "show_color_swatches": true,
+                "show_rating": true,
+                "default_rating": "4.5",
+                "sale_price_color": "#d32f2f",
+                "rating_bg_color": "#f5e6d3",
+                "empty_message": "No products found in this collection.",
+                "pagination_active_color": "#9f532a",
+                "pagination_text_color": "#111111",
+                "padding_top": 40,
+                "padding_bottom": 48
+            }
+        },
+        "custom_customer_reviews_DEPyxK": {
+            "type": "custom_customer_reviews",
+            "blocks": {
+                "review_gexWDD": {
+                    "type": "review",
+                    "settings": {
+                        "star_rating": 5,
+                        "review_date": "07\/20\/2026",
+                        "review_title": "Beautifully made and Comfortable",
+                        "review_body": "The colors and quality of this dress is outstanding. It’s a show stopper",
+                        "reviewer_name": "",
+                        "product_image": "shopify:\/\/shop_images\/108044_7934261035220.jpg",
+                        "product_title": "Marlena D.",
+                        "product_url": "https:\/\/www.heritageclothings.com\/products\/tendai-multicoloured-kente-dress"
+                    }
+                },
+                "review_bnYWnr": {
+                    "type": "review",
+                    "settings": {
+                        "star_rating": 5,
+                        "review_date": "07\/20\/2026",
+                        "review_title": "Fabulous",
+                        "review_body": "The dress fitted well I’m 5.4 so it was abit long Easily corrected with a heel \nGreat quality The colour is bright red and absolutely beautiful",
+                        "reviewer_name": "",
+                        "product_image": "shopify:\/\/shop_images\/108044_15904038322558.jpg",
+                        "product_title": "Kaye B.",
+                        "product_url": "https:\/\/www.heritageclothings.com\/products\/anan-red-and-yellow-off-shoulder-dress"
+                    }
+                },
+                "review_URTc6R": {
+                    "type": "review",
+                    "settings": {
+                        "star_rating": 5,
+                        "review_date": "07\/15\/2026",
+                        "review_title": "Very lovely",
+                        "review_body": "This is a beautiful dress and I just love the feel with the puffy sleeves.",
+                        "reviewer_name": "",
+                        "product_image": "shopify:\/\/shop_images\/108044_7815280689364.jpg",
+                        "product_title": "Guy F.",
+                        "product_url": "https:\/\/www.heritageclothings.com\/products\/olori-multicoloured-dress"
+                    }
+                },
+                "review_mXQUNn": {
+                    "type": "review",
+                    "settings": {
+                        "star_rating": 5,
+                        "review_date": "06\/08\/2025",
+                        "review_title": "dress review",
+                        "review_body": "This is a well made dress - very eye catching and unique. Made from a very thick heavy cotton that is perhaps a little too warm but apart from that, it's beautiful.",
+                        "reviewer_name": "",
+                        "product_image": "shopify:\/\/shop_images\/108044_7731222937812.jpg",
+                        "product_title": "Olivia R.",
+                        "product_url": "https:\/\/www.heritageclothings.com\/products\/anan-green-and-blue-off-shoulder-maxi-dress"
+                    }
+                },
+                "review_pPHgtQ": {
+                    "type": "review",
+                    "settings": {
+                        "star_rating": 5,
+                        "review_date": "06\/30\/2026",
+                        "review_title": "Absolutely stunning",
+                        "review_body": "Absolutely stunning dress, excellent quality and a really nice fit (I am a size 18-20, I usually go for 4XL on the more fitted dresses, I could have probably gotten away with a 3XL on this one).",
+                        "reviewer_name": "",
+                        "product_image": "shopify:\/\/shop_images\/108044_14867096207742.jpg",
+                        "product_title": "Jo S.",
+                        "product_url": "https:\/\/www.heritageclothings.com\/products\/nala-royal-blue-and-green-wrap-dress"
+                    }
+                }
+            },
+            "block_order": [
+                "review_gexWDD",
+                "review_bnYWnr",
+                "review_URTc6R",
+                "review_mXQUNn",
+                "review_pPHgtQ"
+            ],
+            "custom_css": [
+                "p.review-card__body {min-height: 90px;}",
+                ".reviews-summary-card {height: 100%;}"
+            ],
+            "name": "Customer Reviews",
+            "settings": {
+                "heading": "Why Our Customers Love Us",
+                "overall_rating": "4.7\/5",
+                "review_count": "2117",
+                "feature_1": "100% Heavy Cotton",
+                "feature_2": "Made to Last",
+                "feature_3": "Flattering Fits",
+                "feature_4": "Designed for Every Occasion",
+                "button_label": "Read All Reviews",
+                "button_url": "\/pages\/reviews"
+            }
+        }
+    },
+    "order": [
+        "main",
+        "collection_product_grid_eFD9XM",
+        "custom_customer_reviews_DEPyxK"
+    ]
+}
