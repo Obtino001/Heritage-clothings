@@ -204,12 +204,21 @@ class ProductFormComponent extends Component {
   /** @type {Array<{variantId: string, quantity: number}>} */
   #addToCartQueue = [];
 
+  /** @type {string | undefined} */
+  #lastSelectedVariantId;
+
+  /** @type {string | undefined} */
+  #lastSelectedOptionName;
+
   connectedCallback() {
     super.connectedCallback();
 
     const { signal } = this.#abortController;
     const target = this.closest('.shopify-section, dialog, product-card');
     target?.addEventListener(StandardEvents.productSelect, this.#onProductSelect, { signal });
+    target?.addEventListener('pointerdown', this.#syncVariantIdFromPicker, { signal, capture: true });
+    target?.addEventListener('change', this.#syncVariantIdFromPicker, { signal });
+    this.addEventListener('click', this.#syncVariantIdBeforeAddToCart, { signal, capture: true });
 
     // Listen for cart updates to sync data-cart-quantity
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#onCartUpdate, { signal });
@@ -299,24 +308,161 @@ class ProductFormComponent extends Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    if (this.#variantChangeInProgress) {
-      const intendedVariantId = this.#getIntendedVariantId();
-      const quantity = this.#getQuantity();
+    const intendedVariantId = this.#getIntendedVariantId();
+    if (intendedVariantId) this.#writeVariantId(intendedVariantId);
 
-      if (intendedVariantId) {
-        this.#addToCartQueue.push({ variantId: intendedVariantId, quantity });
-      }
+    this.#processAddToCart(intendedVariantId, undefined, event);
+  }
 
-      this.refs.addToCartButtonContainer?.animateAddToCart?.();
-      return;
+  /**
+   * @param {string} name
+   * @returns {boolean}
+   */
+  #isSizeOptionName(name) {
+    return /size|taille|größe|groesse|maat|talla|tamanho/i.test(name || '');
+  }
+
+  /**
+   * @param {Event} event
+   * @returns {HTMLInputElement | HTMLSelectElement | null}
+   */
+  #optionControlFromEvent(event) {
+    const el = event.target;
+    if (!(el instanceof Element) || el.closest('[data-size-chart-open], .size-chart-modal')) return null;
+    if (!el.closest('variant-picker')) return null;
+
+    if (el instanceof HTMLInputElement && (el.type === 'radio' || el.type === 'checkbox')) return el;
+    if (el instanceof HTMLSelectElement) return el;
+
+    const label = el.closest('label');
+    const radio = label?.querySelector('input[type="radio"], input[type="checkbox"]');
+    return radio instanceof HTMLInputElement ? radio : null;
+  }
+
+  /**
+   * Reads the variant ID from the option the shopper just selected.
+   * The hidden form input and ?variant= URL lag behind while Horizon fetches
+   * the updated section, so Add to cart must not use those stale values.
+   * @param {Event} event
+   */
+  #syncVariantIdFromPicker = (event) => {
+    const option = this.#optionControlFromEvent(event);
+    if (!option) return;
+
+    const variantId =
+      option instanceof HTMLSelectElement
+        ? option.selectedOptions[0]?.dataset?.variantId
+        : option.dataset?.variantId;
+
+    if (!variantId) return;
+
+    this.#lastSelectedOptionName =
+      option.dataset?.optionName ||
+      (option instanceof HTMLSelectElement ? option.selectedOptions[0]?.dataset?.optionName : undefined);
+    this.#writeVariantId(variantId);
+  };
+
+  /** @param {Event} event */
+  #syncVariantIdBeforeAddToCart = (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest('add-to-cart-component, [ref="addToCartButton"], button[type="submit"]')) return;
+
+    const intendedVariantId = this.#getIntendedVariantId();
+    if (intendedVariantId) this.#writeVariantId(intendedVariantId);
+  };
+
+  /**
+   * @param {string} variantId
+   */
+  #writeVariantId(variantId) {
+    this.#lastSelectedVariantId = variantId;
+
+    const section = this.closest('.shopify-section, product-information, dialog, product-card');
+    const roots = [this, section].filter(Boolean);
+    /** @type {Set<Element>} */
+    const seen = new Set();
+
+    for (const root of roots) {
+      root.querySelectorAll('input[name="id"]').forEach((input) => {
+        if (!(input instanceof HTMLInputElement) || seen.has(input)) return;
+        seen.add(input);
+        input.value = variantId;
+      });
     }
 
-    this.#processAddToCart(undefined, undefined, event);
+    if (this.dataset.productUrl || this.closest('[data-template-product-match="true"]')) {
+      const url = new URL(window.location.href);
+      if (url.pathname.includes('/products/')) {
+        url.searchParams.set('variant', variantId);
+        if (url.href !== window.location.href) history.replaceState({}, '', url.toString());
+      }
+    }
+  }
+
+  /**
+   * @returns {string | undefined}
+   */
+  #getCheckedSizeVariantId() {
+    const section = this.closest('.shopify-section, product-information, dialog, product-card');
+    const picker = section?.querySelector('variant-picker');
+    if (!picker) return undefined;
+
+    const sizeChecked =
+      picker.querySelector('[data-size-fieldset] input[type="radio"]:checked') ||
+      Array.from(picker.querySelectorAll('fieldset input[type="radio"]:checked')).find((input) =>
+        this.#isSizeOptionName(input instanceof HTMLInputElement ? input.dataset.optionName || '' : '')
+      );
+
+    if (sizeChecked instanceof HTMLInputElement && sizeChecked.dataset.variantId) {
+      return sizeChecked.dataset.variantId;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * @returns {string | undefined}
+   */
+  #getSelectedVariantIdFromPicker() {
+    const fromSize = this.#getCheckedSizeVariantId();
+    if (fromSize) return fromSize;
+
+    const section = this.closest('.shopify-section, product-information, dialog, product-card');
+    const picker = section?.querySelector('variant-picker');
+    if (!picker) return undefined;
+
+    const checkedInputs = picker.querySelectorAll('fieldset input[type="radio"]:checked');
+    for (let i = checkedInputs.length - 1; i >= 0; i--) {
+      const input = checkedInputs[i];
+      if (input instanceof HTMLInputElement && input.dataset.variantId) {
+        return input.dataset.variantId;
+      }
+    }
+
+    const select = picker.querySelector('select');
+    const option = select?.selectedOptions?.[0];
+    return option?.dataset?.variantId;
   }
 
   /** @returns {string | undefined} */
   #getIntendedVariantId() {
-    return new URL(window.location.href).searchParams.get('variant') || this.refs.variantId?.value || undefined;
+    const fromSize = this.#getCheckedSizeVariantId();
+    const lastWasSize = this.#isSizeOptionName(this.#lastSelectedOptionName || '');
+
+    // Size buttons paint as selected immediately; that checked radio is the source of truth.
+    if (fromSize && (lastWasSize || !this.#lastSelectedOptionName)) {
+      return fromSize;
+    }
+
+    return (
+      this.#lastSelectedVariantId ||
+      fromSize ||
+      this.#getSelectedVariantIdFromPicker() ||
+      this.refs.variantId?.value ||
+      new URL(window.location.href).searchParams.get('variant') ||
+      undefined
+    );
   }
 
   /** @returns {number} */
@@ -767,7 +913,23 @@ class ProductFormComponent extends Component {
       }
 
       const { variantId } = this.refs;
-      variantId.value = resource?.id ?? '';
+      const liveId = this.#getIntendedVariantId();
+      if (resource?.id) {
+        const resourceId = String(resource.id);
+        // A slow section fetch can resolve after the shopper already picked another size.
+        if (liveId && liveId !== resourceId) {
+          variantId.value = liveId;
+        } else {
+          variantId.value = resourceId;
+          this.#lastSelectedVariantId = resourceId;
+        }
+      } else if (liveId) {
+        variantId.value = liveId;
+      } else if (this.#lastSelectedVariantId) {
+        variantId.value = this.#lastSelectedVariantId;
+      } else {
+        variantId.value = '';
+      }
 
       const { addToCartButtonContainer: currentAddToCartButtonContainer, acceleratedCheckoutButtonContainer } =
         this.refs;

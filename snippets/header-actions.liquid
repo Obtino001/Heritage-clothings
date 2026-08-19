@@ -108,6 +108,7 @@
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
     <button
+      type="button"
       class="header-actions__action button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       on:click="#cart-drawer/toggle"
       aria-haspopup="dialog"
@@ -125,6 +126,7 @@
       class="header-actions__action action__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       aria-label="{{ 'accessibility.cart' | t }}"
       aria-describedby="cart-bubble-text"
+      data-cart-link
     >
       {{ cart_icon }}
     </a>

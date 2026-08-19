@@ -129,6 +129,7 @@
     if (!sectionId || typeof html !== 'string') return false;
     var wrap = naGetSectionWrap(sectionId);
     if (!wrap) return false;
+    if (wrap.querySelector('theme-drawer, cart-drawer-component')) return false;
     try {
       var doc = new DOMParser().parseFromString(html, 'text/html');
       var fresh = doc.getElementById('shopify-section-' + sectionId);
@@ -168,11 +169,17 @@
   }
 
   function naOpenCartDrawer() {
+    var themeDrawer = document.querySelector('theme-drawer#cart-drawer');
+    if (themeDrawer && typeof themeDrawer.open === 'function') {
+      try { themeDrawer.open(); return; } catch (e) {}
+    }
     var cartDrawer = naGetCartDrawer();
     if (cartDrawer && typeof cartDrawer.open === 'function') {
       try { cartDrawer.open(); return; } catch (e) {}
     }
     document.dispatchEvent(new CustomEvent('dispatch:cart-drawer:open'));
+    var cartLink = document.querySelector('a.header-actions__action[href*="/cart"], a.action__cart[href*="/cart"]');
+    if (cartLink && !themeDrawer) window.location.href = cartLink.href;
   }
 
   function naDispatchPlainCartUpdate(cart) {
@@ -600,6 +607,11 @@
           variant = parseCardVariants(activeCard).find(function (item) { return item.available; }) || parseCardVariants(activeCard)[0];
         }
         if (!variant || !variant.available) {
+          var otherUrl = activeSwatchGoesToOtherProduct(activeCard);
+          if (otherUrl) {
+            window.location.href = otherUrl;
+            return;
+          }
           showToast('Selected option is unavailable');
           return;
         }
@@ -638,6 +650,33 @@
       if (fromMedia) return fromMedia;
     }
     return null;
+  }
+
+  function samePath(url, other) {
+    if (!url) return true;
+    try {
+      var a = new URL(url, window.location.origin).pathname.replace(/\/$/, '');
+      var b = new URL(other || window.location.href, window.location.origin).pathname.replace(/\/$/, '');
+      return a === b;
+    } catch (e) {
+      return url === other;
+    }
+  }
+
+  function applyCardProductLink(card, swatch) {
+    var url = swatch && swatch.dataset.productUrl;
+    if (!url) return;
+    card.querySelectorAll('.na-card__image-link, .na-card__title a').forEach(function (link) {
+      link.href = url;
+    });
+  }
+
+  function activeSwatchGoesToOtherProduct(card) {
+    var swatch = card.querySelector('[data-swatch].is-active');
+    var url = swatch && swatch.dataset.productUrl;
+    if (!url) return null;
+    if (samePath(url, card.dataset.productUrl)) return null;
+    return url;
   }
 
   function initCardVariantPicker(card, section, showToast) {
@@ -700,6 +739,7 @@
       card.querySelectorAll('[data-swatch]').forEach(function (s) { s.classList.remove('is-active'); });
       swatch.classList.add('is-active');
       state.color = swatch.dataset.colorValue;
+      applyCardProductLink(card, swatch);
       if (runFilters !== false) applyFilters();
       updateImageFromSelection(card.querySelector('[data-swatch].is-active:not(.is-hidden)') || swatch);
     }
@@ -719,6 +759,10 @@
     }
 
     card.querySelectorAll('[data-swatch]').forEach(function (swatch) {
+      if (swatch.dataset.colorAvailable === 'false') {
+        swatch.classList.add('is-unavailable');
+        if (swatch.title && swatch.title.indexOf('sold out') === -1) swatch.title += ' (sold out)';
+      }
       swatch.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -726,6 +770,9 @@
         selectColor(swatch);
       });
     });
+
+    var initialSwatch = card.querySelector('[data-swatch].is-active') || card.querySelector('[data-swatch]');
+    if (initialSwatch) applyCardProductLink(card, initialSwatch);
 
     if (sizesWrap) {
       sizesWrap.querySelectorAll('.na-sizes__btn').forEach(function (btn) {

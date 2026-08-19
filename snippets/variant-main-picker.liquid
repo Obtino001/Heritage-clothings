@@ -566,6 +566,23 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
     background: #ffffff !important;
     cursor: not-allowed;
     pointer-events: none;
+    overflow: hidden;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"])::after,
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"])::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(
+      to top left,
+      transparent calc(50% - 1px),
+      #bbbbbb calc(50% - 1px),
+      #bbbbbb calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ) !important;
+    pointer-events: none !important;
   }
 
   variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"]) .variant-option__button-label__text,

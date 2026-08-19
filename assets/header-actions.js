@@ -19,6 +19,7 @@ class HeaderActions extends Component {
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#onCartUpdate);
     document.addEventListener(DrawerOpenEvent.eventName, this.#onDrawerStateChange);
     document.addEventListener(DrawerCloseEvent.eventName, this.#onDrawerStateChange);
+    this.addEventListener('click', this.#onCartTriggerClick);
     this.#syncCartTriggerAriaExpanded();
   }
 
@@ -27,7 +28,36 @@ class HeaderActions extends Component {
     document.removeEventListener(StandardEvents.cartLinesUpdate, this.#onCartUpdate);
     document.removeEventListener(DrawerOpenEvent.eventName, this.#onDrawerStateChange);
     document.removeEventListener(DrawerCloseEvent.eventName, this.#onDrawerStateChange);
+    this.removeEventListener('click', this.#onCartTriggerClick);
   }
+
+  /**
+   * Keeps cart-icon clicks on the cart. If a drawer exists, open it instead of
+   * following a broken homepage link. The drawer button already uses Horizon
+   * `on:click`, so it is left alone.
+   * @param {MouseEvent} event
+   */
+  #onCartTriggerClick = (event) => {
+    const trigger = event.target instanceof Element
+      ? event.target.closest('[data-cart-link], a.action__cart')
+      : null;
+    if (!trigger) return;
+
+    const drawer = document.querySelector('theme-drawer#cart-drawer');
+    if (drawer && typeof drawer.open === 'function') {
+      event.preventDefault();
+      drawer.open();
+      return;
+    }
+
+    if (trigger instanceof HTMLAnchorElement) {
+      const href = trigger.getAttribute('href') || '';
+      if (!href || href === '/' || href === '#') {
+        event.preventDefault();
+        window.location.href = Theme.routes.cart_url || '/cart';
+      }
+    }
+  };
 
   #syncCartTriggerAriaExpanded = () => {
     const cartDrawer = document.getElementById('cart-drawer');

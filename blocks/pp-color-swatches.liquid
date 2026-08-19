@@ -191,17 +191,17 @@
               type="button"
               class="pp-color-swatches__item{% if is_selected %} is-selected{% endif %}{% unless value_available %} is-unavailable{% endunless %}"
               role="listitem"
-              title="{{ value }}"
+              title="{{ value }}{% unless value_available %} (sold out){% endunless %}"
               aria-label="{{ value }}{% unless value_available %} (sold out){% endunless %}"
               aria-pressed="{% if is_selected %}true{% else %}false{% endif %}"
               data-color-swatch
               data-option-value="{{ value | escape }}"
               data-variant-id="{{ swatch_variant.id }}"
+              {% render 'color-swatch-attrs', product: product, color_label: value, option_value: value, selected_color_value: selected_color_value %}
               {% if swatch_image %}
                 data-image-src="{{ swatch_image | image_url: width: 1200 }}"
                 data-image-srcset="{{ swatch_image | image_url: width: 600 }} 600w, {{ swatch_image | image_url: width: 1200 }} 1200w"
               {% endif %}
-              {% unless value_available %}disabled{% endunless %}
             >
               {%- if swatch_image -%}
                 {{
@@ -304,12 +304,10 @@
             aria-pressed="{% if is_selected %}true{% else %}false{% endif %}"
             data-color-swatch
             data-option-value="{{ color_label | escape }}"
+            {% render 'color-swatch-attrs', product: product, color_label: color_label, metafield_item: item, selected_color_value: selected_color_value %}
             {% if swatch_image %}
               data-image-src="{{ swatch_image | image_url: width: 1200 }}"
               data-image-srcset="{{ swatch_image | image_url: width: 600 }} 600w, {{ swatch_image | image_url: width: 1200 }} 1200w"
-            {% endif %}
-            {% if swatch_url != blank %}
-              data-product-url="{{ swatch_url }}"
             {% endif %}
             {% if color_hex != '' and is_multi == false and swatch_image == nil %}
               style="background-color: {{ color_hex }};"
@@ -365,34 +363,62 @@
       }
 
       function getScope() {
-        return root.closest('[id^="shopify-section-"]')
+        return root.closest('product-information')
+          || root.closest('[id^="shopify-section-"]')
           || root.closest('.shopify-section')
-          || root.closest('product-information')
           || root.closest('.product')
           || document;
       }
 
       function normValue(v) {
-        return (v || '').toString().toLowerCase().trim();
+        return (v || '').toString().toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+      }
+
+      function isColorOptionName(name) {
+        var n = normValue(name);
+        return n === 'color' || n === 'colour' || n === 'colors' || n === 'colours';
+      }
+
+      function sameProductPath(url) {
+        if (!url) return true;
+        try {
+          var dest = new URL(url, window.location.origin);
+          return dest.pathname.replace(/\/$/, '') === window.location.pathname.replace(/\/$/, '');
+        } catch (e) {
+          return url === window.location.pathname;
+        }
+      }
+
+      function markUnavailableSwatches() {
+        swatches.forEach(function (swatch) {
+          if (swatch.dataset.colorAvailable === 'false') {
+            swatch.classList.add('is-unavailable');
+            var label = swatch.getAttribute('aria-label') || swatch.title || '';
+            if (label && label.indexOf('sold out') === -1) {
+              swatch.setAttribute('aria-label', label + ' (sold out)');
+              swatch.setAttribute('title', (swatch.title || label) + ' (sold out)');
+            }
+          }
+        });
       }
 
       function getSelectedOptions() {
         var scope = getScope();
         var sel = {};
+        var picker = scope.querySelector('variant-picker');
+        if (!picker) return sel;
 
-        scope.querySelectorAll('select[name^="options"]').forEach(function (select) {
-          var match = select.name.match(/\[(\d+)\]/);
-          if (match && select.value) sel[parseInt(match[1], 10) + 1] = select.value;
+        picker.querySelectorAll('select').forEach(function (select, index) {
+          if (select.value) sel[index + 1] = select.value;
         });
 
-        scope.querySelectorAll('input[type="radio"][name^="options"]:checked').forEach(function (radio) {
-          var match = radio.name.match(/\[(\d+)\]/);
-          if (match) sel[parseInt(match[1], 10) + 1] = radio.value;
-        });
-
-        scope.querySelectorAll('.pp-option__btn.is-selected').forEach(function (btn) {
-          if (btn.dataset.optionPosition) {
-            sel[parseInt(btn.dataset.optionPosition, 10)] = btn.dataset.optionValue;
+        picker.querySelectorAll('fieldset').forEach(function (fieldset) {
+          var checked = fieldset.querySelector('input[type="radio"]:checked');
+          var pos = parseInt(fieldset.dataset.fieldsetIndex, 10);
+          if (checked && !Number.isNaN(pos)) sel[pos + 1] = checked.value;
+          else if (checked && checked.dataset.inputId) {
+            var parts = checked.dataset.inputId.split('-');
+            if (parts[0]) sel[parseInt(parts[0], 10)] = checked.value;
           }
         });
 
@@ -404,39 +430,43 @@
           return (!sel[1] || v.option1 === sel[1])
             && (!sel[2] || v.option2 === sel[2])
             && (!sel[3] || v.option3 === sel[3]);
+        }) || null;
+      }
+
+      function setFormVariantId(variantId) {
+        if (!variantId) return;
+        getScope().querySelectorAll(
+          'product-form-component input[name="id"], form[action*="/cart/add"] input[name="id"]'
+        ).forEach(function (input) {
+          input.value = String(variantId);
         });
       }
 
       function syncNativePicker(value) {
         if (colorMode !== 'option') return;
-        var scope = getScope();
+        var picker = getScope().querySelector('variant-picker');
+        if (!picker) return;
 
-        scope.querySelectorAll('input[type="radio"][name^="options"]').forEach(function (radio) {
-          if (radio.value === value) {
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change', { bubbles: true }));
-          }
+        var matched = null;
+        picker.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+          if (radio.value !== value) return;
+          if (isColorOptionName(radio.dataset.optionName)) matched = radio;
+          else if (!matched) matched = radio;
         });
 
-        scope.querySelectorAll('select[name^="options"]').forEach(function (select) {
+        if (matched && !matched.checked) {
+          matched.checked = true;
+          matched.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        picker.querySelectorAll('select').forEach(function (select) {
           for (var i = 0; i < select.options.length; i++) {
-            if (select.options[i].value === value) {
+            if (select.options[i].value === value && select.selectedIndex !== i) {
               select.selectedIndex = i;
               select.dispatchEvent(new Event('change', { bubbles: true }));
               break;
             }
           }
-        });
-
-        scope.querySelectorAll(
-          'variant-picker button, variant-picker [data-option-value], [data-option-value], .variant-option__button'
-        ).forEach(function (btn) {
-          var btnValue = btn.value || btn.dataset.optionValue || btn.dataset.value;
-          if (btnValue === value) btn.click();
-        });
-
-        scope.querySelectorAll('.pp-option__btn[data-option-position="' + optionPosition + '"]').forEach(function (btn) {
-          btn.classList.toggle('is-selected', btn.dataset.optionValue === value);
         });
       }
 
@@ -490,10 +520,10 @@
       }
 
       function setActiveSwatch(swatch, fromUser) {
-        if (!swatch || swatch.disabled) return;
+        if (!swatch) return;
 
         var productUrl = swatch.dataset.productUrl;
-        if (fromUser !== false && productUrl && productUrl !== window.location.pathname) {
+        if (fromUser !== false && productUrl && !sameProductPath(productUrl)) {
           window.location.href = productUrl;
           return;
         }
@@ -511,13 +541,24 @@
         if (colorMode === 'option') {
           if (fromUser !== false) syncNativePicker(value);
           var sel = getSelectedOptions();
-          sel[optionPosition] = value;
+          if (optionPosition) sel[optionPosition] = value;
           var match = findVariant(sel);
-          if (match) updateGallery(match, swatch, value);
+          if (match) {
+            setFormVariantId(match.id);
+            updateGallery(match, swatch, value);
+          } else if (swatch.dataset.variantId) {
+            setFormVariantId(swatch.dataset.variantId);
+            updateGallery(null, swatch, value);
+          }
+        } else if (swatch.dataset.variantId) {
+          setFormVariantId(swatch.dataset.variantId);
+          updateGallery(null, swatch, value);
         } else {
           updateGallery(null, swatch, value);
         }
       }
+
+      markUnavailableSwatches();
 
       swatches.forEach(function (swatch) {
         swatch.addEventListener('click', function () {
@@ -627,8 +668,22 @@
   }
 
   .pp-color-swatches__item.is-unavailable {
-    opacity: 0.45;
-    cursor: not-allowed;
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  .pp-color-swatches__item.is-unavailable::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top left,
+      transparent calc(50% - 1px),
+      #111111 calc(50% - 1px),
+      #111111 calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    pointer-events: none;
   }
 
   .pp-color-swatches__item:not(.is-selected):not(:disabled):hover {

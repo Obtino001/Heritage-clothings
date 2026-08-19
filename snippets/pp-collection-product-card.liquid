@@ -81,6 +81,11 @@
                 assign mf_colors = product.metafields.custom.colors.value
               endif
 
+              if card_selected_color == blank and mf_colors != blank
+                assign first_mf_color = mf_colors | first
+                assign card_selected_color = first_mf_color.label | default: first_mf_color
+              endif
+
               assign show_color_swatches = false
               if section.settings.show_color_swatches
                 if swatch_option != nil or mf_colors != blank
@@ -104,6 +109,7 @@
   data-cg-product
   data-product-id="{{ product.id }}"
   data-product-title="{{ product.title | escape }}"
+  data-product-url="{{ product.url }}"
   data-collection-handles="{{ collection_handles }}"
   {% if size_option %}
     data-size-option-name="{{ size_option.name | escape }}"
@@ -120,10 +126,13 @@
     data-default-variant-id="{{ featured_variant.id }}"
     {% if swatch_option %}
       {% if swatch_option.position == 1 %}
+        {% assign card_selected_color = featured_variant.option1 %}
         data-default-color="{{ featured_variant.option1 | escape }}"
       {% elsif swatch_option.position == 2 %}
+        {% assign card_selected_color = featured_variant.option2 %}
         data-default-color="{{ featured_variant.option2 | escape }}"
       {% else %}
+        {% assign card_selected_color = featured_variant.option3 %}
         data-default-color="{{ featured_variant.option3 | escape }}"
       {% endif %}
     {% endif %}
@@ -223,17 +232,24 @@
                           endif
 
                           for variant in product.variants
+                            assign size_matches = false
                             if size_option.position == 1 and variant.option1 == value
-                              assign size_variant = variant
+                              assign size_matches = true
                             elsif size_option.position == 2 and variant.option2 == value
-                              assign size_variant = variant
+                              assign size_matches = true
                             elsif size_option.position == 3 and variant.option3 == value
-                              assign size_variant = variant
+                              assign size_matches = true
+                            endif
+                            if size_matches
+                              if size_variant == nil
+                                assign size_variant = variant
+                              endif
+                              if variant.available
+                                assign size_available = true
+                                assign size_variant = variant
+                              endif
                             endif
                           endfor
-                          if size_variant != nil and size_variant.available
-                            assign size_available = true
-                          endif
                         -%}
                         <button
                           type="button"
@@ -352,16 +368,33 @@
                             if swatch_main_image != nil
                               assign swatch_has_image = true
                             endif
+
+                            assign swatch_available = false
+                            for variant in product.variants
+                              assign color_matches = false
+                              if swatch_option.position == 1 and variant.option1 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 2 and variant.option2 == value
+                                assign color_matches = true
+                              elsif swatch_option.position == 3 and variant.option3 == value
+                                assign color_matches = true
+                              endif
+                              if color_matches and variant.available
+                                assign swatch_available = true
+                                break
+                              endif
+                            endfor
                           -%}
                           <button
                             type="button"
-                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% if swatch_is_multi and swatch_thumb_image == nil %} na-swatch--multi{% elsif swatch_hex == '' and swatch_thumb_image == nil %} na-swatch--fallback{% endif %}"
+                            class="na-swatch{% if forloop.first %} is-active{% endif %}{% unless swatch_available %} is-unavailable{% endunless %}{% if swatch_is_multi and swatch_thumb_image == nil %} na-swatch--multi{% elsif swatch_hex == '' and swatch_thumb_image == nil %} na-swatch--fallback{% endif %}"
                             role="listitem"
-                            title="{{ value }}"
+                            title="{{ value }}{% unless swatch_available %} (sold out){% endunless %}"
                             data-swatch
                             data-color-value="{{ value | escape }}"
                             data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
                             data-variant-id="{{ swatch_variant.id }}"
+                            {% render 'color-swatch-attrs', product: product, color_label: value, option_value: value, selected_color_value: card_selected_color %}
                             {% if swatch_main_image %}
                               data-image-src="{{ swatch_main_image | image_url: width: 800 }}"
                               data-image-srcset="{{ swatch_main_image | image_url: width: 400 }} 400w, {{ swatch_main_image | image_url: width: 800 }} 800w"
@@ -482,6 +515,7 @@
                             data-swatch
                             data-color-value="{{ color_label | escape }}"
                             data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            {% render 'color-swatch-attrs', product: product, color_label: color_label, metafield_item: item, selected_color_value: card_selected_color %}
                             {% if mf_main_image %}
                               data-image-src="{{ mf_main_image | image_url: width: 800 }}"
                               data-image-srcset="{{ mf_main_image | image_url: width: 400 }} 400w, {{ mf_main_image | image_url: width: 800 }} 800w"

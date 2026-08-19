@@ -1,7 +1,7 @@
 import { Component } from '@theme/component';
 import { morph, MORPH_OPTIONS } from '@theme/morph';
 import { OverflowList } from '@theme/overflow-list';
-import { yieldToMainThread, getViewParameterValue, ResizeNotifier } from '@theme/utilities';
+import { getViewParameterValue, ResizeNotifier } from '@theme/utilities';
 import { ProductSelectEvent } from '@shopify/events';
 
 /**
@@ -45,6 +45,7 @@ export default class VariantPicker extends Component {
       }
     });
 
+    this.addEventListener('pointerdown', this.#onOptionPointerDown);
     this.addEventListener('change', this.variantChanged.bind(this));
     this.#resizeObserver.observe(this);
   }
@@ -68,6 +69,9 @@ export default class VariantPicker extends Component {
 
     this.updateSelectedOption(event.target);
 
+    const variantId = selectedOption.dataset.variantId || null;
+    this.#applyVariantId(variantId);
+
     const isOnProductPage =
       this.dataset.templateProductMatch === 'true' &&
       !event.target.closest('product-card') &&
@@ -89,9 +93,76 @@ export default class VariantPicker extends Component {
     const optionValueId = selectedOption.dataset.optionValueId ?? '';
     this.fetchUpdatedSection(this.buildRequestUrl(selectedOption), morphElementSelector, optionValueId);
 
-    const url = new URL(window.location.href);
+    this.#syncProductUrl(variantId, isOnProductPage, loadsNewProduct ? newUrl : null);
+  }
 
-    const variantId = selectedOption.dataset.variantId || null;
+  /**
+   * Size pills look selected on pointerdown, but the radio `change` fires later.
+   * Write the clicked option's variant ID immediately so Add to cart cannot
+   * submit the previously selected size.
+   * @param {Event} event
+   */
+  #onOptionPointerDown = (event) => {
+    const option = this.#optionControlFromEvent(event);
+    if (!option) return;
+
+    const variantId =
+      option instanceof HTMLSelectElement
+        ? option.selectedOptions[0]?.dataset?.variantId
+        : option.dataset?.variantId;
+
+    this.#applyVariantId(variantId || null);
+
+    const isOnProductPage =
+      this.dataset.templateProductMatch === 'true' &&
+      !this.closest('product-card') &&
+      !this.closest('quick-add-dialog');
+    if (variantId && isOnProductPage) {
+      this.#syncProductUrl(variantId, true, null);
+    }
+  };
+
+  /**
+   * @param {Event} event
+   * @returns {HTMLInputElement | HTMLSelectElement | null}
+   */
+  #optionControlFromEvent(event) {
+    const el = event.target;
+    if (!(el instanceof Element) || el.closest('[data-size-chart-open], .size-chart-modal')) return null;
+
+    if (el instanceof HTMLInputElement && (el.type === 'radio' || el.type === 'checkbox')) return el;
+    if (el instanceof HTMLSelectElement) return el;
+
+    const label = el.closest('label');
+    const radio = label?.querySelector('input[type="radio"], input[type="checkbox"]');
+    return radio instanceof HTMLInputElement ? radio : null;
+  }
+
+  /**
+   * @param {string | null} variantId
+   */
+  #applyVariantId(variantId) {
+    if (!variantId) return;
+
+    const section =
+      this.closest(
+        '.shopify-section, product-information, dialog, product-card, featured-product-information'
+      ) || this;
+
+    section
+      .querySelectorAll('product-form-component input[name="id"], form[action*="/cart/add"] input[name="id"]')
+      .forEach((input) => {
+        if (input instanceof HTMLInputElement) input.value = variantId;
+      });
+  }
+
+  /**
+   * @param {string | null} variantId
+   * @param {boolean} isOnProductPage
+   * @param {string | null} [newPath]
+   */
+  #syncProductUrl(variantId, isOnProductPage, newPath) {
+    const url = new URL(window.location.href);
 
     if (isOnProductPage) {
       if (variantId) {
@@ -101,15 +172,12 @@ export default class VariantPicker extends Component {
       }
     }
 
-    // Change the path if the option is connected to another product via combined listing.
-    if (loadsNewProduct) {
-      url.pathname = newUrl;
+    if (newPath) {
+      url.pathname = newPath;
     }
 
     if (url.href !== window.location.href) {
-      yieldToMainThread().then(() => {
-        history.replaceState({}, '', url.toString());
-      });
+      history.replaceState({}, '', url.toString());
     }
   }
 

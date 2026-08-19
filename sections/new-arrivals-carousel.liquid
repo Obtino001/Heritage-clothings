@@ -171,6 +171,7 @@
               data-na-card
               data-product-id="{{ product.id }}"
               data-product-title="{{ product.title | escape }}"
+              data-product-url="{{ product.url }}"
               {% if size_option %}
                 data-size-option-name="{{ size_option.name | escape }}"
                 data-size-position="{{ size_option.position }}"
@@ -289,17 +290,24 @@
                           endif
 
                           for variant in product.variants
+                            assign size_matches = false
                             if size_option.position == 1 and variant.option1 == value
-                              assign size_variant = variant
+                              assign size_matches = true
                             elsif size_option.position == 2 and variant.option2 == value
-                              assign size_variant = variant
+                              assign size_matches = true
                             elsif size_option.position == 3 and variant.option3 == value
-                              assign size_variant = variant
+                              assign size_matches = true
+                            endif
+                            if size_matches
+                              if size_variant == nil
+                                assign size_variant = variant
+                              endif
+                              if variant.available
+                                assign size_available = true
+                                assign size_variant = variant
+                              endif
                             endif
                           endfor
-                          if size_variant != nil and size_variant.available
-                            assign size_available = true
-                          endif
                         -%}
                         <button
                           type="button"
@@ -428,6 +436,7 @@
                             data-color-value="{{ value | escape }}"
                             data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
                             data-variant-id="{{ swatch_variant.id }}"
+                            {% render 'color-swatch-attrs', product: product, color_label: value, option_value: value %}
                             {% if swatch_main_image %}
                               data-image-src="{{ swatch_main_image | image_url: width: 800 }}"
                               data-image-srcset="{{ swatch_main_image | image_url: width: 400 }} 400w, {{ swatch_main_image | image_url: width: 800 }} 800w"
@@ -548,6 +557,7 @@
                             data-swatch
                             data-color-value="{{ color_label | escape }}"
                             data-swatch-has-image="{% if swatch_has_image %}true{% else %}false{% endif %}"
+                            {% render 'color-swatch-attrs', product: product, color_label: color_label, metafield_item: item %}
                             {% if mf_main_image %}
                               data-image-src="{{ mf_main_image | image_url: width: 800 }}"
                               data-image-srcset="{{ mf_main_image | image_url: width: 400 }} 400w, {{ mf_main_image | image_url: width: 800 }} 800w"
@@ -1218,6 +1228,25 @@
 
   .na-swatch.is-active {
     box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+  }
+
+  .na-swatch.is-unavailable {
+    opacity: 0.45;
+  }
+
+  .na-swatch.is-unavailable::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      to top left,
+      transparent calc(50% - 1px),
+      #111 calc(50% - 1px),
+      #111 calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    pointer-events: none;
   }
 
   .na-swatch--multi {
@@ -1928,11 +1957,17 @@ body .needsclick { display: none; }
 
   function naOpenCartDrawer() {
     if (naMonsterRefresh()) return;
+    var themeDrawer = document.querySelector('theme-drawer#cart-drawer');
+    if (themeDrawer && typeof themeDrawer.open === 'function') {
+      try { themeDrawer.open(); return; } catch (e) {}
+    }
     var cartDrawer = naGetCartDrawer();
     if (cartDrawer && typeof cartDrawer.open === 'function') {
       try { cartDrawer.open(); return; } catch (e) {}
     }
     document.dispatchEvent(new CustomEvent('dispatch:cart-drawer:open'));
+    var cartLink = document.querySelector('a.header-actions__action[href*="/cart"], a.action__cart[href*="/cart"]');
+    if (cartLink && !themeDrawer) window.location.href = cartLink.href;
   }
 
   function naDispatchPlainCartUpdate(cart) {
@@ -1982,6 +2017,7 @@ body .needsclick { display: none; }
     if (!sectionId || typeof html !== 'string') return false;
     var wrap = naGetSectionWrap(sectionId);
     if (!wrap) return false;
+    if (wrap.querySelector('theme-drawer, cart-drawer-component')) return false;
 
     try {
       var doc = new DOMParser().parseFromString(html, 'text/html');
@@ -2308,6 +2344,18 @@ body .needsclick { display: none; }
     return variants.find(function (variant) {
       return variantMatchesOptions(variant, card, colorValue, sizeValue);
     }) || null;
+  }
+
+  function siblingProductUrl(card) {
+    var swatch = card.querySelector('[data-swatch].is-active');
+    var url = swatch && swatch.dataset.productUrl;
+    if (!url || !card.dataset.productUrl) return null;
+    try {
+      var dest = new URL(url, window.location.origin);
+      var cur = new URL(card.dataset.productUrl, window.location.origin);
+      if (dest.pathname.replace(/\/$/, '') !== cur.pathname.replace(/\/$/, '')) return dest.href;
+    } catch (e) {}
+    return null;
   }
 
   function isVariantAvailableForSelection(card, colorValue, sizeValue) {
@@ -2683,6 +2731,11 @@ body .needsclick { display: none; }
             || parseCardVariants(activeCard)[0];
         }
         if (!variant || !variant.available) {
+          var otherUrl = siblingProductUrl(activeCard);
+          if (otherUrl) {
+            window.location.href = otherUrl;
+            return;
+          }
           showToast('Selected option is unavailable');
           return;
         }
@@ -2783,6 +2836,11 @@ body .needsclick { display: none; }
 
         var variant = findSelectedVariant(card, getEffectiveColor(), state.size);
         if (!variant || !variant.available) {
+          var otherUrl = siblingProductUrl(card);
+          if (otherUrl) {
+            window.location.href = otherUrl;
+            return;
+          }
           showToast('Selected option is unavailable');
           return;
         }
@@ -2825,6 +2883,11 @@ body .needsclick { display: none; }
       card.querySelectorAll('[data-swatch]').forEach(function (s) { s.classList.remove('is-active'); });
       swatch.classList.add('is-active');
       state.color = swatch.dataset.colorValue;
+      if (swatch.dataset.productUrl) {
+        card.querySelectorAll('.na-card__image-link, .na-card__title a').forEach(function (link) {
+          link.href = swatch.dataset.productUrl;
+        });
+      }
 
       if (runFilters !== false) applyFilters();
 

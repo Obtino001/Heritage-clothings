@@ -1,0 +1,131 @@
+{% doc %}
+  Resolves a colourway to a sibling product and prints data attributes
+  so swatches can navigate to the correct product instead of only swapping images.
+
+  @param {object} product - The product currently being rendered
+  @param {string} color_label - Colour name shown on the swatch
+  @param {object} [metafield_item] - Optional color metafield / metaobject entry
+  @param {object} [option_value] - Optional product option value (combined listings)
+  @param {string} [selected_color_value] - Currently selected colour on this product
+
+  @example
+  {% render 'color-swatch-attrs', product: product, color_label: color_label, metafield_item: item %}
+{% enddoc %}
+
+{%- liquid
+  assign color_label_raw = color_label | strip
+  assign color_down = color_label_raw | downcase | replace: '&', 'and' | replace: '  ', ' ' | strip
+  assign color_handle = color_down | handleize
+  assign color_handle_us = color_handle | replace: 'multicoloured', 'multicolored'
+  assign color_handle_uk = color_handle | replace: 'multicolored', 'multicoloured'
+
+  assign sibling = nil
+  assign sibling_url = ''
+  assign sibling_available = true
+  assign is_current_color = false
+
+  if selected_color_value != blank
+    assign selected_down = selected_color_value | downcase | replace: '&', 'and' | replace: '  ', ' ' | strip
+    if selected_down == color_down
+      assign is_current_color = true
+    endif
+  endif
+
+  if option_value != blank and option_value.product_url != blank
+    assign sibling_url = option_value.product_url
+    if option_value.available == false
+      assign sibling_available = false
+    endif
+  endif
+
+  if metafield_item != blank
+    if metafield_item.product.value != blank
+      assign sibling = metafield_item.product.value
+    elsif metafield_item.product != blank and metafield_item.product.url != blank
+      assign sibling = metafield_item.product
+    endif
+    if sibling_url == blank
+      if metafield_item.product_url != blank
+        assign sibling_url = metafield_item.product_url
+      elsif metafield_item.url != blank
+        assign sibling_url = metafield_item.url
+      endif
+    endif
+  endif
+
+  if sibling == nil and is_current_color
+    assign sibling = product
+  endif
+
+  if sibling == nil
+    assign title_down = product.title | downcase | replace: '&', 'and'
+    if title_down contains color_down
+      assign sibling = product
+    endif
+  endif
+
+  if sibling == nil and color_handle != blank
+    assign family = product.title | split: ' ' | first | handleize
+    if family == blank
+      assign family = product.handle | split: '-' | first
+    endif
+
+    assign guess_handles = family | append: '-' | append: color_handle
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-midi-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-maxi-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-cape-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-african-print-midi-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-african-print-cape-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-modern-ankara-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle_us | append: '-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle_uk | append: '-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle_uk | append: '-midi-dress'
+    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle_us | append: '-midi-dress'
+
+    assign guess_list = guess_handles | split: ','
+    for guess in guess_list
+      if sibling == nil and guess != blank
+        assign candidate = all_products[guess]
+        if candidate != blank and candidate.url != blank
+          assign sibling = candidate
+        endif
+      endif
+    endfor
+  endif
+
+  if sibling == nil and template.name == 'product'
+    for coll in product.collections
+      if sibling == nil
+        assign skip_coll = false
+        if coll.handle == 'all' or coll.handle == 'frontpage'
+          assign skip_coll = true
+        endif
+        unless skip_coll
+          for p in coll.products
+            if sibling == nil and p.id != product.id
+              assign p_title = p.title | downcase | replace: '&', 'and'
+              if p_title contains color_down
+                assign sibling = p
+              endif
+            endif
+          endfor
+        endunless
+      endif
+    endfor
+  endif
+
+  if sibling != nil
+    assign sibling_url = sibling.url
+    assign sibling_available = sibling.available
+  endif
+
+  if sibling_url == blank and is_current_color
+    assign sibling_url = product.url
+    assign sibling_available = product.available
+  endif
+-%}
+{%- if sibling_url != blank -%}
+  data-product-url="{{ sibling_url }}"
+{%- endif -%}
+data-color-available="{% if sibling_available %}true{% else %}false{% endif %}"
