@@ -391,13 +391,17 @@ class ProductFormComponent extends Component {
       });
     }
 
-    if (this.dataset.productUrl || this.closest('[data-template-product-match="true"]')) {
-      const url = new URL(window.location.href);
-      if (url.pathname.includes('/products/')) {
-        url.searchParams.set('variant', variantId);
-        if (url.href !== window.location.href) history.replaceState({}, '', url.toString());
-      }
-    }
+    // Apps such as upsell carts read ?variant= before the form input, so keep it
+    // in sync — but only when this form belongs to the product being viewed.
+    const formProductUrl = this.dataset.productUrl;
+    if (!formProductUrl || this.closest('product-card, quick-add-dialog, dialog')) return;
+
+    const url = new URL(window.location.href);
+    const formPath = new URL(formProductUrl, window.location.origin).pathname.replace(/\/$/, '');
+    if (formPath !== url.pathname.replace(/\/$/, '')) return;
+
+    url.searchParams.set('variant', variantId);
+    if (url.href !== window.location.href) history.replaceState({}, '', url.toString());
   }
 
   /**

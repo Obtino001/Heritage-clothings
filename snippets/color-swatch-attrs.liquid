@@ -1,6 +1,9 @@
 {% doc %}
   Resolves a colourway to a sibling product and prints data attributes
-  so swatches can navigate to the correct product instead of only swapping images.
+  so swatches can navigate to the correct colourway of the SAME dress.
+
+  Never matches a product just because its title contains the colour name.
+  That sent shoppers to a different item that happened to be a similar colour.
 
   @param {object} product - The product currently being rendered
   @param {string} color_label - Colour name shown on the swatch
@@ -23,6 +26,12 @@
   assign sibling_url = ''
   assign sibling_available = true
   assign is_current_color = false
+  assign sibling_from_guess = false
+
+  assign family = product.title | split: ' ' | first | handleize
+  if family == blank
+    assign family = product.handle | split: '-' | first
+  endif
 
   if selected_color_value != blank
     assign selected_down = selected_color_value | downcase | replace: '&', 'and' | replace: '  ', ' ' | strip
@@ -64,14 +73,16 @@
     endif
   endif
 
-  if sibling == nil and color_handle != blank
-    assign family = product.title | split: ' ' | first | handleize
-    if family == blank
-      assign family = product.handle | split: '-' | first
+  assign current_style = ''
+  assign current_parts = product.handle | split: '-'
+  for part in current_parts
+    if part == 'midi' or part == 'maxi' or part == 'mini' or part == 'cape' or part == 'wrap' or part == 'woven' or part == 'skater' or part == 'jumpsuit' or part == 'trousers' or part == 'skirt' or part == 'jacket' or part == 'shorts' or part == 'headband' or part == 'earrings' or part == 'turban' or part == 'socks' or part == 'umbrella' or part == 'kente' or part == 'ankara' or part == 'shoulder'
+      assign current_style = current_style | append: part | append: ','
     endif
+  endfor
 
-    assign guess_handles = family | append: '-' | append: color_handle
-    assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-dress'
+  if sibling == nil and color_handle != blank and family != blank
+    assign guess_handles = family | append: '-' | append: color_handle | append: '-dress'
     assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-midi-dress'
     assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-maxi-dress'
     assign guess_handles = guess_handles | append: ',' | append: family | append: '-' | append: color_handle | append: '-cape-dress'
@@ -85,39 +96,72 @@
 
     assign guess_list = guess_handles | split: ','
     for guess in guess_list
-      if sibling == nil and guess != blank
+      if sibling == nil and guess != blank and guess != product.handle
         assign candidate = all_products[guess]
         if candidate != blank and candidate.url != blank
-          assign sibling = candidate
-        endif
-      endif
-    endfor
-  endif
+          assign cand_family = candidate.title | split: ' ' | first | handleize
+          if cand_family == family
+            assign style_ok = true
 
-  if sibling == nil and template.name == 'product'
-    for coll in product.collections
-      if sibling == nil
-        assign skip_coll = false
-        if coll.handle == 'all' or coll.handle == 'frontpage'
-          assign skip_coll = true
-        endif
-        unless skip_coll
-          for p in coll.products
-            if sibling == nil and p.id != product.id
-              assign p_title = p.title | downcase | replace: '&', 'and'
-              if p_title contains color_down
-                assign sibling = p
-              endif
+            if product.type != blank and candidate.type != blank
+              assign cur_type_down = product.type | downcase | strip
+              assign cand_type_down = candidate.type | downcase | strip
+              unless cur_type_down == cand_type_down
+                assign style_ok = false
+              endunless
             endif
-          endfor
-        endunless
+
+            assign cand_style = ''
+            assign cand_parts = candidate.handle | split: '-'
+            for part in cand_parts
+              if part == 'midi' or part == 'maxi' or part == 'mini' or part == 'cape' or part == 'wrap' or part == 'woven' or part == 'skater' or part == 'jumpsuit' or part == 'trousers' or part == 'skirt' or part == 'jacket' or part == 'shorts' or part == 'headband' or part == 'earrings' or part == 'turban' or part == 'socks' or part == 'umbrella' or part == 'kente' or part == 'ankara' or part == 'shoulder'
+                assign cand_style = cand_style | append: part | append: ','
+              endif
+            endfor
+
+            comment
+              Only a conflicting style blocks the match. Handles like
+              "oyin-red-and-yellow-dress" carry no style word at all and are
+              still genuine colourways of the same dress.
+            endcomment
+            if style_ok and current_style != blank and cand_style != blank
+              assign shared_style = false
+              assign current_style_list = current_style | split: ','
+              for marker in current_style_list
+                if marker != blank
+                  assign marker_needle = marker | append: ','
+                  if cand_style contains marker_needle
+                    assign shared_style = true
+                  endif
+                endif
+              endfor
+              unless shared_style
+                assign style_ok = false
+              endunless
+            endif
+            if style_ok
+              assign sibling = candidate
+              assign sibling_from_guess = true
+            endif
+          endif
+        endif
       endif
     endfor
   endif
 
   if sibling != nil
-    assign sibling_url = sibling.url
-    assign sibling_available = sibling.available
+    if sibling_from_guess
+      assign sib_family = sibling.title | split: ' ' | first | handleize
+      if sib_family == family
+        assign sibling_url = sibling.url
+        assign sibling_available = sibling.available
+      else
+        assign sibling = nil
+      endif
+    else
+      assign sibling_url = sibling.url
+      assign sibling_available = sibling.available
+    endif
   endif
 
   if sibling_url == blank and is_current_color
