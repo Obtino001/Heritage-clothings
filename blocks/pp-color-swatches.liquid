@@ -72,8 +72,13 @@
     assign mf_colors = product.metafields.custom.colors.value
   endif
 
+  assign sibling_collection = product.metafields.stiletto.siblings_collection.value
+  assign sibling_option_name = product.metafields.stiletto.sibling_option_name.value | strip
+
   assign color_mode = 'none'
-  if color_option != nil
+  if sibling_collection != blank and sibling_option_name != blank
+    assign color_mode = 'siblings'
+  elsif color_option != nil
     assign color_mode = 'option'
   elsif mf_colors != blank
     assign color_mode = 'metafield'
@@ -82,7 +87,9 @@
   assign label_name = block_settings.label_name | default: 'Colour'
   assign selected_color_value = ''
 
-  if color_mode == 'option'
+  if color_mode == 'siblings'
+    assign selected_color_value = sibling_option_name
+  elsif color_mode == 'option'
     assign label_name = color_option.name
     case color_option.position
       when 1
@@ -129,7 +136,59 @@
     </p>
 
     <div class="pp-color-swatches__list" role="list" aria-label="{{ label_name }} options">
-      {%- if color_mode == 'option' -%}
+      {%- if color_mode == 'siblings' -%}
+        {%- for sibling_product in sibling_collection.products -%}
+          {%- liquid
+            assign sibling_label = sibling_product.metafields.stiletto.sibling_option_name.value | strip
+            assign sibling_image = sibling_product.featured_media.preview_image
+            assign sibling_selected = false
+            if sibling_product.id == product.id
+              assign sibling_selected = true
+            endif
+
+            assign show_sibling = true
+            if sibling_label == blank
+              assign show_sibling = false
+            elsif block_settings.hide_unavailable and sibling_product.available == false
+              assign show_sibling = false
+            endif
+          -%}
+
+          {%- if show_sibling -%}
+            <button
+              type="button"
+              class="pp-color-swatches__item{% if sibling_selected %} is-selected{% endif %}{% unless sibling_product.available %} is-unavailable{% endunless %}"
+              role="listitem"
+              title="{{ sibling_label | escape }}{% unless sibling_product.available %} (sold out){% endunless %}"
+              aria-label="{{ sibling_label | escape }}{% unless sibling_product.available %} (sold out){% endunless %}"
+              aria-pressed="{% if sibling_selected %}true{% else %}false{% endif %}"
+              data-color-swatch
+              data-option-value="{{ sibling_label | escape }}"
+              data-product-url="{{ sibling_product.url }}"
+              data-color-available="{% if sibling_product.available %}true{% else %}false{% endif %}"
+              {% if sibling_image %}
+                data-image-src="{{ sibling_image | image_url: width: 1200 }}"
+                data-image-srcset="{{ sibling_image | image_url: width: 600 }} 600w, {{ sibling_image | image_url: width: 1200 }} 1200w"
+              {% endif %}
+            >
+              {%- if sibling_image -%}
+                {{
+                  sibling_image
+                  | image_url: width: 240
+                  | image_tag:
+                    widths: '120, 180, 240',
+                    sizes: '(max-width: 749px) 72px, 96px',
+                    alt: sibling_label,
+                    class: 'pp-color-swatches__img',
+                    loading: 'lazy'
+                }}
+              {%- else -%}
+                <span class="pp-color-swatches__fallback">{{ sibling_label | slice: 0, 1 }}</span>
+              {%- endif -%}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- elsif color_mode == 'option' -%}
         {%- for value in color_option.values -%}
           {%- liquid
             assign swatch_variant = nil
@@ -227,7 +286,6 @@
             assign color_label = item.label | default: item
             assign color_hex = ''
             assign swatch_image = nil
-            assign swatch_url = ''
 
             if item.color != blank
               assign color_hex = item.color
@@ -238,14 +296,6 @@
               assign swatch_image = item.pattern
             elsif item.swatch != blank and item.swatch.image != blank
               assign swatch_image = item.swatch.image
-            endif
-
-            if item.product != blank and item.product.value.url != blank
-              assign swatch_url = item.product.value.url
-            elsif item.product_url != blank
-              assign swatch_url = item.product_url
-            elsif item.url != blank
-              assign swatch_url = item.url
             endif
 
             assign color_down = color_label | downcase | strip

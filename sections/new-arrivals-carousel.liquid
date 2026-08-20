@@ -87,6 +87,8 @@
               assign size_option = nil
               assign swatch_option = nil
               assign mf_colors = nil
+              assign sibling_collection = product.metafields.stiletto.siblings_collection.value
+              assign sibling_option_name = product.metafields.stiletto.sibling_option_name.value | strip
 
               for option in product.options_with_values
                 assign option_down = option.name | downcase
@@ -149,7 +151,9 @@
 
               assign show_color_swatches = false
               if section.settings.show_color_swatches
-                if swatch_option != nil or mf_colors != blank
+                if sibling_collection != blank and sibling_option_name != blank
+                  assign show_color_swatches = true
+                elsif swatch_option != nil or mf_colors != blank
                   assign show_color_swatches = true
                 endif
               endif
@@ -349,7 +353,37 @@
                 <div class="na-card__meta-row">
                   {%- if show_color_swatches -%}
                     <div class="na-swatches" role="list" aria-label="Available colors">
-                      {%- if swatch_option != nil -%}
+                      {%- if sibling_collection != blank and sibling_option_name != blank -%}
+                        {%- for sibling_product in sibling_collection.products -%}
+                          {%- liquid
+                            assign sibling_label = sibling_product.metafields.stiletto.sibling_option_name.value | strip
+                            assign sibling_image = sibling_product.featured_media.preview_image
+                            assign sibling_selected = false
+                            if sibling_product.id == product.id
+                              assign sibling_selected = true
+                            endif
+                          -%}
+                          {%- if sibling_label != blank -%}
+                            <button
+                              type="button"
+                              class="na-swatch{% if sibling_selected %} is-active{% endif %}{% unless sibling_product.available %} is-unavailable{% endunless %}"
+                              role="listitem"
+                              title="{{ sibling_label | escape }}{% unless sibling_product.available %} (sold out){% endunless %}"
+                              aria-label="{{ sibling_label | escape }}{% unless sibling_product.available %} (sold out){% endunless %}"
+                              data-swatch
+                              data-color-value="{{ sibling_label | escape }}"
+                              data-swatch-has-image="{% if sibling_image %}true{% else %}false{% endif %}"
+                              data-product-url="{{ sibling_product.url }}"
+                              data-color-available="{% if sibling_product.available %}true{% else %}false{% endif %}"
+                              {% if sibling_image %}
+                                data-image-src="{{ sibling_image | image_url: width: 800 }}"
+                                data-image-srcset="{{ sibling_image | image_url: width: 400 }} 400w, {{ sibling_image | image_url: width: 800 }} 800w"
+                                style="background-image: url('{{ sibling_image | image_url: width: 80 }}'); background-size: cover; background-position: center;"
+                              {% endif %}
+                            ></button>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- elsif swatch_option != nil -%}
                         {%- for value in swatch_option.values -%}
                           {%- liquid
                             assign swatch_variant = nil
