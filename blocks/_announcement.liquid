@@ -75,6 +75,7 @@
     "
     {{ block.shopify_attributes }}
     aria-hidden="{% if visible_block_index == 0 %}false{% else %}true{% endif %}"
+    {% unless visible_block_index == 0 %}hidden{% endunless %}
   >
     <p class="announcement-bar__text">
       {{ block.settings.text }}

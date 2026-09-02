@@ -28,6 +28,7 @@ export class AnnouncementBar extends Component {
     this.addEventListener('mouseleave', this.resume);
     document.addEventListener('visibilitychange', this.#handleVisibilityChange);
 
+    this.#syncSlides();
     this.play();
   }
 
@@ -108,14 +109,25 @@ export class AnnouncementBar extends Component {
 
   set current(current) {
     this.#current = current;
+    this.#syncSlides();
+  }
 
-    let relativeIndex = current % (this.refs.slides ?? []).length;
+  /**
+   * Show only the active announcement.
+   */
+  #syncSlides() {
+    const slides = this.refs.slides ?? [];
+    if (!slides.length) return;
+
+    let relativeIndex = this.#current % slides.length;
     if (relativeIndex < 0) {
-      relativeIndex += (this.refs.slides ?? []).length;
+      relativeIndex += slides.length;
     }
 
-    this.refs.slides?.forEach((slide, index) => {
-      slide.setAttribute('aria-hidden', `${index !== relativeIndex}`);
+    slides.forEach((slide, index) => {
+      const isActive = index === relativeIndex;
+      slide.setAttribute('aria-hidden', `${!isActive}`);
+      slide.toggleAttribute('hidden', !isActive);
     });
   }
 
