@@ -2,16 +2,20 @@
 
 {% liquid
   assign is_size_chart_page = false
+  assign is_adult_size_chart_page = false
   if request.page_type == 'page'
     assign size_chart_handle = page.handle | default: ''
-    if size_chart_handle contains 'size-chart' or size_chart_handle contains 'sizing-chart' or size_chart_handle == 'sizing' or size_chart_handle == 'size-guide' or size_chart_handle == 'fit-note'
+    if size_chart_handle == 'size-chart' or size_chart_handle == 'sizing-chart'
+      assign is_adult_size_chart_page = true
+      assign is_size_chart_page = true
+    elsif size_chart_handle contains 'size-chart' or size_chart_handle contains 'sizing-chart' or size_chart_handle == 'sizing' or size_chart_handle == 'size-guide' or size_chart_handle == 'fit-note'
       assign is_size_chart_page = true
     endif
   endif
 %}
 
 <div
-  class="page-content{% if is_size_chart_page %} page-content--size-chart{% endif %}"
+  class="page-content{% if is_size_chart_page %} page-content--size-chart{% endif %}{% if is_adult_size_chart_page %} page-content--adult-size-chart{% endif %}"
   style="
     {% if block.settings.text_color != blank %}
       --color: {{ block.settings.text_color }};
@@ -19,6 +23,9 @@
     {% endif %}
   "
 >
+  {%- if is_adult_size_chart_page -%}
+    {% render 'heritage-adult-size-chart' %}
+  {%- endif -%}
   <rte-formatter>
     {{ page.content }}
   </rte-formatter>

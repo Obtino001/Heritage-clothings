@@ -24,6 +24,11 @@ body, p, a, span{font-family: "Neue Montreal" !important;}
 
 
 div#smile-ui-container, .stamped-launcher-button{ z-index: 9999 !important; }
+body:has(.menu-drawer-container[open]) #smile-ui-container,
+body:has(.menu-drawer-container[open]) .stamped-launcher-button {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 
 .page-width { max-width: 1340px; padding: 0 20px; margin: 0 auto; }
 .header__row.section { max-width: 1340px; margin: 0 auto; padding: 0 20px; display: block; }
@@ -593,48 +598,73 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
   margin-inline: auto;
 }
 
-.page--size-chart .page-content .rte-table-wrapper,
-.page-content--size-chart .rte-table-wrapper {
+/* Adult chart: keep models/copy from the page, hide the Horizon-restyled RTE table. */
+.page-content--adult-size-chart rte-formatter > .size-chart-scroll,
+.page-content--adult-size-chart rte-formatter .rte-table-wrapper,
+.page-content--adult-size-chart rte-formatter table,
+.page-content--adult-size-chart rte-formatter .size-chart-swipe-hint {
+  display: none !important;
+}
+
+.heritage-size-chart.size-chart-scroll {
   width: 100%;
   overflow-x: auto;
+  border-radius: 10px;
   -webkit-overflow-scrolling: touch;
+  margin-block: 8px 24px;
 }
 
-.page--size-chart .page-content table,
-.page-content--size-chart table {
-  width: auto !important;
-  max-width: 100%;
-  margin-inline: auto;
-  border-collapse: collapse;
+.heritage-size-chart .rte-table-wrapper {
+  width: 100%;
+  overflow: visible;
 }
 
-.page--size-chart .page-content thead,
-.page--size-chart .page-content tr:not(:has(td)),
-.page-content--size-chart thead,
-.page-content--size-chart tr:not(:has(td)) {
-  background-color: #2f4a36;
-  color: #fff;
-  font-weight: 700;
-  text-transform: none;
+.heritage-size-chart table {
+  width: 100% !important;
+  min-width: 640px;
+  margin: 0 !important;
+  border-collapse: collapse !important;
+  border: 0 !important;
 }
 
-.page--size-chart .page-content th,
-.page--size-chart .page-content td,
-.page-content--size-chart th,
-.page-content--size-chart td {
-  border: 1px solid #dddddd;
-  padding: 8px 10px;
-  text-align: start;
-  white-space: nowrap;
+.heritage-size-chart thead,
+.heritage-size-chart tr:not(:has(td)) {
+  background-color: #223428 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
 }
 
-.page--size-chart .page-content table.MsoNormalTable tr:first-child td,
-.page-content--size-chart table.MsoNormalTable tr:first-child td {
-  background: #2f4a36 !important;
-  color: #fff !important;
+.heritage-size-chart tr:has(td) {
+  border-bottom: 0 !important;
 }
 
-.page--size-chart .page-content table.MsoNormalTable tr:first-child td span,
-.page-content--size-chart table.MsoNormalTable tr:first-child td span {
-  color: #fff !important;
+.heritage-size-chart th,
+.heritage-size-chart td {
+  border: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.heritage-size-chart .sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.heritage-size-chart thead .sticky-col {
+  z-index: 2;
+}
+
+.heritage-size-chart .size-chart-swipe-hint {
+  display: none;
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8a8a8a;
+  text-align: right;
+}
+
+@media (max-width: 749px) {
+  .heritage-size-chart .size-chart-swipe-hint {
+    display: block;
+  }
 }

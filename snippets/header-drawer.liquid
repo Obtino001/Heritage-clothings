@@ -1002,6 +1002,17 @@
     overflow: initial;
   }
 
+  /* Keep the open slide above later siblings (e.g. ACCESSORIES leaking over SHOP ALL). */
+  .menu-drawer--has-submenu-opened .menu-drawer__navigation > .menu-drawer__menu > .menu-drawer__list-item:has(> details.menu-open) {
+    position: relative;
+    z-index: 2;
+  }
+
+  .menu-drawer--has-submenu-opened .menu-drawer__navigation > .menu-drawer__menu > .menu-drawer__list-item:not(:has(> details.menu-open)) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .menu-drawer__backdrop {
     position: fixed;
     top: 0;
@@ -1332,7 +1343,6 @@
     text-decoration: none;
     color: inherit;
     position: relative;
-    z-index: 1;
   }
 
   .menu-drawer__submenu-hitarea {
@@ -1378,7 +1388,7 @@
     height: 100dvh;
     left: 0;
     background-color: var(--color-background);
-    z-index: var(--layer-flat);
+    z-index: 2;
     transform: translateX(-5%);
     visibility: hidden;
     overflow-y: auto;
