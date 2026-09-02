@@ -577,11 +577,7 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
     bottom: 130px;
 }
 
-/* Size chart pages: use the same content width as the rest of the site. */
-.page--size-chart.page-width-normal {
-  --page-content-width: 1340px;
-}
-
+/* Size chart: original page column (~42rem). Table and model photos share this width. */
 .page--size-chart .text-block > * {
   max-inline-size: none;
 }
@@ -589,7 +585,6 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
 .page--size-chart .page-content,
 .page-content--size-chart {
   width: 100%;
-  max-width: none;
 }
 
 .page--size-chart .page-content img,
