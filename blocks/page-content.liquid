@@ -1,7 +1,17 @@
 
 
+{% liquid
+  assign is_size_chart_page = false
+  if request.page_type == 'page'
+    assign size_chart_handle = page.handle | default: ''
+    if size_chart_handle contains 'size-chart' or size_chart_handle contains 'sizing-chart' or size_chart_handle == 'sizing' or size_chart_handle == 'size-guide' or size_chart_handle == 'fit-note'
+      assign is_size_chart_page = true
+    endif
+  endif
+%}
+
 <div
-  class="page-content"
+  class="page-content{% if is_size_chart_page %} page-content--size-chart{% endif %}"
   style="
     {% if block.settings.text_color != blank %}
       --color: {{ block.settings.text_color }};

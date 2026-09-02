@@ -4,12 +4,20 @@
   if section.settings.background_color != blank
     render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
   endif
+
+  assign is_size_chart_page = false
+  if request.page_type == 'page'
+    assign size_chart_handle = page.handle | default: ''
+    if size_chart_handle contains 'size-chart' or size_chart_handle contains 'sizing-chart' or size_chart_handle == 'sizing' or size_chart_handle == 'size-guide' or size_chart_handle == 'fit-note'
+      assign is_size_chart_page = true
+    endif
+  endif
 %}
 
 <div
   class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
 ></div>
-<div class="section page-width-content{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}">
+<div class="section {% if is_size_chart_page %}page-width-narrow page--size-chart{% else %}page-width-content{% endif %}{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}">
   <div
     class="
       spacing-style

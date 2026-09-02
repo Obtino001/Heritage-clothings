@@ -571,3 +571,70 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
     left: 20px;
     bottom: 130px;
 }
+
+/* Size chart pages: Horizon page-width-content is ~42rem and img { width: 100% }
+   stretches chart/model photos. Restore the previous full-page RTE layout. */
+.page--size-chart .text-block > * {
+  max-inline-size: none;
+}
+
+.page--size-chart .page-content,
+.page-content--size-chart {
+  width: 100%;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.page--size-chart .page-content img,
+.page-content--size-chart img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.page--size-chart .page-content .rte-table-wrapper,
+.page-content--size-chart .rte-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page--size-chart .page-content table,
+.page-content--size-chart table {
+  width: auto !important;
+  max-width: 100%;
+  margin-inline: auto;
+  border-collapse: collapse;
+}
+
+.page--size-chart .page-content thead,
+.page--size-chart .page-content tr:not(:has(td)),
+.page-content--size-chart thead,
+.page-content--size-chart tr:not(:has(td)) {
+  background-color: #2f4a36;
+  color: #fff;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.page--size-chart .page-content th,
+.page--size-chart .page-content td,
+.page-content--size-chart th,
+.page-content--size-chart td {
+  border: 1px solid #dddddd;
+  padding: 8px 10px;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.page--size-chart .page-content table.MsoNormalTable tr:first-child td,
+.page-content--size-chart table.MsoNormalTable tr:first-child td {
+  background: #2f4a36 !important;
+  color: #fff !important;
+}
+
+.page--size-chart .page-content table.MsoNormalTable tr:first-child td span,
+.page-content--size-chart table.MsoNormalTable tr:first-child td span {
+  color: #fff !important;
+}

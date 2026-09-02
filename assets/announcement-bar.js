@@ -112,11 +112,17 @@ export class AnnouncementBar extends Component {
     this.#syncSlides();
   }
 
+  #getSlides() {
+    const fromRefs = this.refs.slides;
+    if (fromRefs && fromRefs.length) return [...fromRefs];
+    return [...this.querySelectorAll('.announcement-bar__slide')];
+  }
+
   /**
    * Show only the active announcement.
    */
   #syncSlides() {
-    const slides = this.refs.slides ?? [];
+    const slides = this.#getSlides();
     if (!slides.length) return;
 
     let relativeIndex = this.#current % slides.length;
@@ -129,6 +135,8 @@ export class AnnouncementBar extends Component {
       slide.setAttribute('aria-hidden', `${!isActive}`);
       slide.toggleAttribute('hidden', !isActive);
     });
+
+    this.setAttribute('data-ready', '');
   }
 
   /**

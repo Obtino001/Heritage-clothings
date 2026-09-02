@@ -4,9 +4,29 @@
   <script
     src="{{ 'announcement-bar.js' | asset_url }}"
     type="module"
-    fetchpriority="low"
   ></script>
 {% endif %}
+
+{% style %}
+  .announcement-bar__slides {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .announcement-bar__slides > * {
+    grid-area: 1 / 1;
+  }
+
+  .announcement-bar__slide[aria-hidden='true'],
+  .announcement-bar__slide[hidden] {
+    display: none !important;
+  }
+
+  .announcement-bar__slides > *:has(.announcement-bar__slide[aria-hidden='true']),
+  .announcement-bar__slides > *:has(.announcement-bar__slide[hidden]) {
+    display: none !important;
+  }
+{% endstyle %}
 
 {% render 'contrast-override', background_color: section.settings.background_color, section_id: section.id %}
 
@@ -58,7 +78,7 @@
 
   .announcement-bar__slides {
     display: grid;
-    grid: [stack] auto / [stack] auto;
+    grid-template-columns: minmax(0, 1fr);
     width: calc(100% - var(--button-size) * 2);
     max-width: 680px;
     margin-inline: auto;
@@ -67,7 +87,8 @@
   }
 
   .announcement-bar__slides > * {
-    grid-area: stack;
+    grid-area: 1 / 1;
+    min-width: 0;
   }
 
   .announcement-bar__slide {
@@ -81,6 +102,11 @@
 
   .announcement-bar .announcement-bar__slide[aria-hidden='true'],
   .announcement-bar .announcement-bar__slide[hidden] {
+    display: none !important;
+  }
+
+  .announcement-bar__slides > *:has(.announcement-bar__slide[aria-hidden='true']),
+  .announcement-bar__slides > *:has(.announcement-bar__slide[hidden]) {
     display: none !important;
   }
 
