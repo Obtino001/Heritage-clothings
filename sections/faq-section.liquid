@@ -1,0 +1,295 @@
+<style>
+  .faq-section-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }};
+  }
+
+  .faq-section-{{ section.id }} .faq-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .faq-section-{{ section.id }} .faq-main-heading {
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+    font-weight: {{ section.settings.heading_font.weight }};
+    font-size: clamp(2rem,4vw,2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-align: center;
+    margin: 0 0 48px;
+  }
+
+  .faq-section-{{ section.id }} .faq-group-title {
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 48px 0 20px;
+  }
+
+  .faq-section-{{ section.id }} .faq-group-title:first-child {
+    margin-top: 0;
+  }
+
+  .faq-section-{{ section.id }} .faq-item {
+    background-color: {{ section.settings.card_color }};
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .faq-section-{{ section.id }} .faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    padding: 20px 22px;
+    color: {{ section.settings.text_color }};
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }};
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    transition: opacity 0.25s ease;
+        justify-content: space-between;
+  }
+
+  .faq-section-{{ section.id }} .faq-question:hover {
+    opacity: 0.7;
+  }
+
+  .faq-section-{{ section.id }} .faq-chevron {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid {{ section.settings.text_color }};
+    border-bottom: 2px solid {{ section.settings.text_color }};
+    transform: rotate(-45deg);
+    transition: transform 0.3s ease;
+  }
+
+  .faq-section-{{ section.id }} .faq-item.is-open .faq-chevron {
+    transform: rotate(45deg);
+  }
+
+  .faq-section-{{ section.id }} .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .faq-section-{{ section.id }} .faq-answer-inner {
+    padding: 0 22px 22px;
+    font-size: 15px;
+    line-height: 1.7;
+    opacity: 0.85;
+  }
+
+  .faq-section-{{ section.id }} .faq-answer-inner p {
+    margin: 0 0 12px;
+  }
+
+  .faq-section-{{ section.id }} .faq-answer-inner p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .faq-section-{{ section.id }} .faq-question {
+      font-size: 14px;
+      padding: 16px 18px;
+    }
+    .faq-section-{{ section.id }} .faq-group-title {
+      font-size: 18px;
+    }
+  }
+</style>
+
+<section class="faq-section-{{ section.id }}">
+  <div class="faq-container">
+    {% if section.settings.main_heading != blank %}
+      <h2 class="faq-main-heading">{{ section.settings.main_heading }}</h2>
+    {% endif %}
+
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'group_title' %}
+          <h3 class="faq-group-title" {{ block.shopify_attributes }}>{{ block.settings.title }}</h3>
+
+        {% when 'faq_item' %}
+          <div class="faq-item" {{ block.shopify_attributes }}>
+            <button
+              type="button"
+              class="faq-question"
+              aria-expanded="false"
+              aria-controls="faq-answer-{{ section.id }}-{{ forloop.index }}"
+            >
+              
+              <span>{{ block.settings.question }}</span>
+              <span class="faq-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="faq-answer" id="faq-answer-{{ section.id }}-{{ forloop.index }}">
+              <div class="faq-answer-inner">{{ block.settings.answer }}</div>
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+  (function () {
+    var section = document.querySelector('.faq-section-{{ section.id }}');
+    if (!section) return;
+
+    section.querySelectorAll('.faq-question').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var item = button.closest('.faq-item');
+        var answer = item.querySelector('.faq-answer');
+        var isOpen = item.classList.contains('is-open');
+
+        {% if section.settings.close_others %}
+        section.querySelectorAll('.faq-item.is-open').forEach(function (openItem) {
+          if (openItem !== item) {
+            openItem.classList.remove('is-open');
+            openItem.querySelector('.faq-answer').style.maxHeight = null;
+            openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          }
+        });
+        {% endif %}
+
+        if (isOpen) {
+          item.classList.remove('is-open');
+          answer.style.maxHeight = null;
+          button.setAttribute('aria-expanded', 'false');
+        } else {
+          item.classList.add('is-open');
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+          button.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Main heading",
+      "default": "FAQ"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#F2EDE3"
+    },
+    {
+      "type": "color",
+      "id": "card_color",
+      "label": "Question box color",
+      "default": "#E7E1D4"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "playfair_display_n4"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Body font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "close_others",
+      "label": "Close other questions when one opens",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "group_title",
+      "name": "Category title",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "About us"
+        }
+      ]
+    },
+    {
+      "type": "faq_item",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Where are your items made?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Write your answer here.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        { "type": "group_title", "settings": { "title": "About us" } },
+        { "type": "faq_item" },
+        { "type": "faq_item" },
+        { "type": "group_title", "settings": { "title": "Shipping" } },
+        { "type": "faq_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

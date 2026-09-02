@@ -1,0 +1,270 @@
+{%- doc -%}
+  Trending image cards for predictive search empty state.
+  Falls back to first shop collections when theme settings are empty.
+{%- enddoc -%}
+
+{%- liquid
+  assign trending_title = settings.predictive_search_trending_title | default: 'Trending'
+  assign trending_collections = settings.predictive_search_trending_collections
+  assign use_fallback = false
+
+  if trending_collections == blank or trending_collections.size == 0
+    assign use_fallback = true
+  endif
+-%}
+
+<section class="predictive-search-trending">
+  <div class="predictive-search-sidebar__heading-row">
+    <h4 class="predictive-search-sidebar__heading">{{ trending_title }}</h4>
+    <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
+  </div>
+
+  <div class="predictive-search-trending__viewport">
+    <ul class="predictive-search-trending__grid list-unstyled" role="list" data-trending-scroll>
+      {%- if use_fallback -%}
+        {%- assign rendered_trending = 0 -%}
+        {%- for collection in collections -%}
+          {%- if rendered_trending >= 4 -%}
+            {%- break -%}
+          {%- endif -%}
+          {%- if collection.all_products_count > 0 -%}
+            <li class="predictive-search-trending__item">
+              <a href="{{ collection.url }}" class="predictive-search-trending__card">
+                <div class="predictive-search-trending__media">
+                  {%- if collection.featured_image != blank -%}
+                    {{
+                      collection.featured_image
+                      | image_url: width: 600
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '300, 400, 500, 600',
+                        sizes: '(min-width: 990px) 180px, 25vw',
+                        class: 'predictive-search-trending__image',
+                        alt: collection.featured_image.alt | default: collection.title
+                    }}
+                  {%- else -%}
+                    <div class="predictive-search-trending__placeholder"></div>
+                  {%- endif -%}
+                </div>
+                <span class="predictive-search-trending__label">{{ collection.title | upcase }}</span>
+              </a>
+            </li>
+            {%- assign rendered_trending = rendered_trending | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign rendered_trending = 0 -%}
+        {%- for collection in trending_collections -%}
+          {%- if rendered_trending >= 4 -%}
+            {%- break -%}
+          {%- endif -%}
+          {%- if collection != blank and collection.all_products_count > 0 -%}
+            <li class="predictive-search-trending__item">
+              <a href="{{ collection.url }}" class="predictive-search-trending__card">
+                <div class="predictive-search-trending__media">
+                  {%- if collection.featured_image != blank -%}
+                    {{
+                      collection.featured_image
+                      | image_url: width: 600
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '300, 400, 500, 600',
+                        sizes: '(min-width: 990px) 180px, 25vw',
+                        class: 'predictive-search-trending__image',
+                        alt: collection.featured_image.alt | default: collection.title
+                    }}
+                  {%- else -%}
+                    <div class="predictive-search-trending__placeholder"></div>
+                  {%- endif -%}
+                </div>
+                <span class="predictive-search-trending__label">{{ collection.title | upcase }}</span>
+              </a>
+            </li>
+            {%- assign rendered_trending = rendered_trending | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </ul>
+
+    <div class="predictive-search-trending__pagination" data-trending-pagination hidden></div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var MOBILE_MQ = window.matchMedia('(max-width: 989px)');
+
+    function getTrendingItems(grid) {
+      return Array.prototype.filter.call(
+        grid.querySelectorAll('.predictive-search-trending__item'),
+        function (item) {
+          var image = item.querySelector('.predictive-search-trending__image');
+          var label = item.querySelector('.predictive-search-trending__label');
+          return image || (label && label.textContent.trim().length > 0);
+        }
+      );
+    }
+
+    function getSlidesPerView(grid, items) {
+      if (!items.length) return 1;
+      var itemWidth = items[0].getBoundingClientRect().width;
+      if (itemWidth <= 0) return 2;
+      var gap = parseFloat(getComputedStyle(grid).columnGap || getComputedStyle(grid).gap || '8') || 8;
+      return Math.max(1, Math.floor((grid.clientWidth + gap) / (itemWidth + gap)));
+    }
+
+    function getPageCount(items, slidesPerView) {
+      if (items.length <= slidesPerView) return 0;
+      return items.length - slidesPerView + 1;
+    }
+
+    function getScrollPositions(items, pageCount) {
+      var positions = [];
+      for (var i = 0; i < pageCount; i++) {
+        positions.push(items[i].offsetLeft);
+      }
+      return positions;
+    }
+
+    function updateActiveDot(grid, pagination, scrollPositions) {
+      var dots = pagination.querySelectorAll('.predictive-search-trending__dot');
+      if (!dots.length || !scrollPositions.length) return;
+
+      var active = 0;
+      var minDistance = Infinity;
+      var scrollLeft = grid.scrollLeft;
+
+      scrollPositions.forEach(function (position, index) {
+        var distance = Math.abs(position - scrollLeft);
+        if (distance < minDistance) {
+          minDistance = distance;
+          active = index;
+        }
+      });
+
+      dots.forEach(function (dot, index) {
+        dot.classList.toggle('is-active', index === active);
+        dot.setAttribute('aria-current', index === active ? 'true' : 'false');
+      });
+    }
+
+    function setupTrendingPagination(section) {
+      var grid = section.querySelector('[data-trending-scroll]');
+      var pagination = section.querySelector('[data-trending-pagination]');
+      if (!grid || !pagination) return;
+
+      if (section._trendingScrollHandler) {
+        grid.removeEventListener('scroll', section._trendingScrollHandler);
+        section._trendingScrollHandler = null;
+      }
+
+      pagination.innerHTML = '';
+      pagination.hidden = true;
+      section._trendingScrollPositions = [];
+
+      if (!MOBILE_MQ.matches) return;
+
+      var items = getTrendingItems(grid);
+      var slidesPerView = getSlidesPerView(grid, items);
+      var pageCount = getPageCount(items, slidesPerView);
+
+      if (pageCount < 2) return;
+
+      var scrollPositions = getScrollPositions(items, pageCount);
+      section._trendingScrollPositions = scrollPositions;
+
+      scrollPositions.forEach(function (position, index) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'predictive-search-trending__dot' + (index === 0 ? ' is-active' : '');
+        dot.setAttribute('aria-label', 'Show trending slide ' + (index + 1));
+        dot.setAttribute('aria-current', index === 0 ? 'true' : 'false');
+        dot.addEventListener('click', function () {
+          grid.scrollTo({ left: position, behavior: 'smooth' });
+        });
+        pagination.appendChild(dot);
+      });
+
+      pagination.hidden = false;
+
+      section._trendingScrollHandler = function () {
+        updateActiveDot(grid, pagination, scrollPositions);
+      };
+
+      grid.addEventListener('scroll', section._trendingScrollHandler, { passive: true });
+      updateActiveDot(grid, pagination, scrollPositions);
+    }
+
+    function initAllTrendingPagination() {
+      document.querySelectorAll('.predictive-search-trending').forEach(setupTrendingPagination);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAllTrendingPagination);
+    } else {
+      initAllTrendingPagination();
+    }
+
+    MOBILE_MQ.addEventListener('change', initAllTrendingPagination);
+    window.addEventListener('resize', initAllTrendingPagination);
+    document.addEventListener('shopify:section:load', initAllTrendingPagination);
+
+    var searchModal = document.getElementById('search-modal');
+    if (searchModal) {
+      var dialog = searchModal.querySelector('.search-modal__content');
+      if (dialog) {
+        var observer = new MutationObserver(function () {
+          if (dialog.open) {
+            requestAnimationFrame(initAllTrendingPagination);
+          }
+        });
+        observer.observe(dialog, { attributes: true, attributeFilter: ['open'] });
+      }
+    }
+  })();
+</script>
+
+{% stylesheet %}
+  .predictive-search-trending__viewport {
+    width: 100%;
+  }
+
+  .predictive-search-trending__pagination {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  @media screen and (max-width: 989px) {
+    .predictive-search-trending__pagination:not([hidden]) {
+      display: flex;
+    }
+  }
+
+  .predictive-search-trending__dot {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #e6e6e6;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+  }
+
+  .predictive-search-trending__dot.is-active {
+    background: #212121;
+  }
+
+  @media screen and (min-width: 990px) {
+    .predictive-search-trending__pagination {
+      display: none !important;
+    }
+  }
+{% endstylesheet %}

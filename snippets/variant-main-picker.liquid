@@ -1,0 +1,860 @@
+{%- doc -%}
+  Renders the main variant picker for the variants block.
+  File: snippets/variant-main-picker.liquid
+
+  @param {object} product_resource - The product object.
+  @param {object} [block] - The block object
+  @param {object} section - The section object.
+  @param {object} product - The current product object (used to determine selected variant state).
+{%- enddoc -%}
+
+{% assign block_settings = block.settings %}
+
+{% liquid
+  assign has_custom_variant_buttons = false
+  if block_settings.variant_style_class == 'custom'
+    assign has_custom_variant_buttons = true
+  endif
+  if block_settings.variant_style == 'buttons' and block_settings.selected_variant_style_class == 'custom'
+    assign has_custom_variant_buttons = true
+  endif
+  assign fieldset_index = 0
+
+  assign size_chart_text = block_settings.size_chart_link_text
+  if size_chart_text == blank
+    assign size_chart_text = block_settings.link_text
+  endif
+  if size_chart_text == blank
+    assign size_chart_text = 'Size Chart'
+  endif
+
+  assign size_chart_page = block_settings.size_chart_page
+  if size_chart_page == blank
+    assign size_chart_page = block_settings.content
+  endif
+
+  comment
+    Dynamic fallbacks so the size chart works without manually picking a page per block.
+    1) Product metafield that references a page, 2) sizing-chart page, 3) other common handles.
+  endcomment
+  if size_chart_page == blank and product_resource.metafields.custom.size_chart.type == 'page_reference'
+    assign size_chart_page = product_resource.metafields.custom.size_chart.value
+  endif
+  if size_chart_page == blank and product_resource.metafields.custom.size_chart_page.type == 'page_reference'
+    assign size_chart_page = product_resource.metafields.custom.size_chart_page.value
+  endif
+
+  if size_chart_page == blank
+    assign size_chart_page = pages['sizing-chart']
+  endif
+
+  if size_chart_page == blank
+    assign size_chart_handle_candidates = 'sizing-chart,size-chart,size-guide,sizing-guide,sizing,size-charts,size-chart-2023,size-guide-2023'
+    assign size_chart_handle_list = size_chart_handle_candidates | split: ','
+    for size_chart_handle in size_chart_handle_list
+      assign candidate_page = pages[size_chart_handle]
+      if candidate_page != blank and candidate_page.content != blank
+        assign size_chart_page = candidate_page
+        break
+      endif
+    endfor
+  endif
+
+  assign size_chart_metafield = nil
+  if size_chart_page == blank
+    if product_resource.metafields.custom.size_chart.type == 'rich_text_field'
+      assign size_chart_metafield = product_resource.metafields.custom.size_chart
+    elsif product_resource.metafields.custom.size_chart_html.type == 'rich_text_field'
+      assign size_chart_metafield = product_resource.metafields.custom.size_chart_html
+    endif
+  endif
+
+  assign show_size_chart = true
+  if block_settings.show_size_chart == false
+    assign show_size_chart = false
+  endif
+
+  assign size_chart_modal_id = 'size-chart-modal-' | append: block.id
+%}
+
+{% unless product_resource.has_only_default_variant %}
+  {% if has_custom_variant_buttons %}
+    {% render 'variant-button-custom-styles', block_settings: block_settings, block_id: block.id %}
+  {% endif %}
+  <variant-picker
+    class="variant-picker spacing-style variant-picker--{{ block_settings.alignment }}{% if has_custom_variant_buttons %} variant-picker--custom-{{ block.id }}{% endif %}"
+    style="
+      {% render 'spacing-style', settings: block_settings %}
+      {% if block_settings.option_label_text_color != blank %}
+        --variant-option-label-color: rgba({{ block_settings.option_label_text_color.rgba }});
+        --variant-option-label-color-subdued: rgba({{ block_settings.option_label_text_color.rgb }} / var(--opacity-subdued-text));
+      {% endif %}
+    "
+    data-section-id="{{ section.id }}"
+    data-product-id="{{ product_resource.id }}"
+    data-product-handle="{{ product_resource.handle }}"
+    data-product-title="{{ product_resource.title | escape }}"
+    data-block-id="{{ block.id }}"
+    data-product-url="{{ product_resource.url }}"
+    ref="mainVariantPicker"
+    {% if product.id == product_resource.id %}
+      data-template-product-match="true"
+    {% endif %}
+    {{ block.shopify_attributes }}
+    {% if request.visual_preview_mode %}
+      data-shopify-visual-preview
+    {% endif %}
+  >
+    <form class="variant-picker__form">
+      {%- for product_option in product_resource.options_with_values -%}
+        {%- liquid
+          assign swatch_count = product_option.values | map: 'swatch' | compact | size
+          assign variant_style = block_settings.variant_style
+          assign option_id_attribute = ''
+          assign fieldset_id = ''
+
+          if swatch_count > 0 and block_settings.show_swatches
+            if block_settings.variant_style == 'dropdown'
+              assign variant_style = 'swatch_dropdown'
+            else
+              assign variant_style = 'swatch'
+            endif
+          endif
+
+          if variant_style == 'buttons' and settings.variant_button_width == 'equal-width-buttons'
+            assign fieldset_id = section.id | append: '-' | append: product_resource.id | append: '-' | append: product_option.name | handleize
+            assign option_id_attribute = 'data-option-id="' | append: fieldset_id | append: '"'
+            assign longest_value = 0
+          endif
+
+          assign option_name_down = product_option.name | downcase | strip
+          assign is_size_option = false
+          if option_name_down == 'size'
+            assign is_size_option = true
+          endif
+
+          assign is_size_buttons = false
+          if is_size_option and variant_style != 'swatch'
+            assign is_size_buttons = true
+          endif
+        -%}
+
+        {%- if product_option.values.size == 1 and variant_style != 'swatch' -%}
+          <div
+            class="variant-option"
+            data-testid="variant-option-single"
+          >
+            {{- product_option.name | escape -}}
+            <span
+              class="variant-option__swatch-value"
+              data-testid="variant-option-single-value"
+            >
+              {{- product_option.selected_value -}}
+            </span>
+          </div>
+        {%- elsif variant_style == 'swatch' or block_settings.variant_style == 'buttons' -%}
+          <fieldset
+            class="variant-option variant-option--buttons{% if variant_style == 'swatch' %} variant-option--swatches{% else %} variant-option--{{ settings.variant_button_width }}{% endif %}{% if is_size_buttons %} variant-option--size{% endif %}"
+            data-fieldset-index="{{ fieldset_index }}"
+            {% if is_size_buttons %}data-size-fieldset{% endif %}
+            ref="fieldsets[]"
+            {{ option_id_attribute }}
+          >
+            {%- if is_size_buttons -%}
+              <legend class="visually-hidden">{{ product_option.name | escape }}</legend>
+              <div class="variant-option__size-wrap">
+                <div class="variant-option__header">
+                  <p class="variant-option__label-row">
+                    <span class="variant-option__label-name">{{ product_option.name | escape }}:</span>
+                    <span class="variant-option__selected-value" data-selected-value>{{ product_option.selected_value }}</span>
+                  </p>
+                  {%- if show_size_chart -%}
+                    <button
+                      type="button"
+                      class="variant-option__size-chart-link"
+                      data-size-chart-open="{{ size_chart_modal_id }}"
+                      aria-haspopup="dialog"
+                    >
+                      <svg class="variant-option__size-chart-icon" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M3 4.64915C3 5.57915 4.49167 6.33332 6.33333 6.33332V4.64915C6.33333 3.82082 6.33333 3.40582 6.0025 3.15332C5.67083 2.90082 5.3425 2.99499 4.68583 3.18415C3.67917 3.47499 3 4.02082 3 4.64915Z" stroke="currentColor" stroke-linejoin="round"/>
+                        <path d="M12.1667 3.41667C12.1667 5.0275 9.555 6.33333 6.33333 6.33333C3.11167 6.33333 0.5 5.0275 0.5 3.41667C0.5 1.80583 3.11167 0.5 6.33333 0.5C9.555 0.5 12.1667 1.80583 12.1667 3.41667Z" stroke="currentColor"/>
+                        <path d="M0.5 3.83331V9.38915C0.5 10.9225 3.11167 12.1666 6.33333 12.1666H15.5C16.2858 12.1666 16.6783 12.1666 16.9225 11.9225C17.1667 11.6783 17.1667 11.2858 17.1667 10.5V7.99998C17.1667 7.21415 17.1667 6.82165 16.9225 6.57748C16.6783 6.33331 16.2858 6.33331 15.5 6.33331H6.33333" stroke="currentColor"/>
+                        <path d="M13.833 12.1666V10.5M10.4997 12.1666V10.5M7.16634 12.1666V10.5M3.83301 11.75V10.0833" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <span>{{ size_chart_text }}</span>
+                    </button>
+                  {%- endif -%}
+                </div>
+                <div class="variant-option__buttons variant-option__buttons--size">
+            {%- else -%}
+              <legend>
+                {{ product_option.name | escape -}}
+                {%- if variant_style == 'swatch' -%}
+                  <span class="variant-option__swatch-value">{{ product_option.selected_value }}</span>
+                {%- endif %}
+              </legend>
+              <div class="variant-option__buttons">
+            {%- endif -%}
+              {%- for product_option_value in product_option.values -%}
+                {% if product_option_value.size > longest_value and option_id_attribute %}
+                  {% assign longest_value = product_option_value.size %}
+                {% endif %}
+                <label
+                  class="variant-option__button-label{% if variant_style == 'swatch' %} variant-option__button-label--has-swatch{% endif %}{% if is_size_buttons %} variant-option__button-label--size{% endif %}"
+                >
+                  <input
+                    type="radio"
+                    name="{{ product_option.name | escape }}-{{ block.id }}-{{ product_resource.id }}"
+                    value="{{ product_option_value | escape }}"
+                    aria-label="{{ product_option_value.name | default: product_option_value | escape }}{% if product_option_value.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                    {% if product_option_value.available == false %}
+                      aria-disabled="true"
+                    {% endif %}
+                    data-previous-checked="false"
+                    data-fieldset-index="{{ fieldset_index }}"
+                    data-input-index="{{ forloop.index0 }}"
+                    data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+                    data-option-name="{{ product_option.name | escape }}"
+                    data-option-value-id="{{ product_option_value.id }}"
+                    data-option-available="{{ product_option_value.available }}"
+                    data-connected-product-url="{{ product_option_value.product_url }}"
+                    {% if product_option_value.variant.id %}
+                      data-variant-id="{{ product_option_value.variant.id }}"
+                    {% endif %}
+                    {% if product_option_value.selected %}
+                      data-current-checked="true"
+                      checked
+                    {% else %}
+                      data-current-checked="false"
+                    {% endif %}
+                  >
+                  {% if variant_style == 'swatch' %}
+                    {% liquid
+                      assign featured_media = product_option_value.variant.featured_media
+
+                      if featured_media == blank and product_option_value.product_url
+                        assign featured_media = product_option_value.variant.product.featured_media
+                      endif
+                    %}
+
+                    {% render 'swatch',
+                      swatch: product_option_value.swatch,
+                      variant_image: featured_media,
+                      mode: 'unscaled'
+                    %}
+                  {% else %}
+                    {% if product_option_value.available == true %}
+                      <span
+                        class="variant-option__button-label__pill"
+                        data-key="variant-option-pill"
+                      ></span>
+                    {% endif %}
+                    <span
+                      class="variant-option__button-label__text"
+                      data-key="variant-option-text"
+                    >
+                      {{- product_option_value | escape -}}
+                    </span>
+                  {% endif %}
+                  {%- unless is_size_buttons -%}
+                    {% render 'strikethrough-variant', product_option: product_option_value %}
+                  {%- endunless -%}
+                </label>
+              {%- endfor -%}
+                </div>
+              {%- if is_size_buttons -%}
+              </div>
+              {%- endif -%}
+
+            {% if option_id_attribute != blank %}
+              {% style %}
+                [data-option-id="{{ fieldset_id }}"] {
+                  --variant-ch: {{ longest_value | times: 0.65 }}em;
+                }
+              {% endstyle %}
+            {% endif %}
+          </fieldset>
+          {%- assign fieldset_index = fieldset_index | plus: 1 -%}
+        {%- elsif block_settings.variant_style == 'dropdowns' -%}
+          {% liquid
+            assign property_being_updated = false
+            if settings.variant_swatch_width != settings.variant_swatch_height
+              assign property_being_updated = true
+              assign new_width = settings.variant_swatch_width | times: 1.0 | divided_by: settings.variant_swatch_height | times: 20
+            endif
+          %}
+
+          <div class="variant-option variant-option--dropdowns">
+            <label for="Option-{{ block.id }}-{{ forloop.index0 }}">{{ product_option.name | escape }}</label>
+            <div
+              class="variant-option__select-wrapper"
+              style="
+                {%- if property_being_updated -%}
+                  --variant-picker-swatch-width: clamp(10px,{{ new_width }}px, 50px);
+                {%- endif -%}
+              "
+            >
+              <select
+                id="Option-{{ block.id }}-{{ forloop.index0 }}"
+                name="options[{{ product_option.name | escape }}]"
+                class="variant-option__select"
+              >
+                {%- for product_option_value in product_option.values -%}
+                  <option
+                    value="{{ product_option_value | escape }}"
+                    data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+                    data-option-name="{{ product_option.name | escape }}"
+                    data-option-value-id="{{ product_option_value.id }}"
+                    data-variant-id="{{ product_option_value.variant.id }}"
+                    data-connected-product-url="{{ product_option_value.product_url }}"
+                    {% if product_option_value.selected %}
+                      selected="selected"
+                    {% endif %}
+                  >
+                    {% if product_option_value.available == false %}
+                      {{ product_option_value | escape }} - {{ 'content.unavailable' | t }}
+                    {% else %}
+                      {{ product_option_value | escape }}
+                    {% endif %}
+                  </option>
+                {%- endfor -%}
+              </select>
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                class="icon icon-caret"
+                viewBox="0 0 10 6"
+              >
+                {%- render 'icon', icon: 'caret' -%}
+              </svg>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <script type="application/json">
+        {{ product_resource.selected_or_first_available_variant | json }}
+      </script>
+    </form>
+
+    {%- if show_size_chart -%}
+      <div
+        class="size-chart-modal"
+        id="{{ size_chart_modal_id }}"
+        role="dialog"
+        aria-modal="true"
+        aria-label="{{ size_chart_text | escape }}"
+        hidden
+      >
+        <div class="size-chart-modal__overlay" data-size-chart-close></div>
+        <div class="size-chart-modal__panel">
+        <div class="size_chart_head">
+           <h2 class="size-chart_heading">
+          SIZE CHART
+         </h2>
+          <button
+            class="size-chart-modal__close"
+            type="button"
+            aria-label="Close size chart"
+            data-size-chart-close
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>  
+
+          <div class="size-chart-modal__body rte">
+            {%- if size_chart_page != blank and size_chart_page.content != blank -%}
+              {{ size_chart_page.content }}
+            {%- elsif size_chart_metafield != nil -%}
+              {{ size_chart_metafield | metafield_tag }}
+            {%- else -%}
+              <p>Size chart coming soon.</p>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </variant-picker>
+{% endunless %}
+
+{% render 'variant-picker-styles' %}
+
+{% stylesheet %}
+
+
+.size-chart-modal__body table td{ color: #000;    border: 0 !important;}
+body .size-chart-modal__panel {  position: relative; border-radius: 12px; overflow: hidden;    background: #fff;
+    padding: 0; }
+.size-chart-modal__panel .size_chart_head { position: absolute; top: 0; width: 100%; background: #fff; z-index: 999; display: flex; align-items: center; padding: 10px 24px; justify-content: space-between; }
+
+h2.size-chart_heading { font-size: 22px; margin: 0; }
+.size-chart-modal__panel .size-chart-modal__close {
+    position: unset;}
+
+
+  variant-picker fieldset.variant-option--size,
+  .variant-picker fieldset.variant-option--size {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 0 24px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: unset !important;
+  }
+
+  variant-picker fieldset.variant-option--size > .variant-option__size-wrap,
+  .variant-picker fieldset.variant-option--size > .variant-option__size-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 14px;
+  }
+
+  variant-picker fieldset.variant-option--size .variant-option__header,
+  .variant-picker fieldset.variant-option--size .variant-option__header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  variant-picker fieldset.variant-option--size .variant-option__buttons--size,
+  .variant-picker fieldset.variant-option--size .variant-option__buttons--size {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: unset !important;
+  }
+
+  variant-picker fieldset.variant-option--size.variant-option--equal-width-buttons,
+  .variant-picker fieldset.variant-option--size.variant-option--equal-width-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .variant-option__label-row {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #111111;
+    white-space: nowrap;
+  }
+
+  .variant-option__label-name {
+    font-weight: 700;
+  }
+
+  .variant-option__selected-value {
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .variant-option__size-chart-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #111111;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .variant-option__size-chart-icon {
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .variant-option__size-chart-link:hover {
+    opacity: 0.75;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size,
+  .variant-picker .variant-option--size .variant-option__button-label--size {
+    position: relative;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1.5px solid #111111 !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    flex: none !important;
+    aspect-ratio: 1 / 1;
+    overflow: visible;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size::before,
+  variant-picker .variant-option--size .variant-option__button-label--size::after,
+  .variant-picker .variant-option--size .variant-option__button-label--size::before,
+  .variant-picker .variant-option--size .variant-option__button-label--size::after {
+    display: none !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size input,
+  .variant-picker .variant-option--size .variant-option__button-label--size input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label__pill,
+  .variant-picker .variant-option--size .variant-option__button-label__pill {
+    display: none !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label__text,
+  .variant-picker .variant-option--size .variant-option__button-label__text {
+    font-size: 13px !important;
+    font-weight: 500;
+    line-height: 1;
+    color: #111111 !important;
+    pointer-events: none;
+    text-decoration: none !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input:checked),
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input:checked) {
+    background: #111111 !important;
+    border-color: #111111 !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input:checked) .variant-option__button-label__text,
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input:checked) .variant-option__button-label__text {
+    color: #ffffff !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"]),
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"]) {
+    border-color: #cccccc !important;
+    background: #ffffff !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"])::after,
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"])::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(
+      to top left,
+      transparent calc(50% - 1px),
+      #bbbbbb calc(50% - 1px),
+      #bbbbbb calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ) !important;
+    pointer-events: none !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"]) .variant-option__button-label__text,
+  .variant-picker .variant-option--size .variant-option__button-label--size:has(input[data-option-available="false"]) .variant-option__button-label__text {
+    color: #bbbbbb !important;
+  }
+
+  variant-picker .variant-option--size .variant-option__button-label--size:not(:has(input:checked)):not(:has(input[data-option-available="false"])):hover,
+  .variant-picker .variant-option--size .variant-option__button-label--size:not(:has(input:checked)):not(:has(input[data-option-available="false"])):hover {
+    border-color: #666666 !important;
+  }
+
+  variant-picker .variant-option--size .strikethrough-variant,
+  variant-picker .variant-option--size [class*="strikethrough"],
+  .variant-picker .variant-option--size .strikethrough-variant,
+  .variant-picker .variant-option--size [class*="strikethrough"] {
+    display: none !important;
+  }
+
+  .size-chart-modal[hidden] {
+    display: none !important;
+  }
+
+  .size-chart-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .size-chart-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+  }
+
+  .size-chart-modal__panel .size-chart-modal__body {
+        margin-top: 35px;
+    position: relative;
+    z-index: 1;
+    width: min(720px, 100%);
+    max-height: min(85vh, 900px);
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  }
+
+  .size-chart-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #111111;
+  }
+
+  .size-chart-modal__body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #111111;
+  }
+
+  .size-chart-modal__body table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .size-chart-table--mobile {
+    display: none;
+  }
+
+  .size-chart-modal__body th,
+  .size-chart-modal__body td {
+    border: 1px solid #dddddd;
+    padding: 8px 10px;
+    text-align: left;
+  }
+
+  @media (max-width: 749px) {
+    /*
+      The page-editor table has inline white-space, padding and font-size
+      declarations. These scoped !important rules intentionally override
+      that authored markup on mobile only.
+    */
+    .size-chart-modal__body .size-chart-table--desktop {
+      display: none !important;
+    }
+
+    .size-chart-modal__body .size-chart-table--mobile {
+      display: table !important;
+      width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .size-chart-modal__body .size-chart-table--mobile th,
+    .size-chart-modal__body .size-chart-table--mobile td {
+      width: 22.5% !important;
+      padding: 7px 4px !important;
+      font-size: 11px !important;
+      line-height: 1.3 !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      text-align: center !important;
+      vertical-align: middle;
+    }
+
+    .size-chart-modal__body .size-chart-table--mobile th:first-child,
+    .size-chart-modal__body .size-chart-table--mobile td:first-child {
+      width: 32.5% !important;
+      text-align: left !important;
+    }
+
+    .size-chart-mobile-value {
+      display: block;
+    }
+
+    .size-chart-mobile-value + .size-chart-mobile-value {
+      margin-top: 2px;
+    }
+
+    .size-chart-modal__body .size-chart-table--scroll-fallback {
+      min-width: 680px;
+    }
+
+    variant-picker .variant-option--size .variant-option__header,
+    .variant-picker .variant-option--size .variant-option__header {
+      flex-wrap: wrap;
+    }
+
+    .size-chart-modal {
+      padding: 16px;
+    }
+
+    .size-chart-modal__panel {
+      padding: 24px 16px 16px;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var blockId = '{{ block.id }}';
+    var modalId = 'size-chart-modal-' + blockId;
+
+    function initSizeLabels(picker) {
+      picker.querySelectorAll('[data-size-fieldset]').forEach(function (fieldset) {
+        var valueEl = fieldset.querySelector('[data-selected-value]');
+        if (!valueEl) return;
+
+        function syncLabel() {
+          var checked = fieldset.querySelector('input[type="radio"]:checked');
+          if (checked) valueEl.textContent = checked.value;
+        }
+
+        fieldset.addEventListener('change', syncLabel);
+        syncLabel();
+      });
+    }
+
+    function initMobileSizeChart(modal) {
+      var tables = modal.querySelectorAll('.size-chart-modal__body table');
+
+      tables.forEach(function (table) {
+        if (table.dataset.ppMobileChartInit === 'true') return;
+        table.dataset.ppMobileChartInit = 'true';
+
+        var rows = Array.from(table.rows || []);
+        var hasExpectedShape = rows.length > 1 && rows.every(function (row) {
+          var cells = Array.from(row.cells || []);
+          return cells.length === 7 && cells.every(function (cell) {
+            return cell.colSpan === 1 && cell.rowSpan === 1;
+          });
+        });
+
+        // Keep the original scrollable table if the merchant changes its shape.
+        if (!hasExpectedShape) {
+          table.classList.add('size-chart-table--scroll-fallback');
+          return;
+        }
+
+        var mobileTable = table.cloneNode(true);
+        mobileTable.removeAttribute('data-pp-mobile-chart-init');
+        mobileTable.classList.add('size-chart-table--mobile');
+        mobileTable.setAttribute('data-mobile-size-chart', '');
+
+        Array.from(mobileTable.rows).forEach(function (row) {
+          var cells = Array.from(row.cells);
+
+          // Seven columns become Size + Bust + Waist + Hip. Each measurement
+          // retains its imperial and metric values on separate lines.
+          [[5, 6], [3, 4], [1, 2]].forEach(function (pair) {
+            var primary = cells[pair[0]];
+            var secondary = cells[pair[1]];
+            var primaryValue = document.createElement('span');
+            var secondaryValue = document.createElement('span');
+
+            primaryValue.className = 'size-chart-mobile-value';
+            secondaryValue.className = 'size-chart-mobile-value';
+            primaryValue.innerHTML = primary.innerHTML;
+            secondaryValue.innerHTML = secondary.innerHTML;
+            primary.replaceChildren(primaryValue, secondaryValue);
+            secondary.remove();
+          });
+        });
+
+        table.classList.add('size-chart-table--desktop');
+        table.insertAdjacentElement('afterend', mobileTable);
+      });
+    }
+
+    function initSizeChartModals(picker) {
+      picker.querySelectorAll('[data-size-chart-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var targetId = btn.getAttribute('data-size-chart-open') || modalId;
+          var modal = document.getElementById(targetId);
+          if (!modal) return;
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+          var closeBtn = modal.querySelector('.size-chart-modal__close');
+          if (closeBtn) closeBtn.focus();
+        });
+      });
+
+      var modal = document.getElementById(modalId);
+      if (modal && !modal.dataset.ppModalInit) {
+        modal.dataset.ppModalInit = 'true';
+        initMobileSizeChart(modal);
+        modal.querySelectorAll('[data-size-chart-close]').forEach(function (el) {
+          el.addEventListener('click', function () {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+          });
+        });
+      }
+    }
+
+    function initPicker(picker) {
+      if (!picker || picker.dataset.ppSizeInit === 'true') return;
+      picker.dataset.ppSizeInit = 'true';
+      initSizeLabels(picker);
+      initSizeChartModals(picker);
+    }
+
+    document.querySelectorAll('variant-picker[data-block-id="{{ block.id }}"]').forEach(initPicker);
+
+    if (!window.__ppSizeChartEscapeInit) {
+      window.__ppSizeChartEscapeInit = true;
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var openModal = document.querySelector('.size-chart-modal:not([hidden])');
+        if (openModal) {
+          openModal.hidden = true;
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      event.target.querySelectorAll('variant-picker[data-block-id="{{ block.id }}"]').forEach(initPicker);
+    });
+  })();
+</script>

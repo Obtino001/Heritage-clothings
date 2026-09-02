@@ -1,0 +1,221 @@
+<section class="usp_bar_btm">
+
+    <div class="page-width">
+  <div class="usp_bar_btmcontainer_">
+
+    {% for block in section.blocks %}
+      <div class="usp_bar_btmitem_" {{ block.shopify_attributes }}>
+        
+        <div class="usp_bar_btmicon_">
+          {% if block.settings.image != blank %}
+            <img 
+              src="{{ block.settings.image | image_url: width: 80 }}" 
+              alt="{{ block.settings.title | escape }}" 
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+
+        <div class="usp_bar_btmcontent_">
+          <p class="usp_bar_btmtitle_">{{ block.settings.title }}</p>
+          <p class="usp_bar_btmtext_">{{ block.settings.text }}</p>
+        </div>
+
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+</section>
+
+<style>
+.usp_bar_btm {
+  background: #FFFFFF;
+  padding: 38px 0px;
+}
+
+.usp_bar_btm .usp_bar_btmcontainer_ {
+ 
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.usp_bar_btm .usp_bar_btmitem_ {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+{% comment %} .usp_bar_btm .usp_bar_btmitem_ .usp_bar_btmcontent_{
+    flex: 1;
+} {% endcomment %}
+
+.usp_bar_btm .usp_bar_btmitem_:nth-child(2){
+  justify-content: center;
+}
+
+.usp_bar_btm .usp_bar_btmitem_:nth-child(3){
+  justify-content: center;
+}
+
+.usp_bar_btm .usp_bar_btmitem_:nth-child(4){
+  justify-content: end;
+}
+.usp_bar_btm .usp_bar_btmitem_:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 40px;
+  width: 1px;
+  background: #ddd;
+}
+
+.usp_bar_btm .usp_bar_btmicon_ img {
+ width: 43px; height: 38px; object-fit: contain;
+
+}
+.usp_bar_btmicon_ {
+    flex-shrink: unset;
+}
+.usp_bar_btm .usp_bar_btmtitle_ {
+ 
+  margin: 0;
+ margin-bottom: 14px;
+  font-family: Neue Montreal Med !important;
+font-weight: 500;
+font-size: 16px;
+line-height: 100%;
+letter-spacing: 0%;
+text-align: left;
+
+}
+
+.usp_bar_btm .usp_bar_btmtext_ {
+  color: #000;
+  margin: 2px 0 0;
+
+  font-family: Neue Montreal;
+font-weight: 400;
+font-size: 14px;
+line-height: 100%;
+letter-spacing: 0%;
+
+}
+
+/* Responsive */
+
+@media screen and (max-width: 1024px) {
+
+
+  .usp_bar_btm .usp_bar_btmcontainer_ {
+  
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .usp_bar_btm .usp_bar_btmitem_:not(:last-child)::after{
+    display: none;
+  }
+
+  .usp_bar_btm .usp_bar_btmitem_ {
+   
+    justify-content: start !important;
+  }
+}
+@media screen and (max-width: 768px) {
+  .usp_bar_btm .usp_bar_btmcontainer_ {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 20px;
+  }
+
+  .usp_bar_btm .usp_bar_btmitem_::after {
+    display: none;
+  }
+
+}
+@media screen and (max-width: 500px) {
+.usp_bar_btm .usp_bar_btmitem_ {
+   
+    flex-direction: column;
+    align-items: center;
+}
+.usp_bar_btm .usp_bar_btmtitle_, .usp_bar_btm .usp_bar_btmtext_{
+   text-align: center;
+}
+.usp_bar_btm .usp_bar_btmitem_ .usp_bar_btmcontent_{
+   width: 100%;
+}
+    .usp_bar_btm .usp_bar_btmcontainer_ {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "USP Bar",
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "usp",
+      "name": "USP Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Icon Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Sub text here"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "USP Bar Bottom",
+      "blocks": [
+        {
+          "type": "usp",
+          "settings": {
+            "title": "100% Heavy Cotton",
+            "text": "Premium, breathable & made to last"
+          }
+        },
+        {
+          "type": "usp",
+          "settings": {
+            "title": "Free UK Shipping",
+            "text": "Fast & reliable delivery"
+          }
+        },
+        {
+          "type": "usp",
+          "settings": {
+            "title": "Buy Now, Pay Later",
+            "text": "Flexible payments, zero stress"
+          }
+        },
+        {
+          "type": "usp",
+          "settings": {
+            "title": "14 Days Return",
+            "text": "Not quite right? Return within 14 days"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

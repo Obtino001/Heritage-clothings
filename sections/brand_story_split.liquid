@@ -1,0 +1,410 @@
+<section class="brand_story_split_">
+  <div class="page-width">
+
+    <div class="brand_story_split_inner_">
+      {% if section.settings.heading != blank %}
+        <div class="brand_story_split_heading_ only_mob">
+          {{ section.settings.heading }}
+        </div>
+      {% endif %}
+
+      <div class="brand_story_split_image_wrap_">
+        {% if section.settings.background_image != blank %}
+          {{
+            section.settings.background_image
+            | image_url: width: 1000
+            | image_tag:
+              loading: 'lazy',
+              class: 'brand_story_split_bg_image_'
+          }}
+        {% endif %}
+
+        {% if section.settings.front_image != blank %}
+          <div class="brand_story_split_front_image_wrap_">
+            {{
+              section.settings.front_image
+              | image_url: width: 1000
+              | image_tag:
+                loading: 'lazy',
+                class: 'brand_story_split_front_image_'
+            }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="brand_story_split_content_">
+
+        {% if section.settings.heading != blank %}
+          <div class="brand_story_split_heading_">
+            {{ section.settings.heading }}
+          </div>
+        {% endif %}
+
+        {% if section.settings.description != blank %}
+          <div class="brand_story_split_text_">
+            {{ section.settings.description }}
+          </div>
+        {% endif %}
+
+        {% if section.blocks.size > 0 %}
+          <div class="brand_story_split_features_">
+
+            {% for block in section.blocks %}
+              <div
+                class="brand_story_split_feature_"
+                {{ block.shopify_attributes }}
+              >
+
+                {% if block.settings.icon %}
+                  <div class="brand_story_split_feature_icon_">
+                    {{
+                      block.settings.icon
+                      | image_url: width: 120
+                      | image_tag:
+                        loading: 'lazy'
+                    }}
+                  </div>
+                {% endif %}
+
+                <div class="brand_story_split_feature_title_">
+                  {{ block.settings.title }}
+                </div>
+
+              </div>
+            {% endfor %}
+
+          </div>
+        {% endif %}
+
+        {% if section.settings.button_text != blank %}
+          <a
+            href="{{ section.settings.button_link }}"
+            class="brand_story_split_button_"
+          >
+            {{ section.settings.button_text }}
+          </a>
+        {% endif %}
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+.brand_story_split_{
+  margin-top: 100px;
+  padding: 47px 0;
+  background: #F5EFE6;
+}
+
+.brand_story_split_inner_{
+  display: grid;
+  grid-template-columns: minmax(300px, 520px) 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.brand_story_split_image_wrap_{
+  position: relative;
+  overflow: visible;
+}
+
+.brand_story_split_bg_image_{
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 40px 140px 40px 40px;
+}
+
+.brand_story_split_front_image_wrap_{
+position: absolute; right: 0; bottom: 0; width: 84%; z-index: 2; pointer-events: none; height: 100%; display: flex; align-items: flex-end;
+}
+
+.brand_story_split_front_image_{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.brand_story_split_content_{
+  max-width: 640px;
+}
+
+.brand_story_split_heading_{
+  margin-bottom: 60px;
+  font-family: Lora;
+  font-weight: 500;
+  font-size: 65px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.brand_story_split_heading_.only_mob{
+  display: none;
+}
+
+.brand_story_split_heading_ em{
+  font-style: italic;
+}
+
+.brand_story_split_text_{
+  margin-bottom: 50px;
+  font-family: Neue Montreal;
+  font-weight: 500;
+  color: #000000;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0%;
+}
+
+.brand_story_split_text_ p{
+  margin: 0 0 18px;
+}
+
+.brand_story_split_features_{
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 50px;
+  max-width: 80%;
+  margin-bottom: 50px;
+}
+
+.brand_story_split_feature_{
+  text-align: center;
+  position: relative;
+  padding-right: 30px;
+}
+
+.brand_story_split_feature_:not(:last-child)::after{
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 35px;
+  background: #1A1A1A33;
+}
+
+.brand_story_split_feature_icon_{
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.brand_story_split_feature_icon_ img{
+  width: 47px;
+  height: 47px;
+  object-fit: contain;
+}
+
+.brand_story_split_feature_title_{
+  font-family: Neue Montreal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 111.00000000000001%;
+  letter-spacing: 0%;
+  text-align: center;
+}
+
+.brand_story_split_button_{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: #35553D;
+  color: #fff;
+  text-decoration: none;
+  transition: .3s;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+}
+
+.brand_story_split_button_:hover{
+  opacity: .85;
+}
+
+@media screen and (max-width: 1280px){
+  .brand_story_split_inner_{
+    gap: 60px;
+  }
+
+  .brand_story_split_heading_{
+    margin-bottom: 20px;
+    font-size: 55px;
+  }
+}
+
+@media screen and (max-width: 860px){
+  .brand_story_split_inner_{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand_story_split_image_wrap_{
+    max-width: 550px;
+    margin: 0 auto;
+    width:100%;
+  }
+  .brand_story_split_feature_{padding:0;}
+  .brand_story_split_feature_:not(:last-child)::after{right: -16px;}
+div .brand_story_split_text_ { margin-bottom: 0; }
+
+
+
+  .brand_story_split_content_{
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px){
+  .brand_story_split_heading_.only_mob{
+    display: block;
+    font-size: 40px;
+    margin: 0 !important;
+  }
+
+  .brand_story_split_heading_{
+    display: none;
+  }
+
+  .brand_story_split_{
+    padding: 60px 0;
+  }
+
+  .brand_story_split_features_{
+    gap: 30px;
+    max-width: 100%;
+    margin-bottom: 33px;
+    width: 100%;
+  }
+
+  .brand_story_split_content_{
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .brand_story_split_text_{
+    margin-bottom: 30px;
+  }
+}
+
+@media screen and (max-width: 500px){
+  .brand_story_split_{
+    padding: 30px 0 43px;
+  }
+
+  .brand_story_split_heading_.only_mob{
+    display: block;
+    font-size: 36px;
+    margin: 0 !important;
+    text-align: center;
+  }
+
+  .brand_story_split_{
+    margin-top: 45px;
+  }
+
+  .brand_story_split_text_,
+  .brand_story_split_feature_title_{
+    font-size: 12px;
+  }
+
+  .brand_story_split_button_{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 155px;
+    height: 43px;
+  }
+}
+
+@media screen and (max-width: 430px){
+  .brand_story_split_features_{
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Brand Story Split",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "front_image",
+      "label": "Front image"
+    },
+    {
+      "type": "html",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Story.<br><em>Our Heritage.</em>"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Heritage Clothing is rooted in African culture, creating bold and vibrant pieces that celebrate identity, confidence, and self-expression.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Read More"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "html",
+          "id": "title",
+          "label": "Title",
+          "default": "Rooted in African heritage"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story Split",
+      "blocks": [
+        { "type": "feature" },
+        { "type": "feature" },
+        { "type": "feature" }
+      ]
+    }
+  ]
+}
+{% endschema %}

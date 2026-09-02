@@ -1,0 +1,84 @@
+{%- doc -%}
+  Heritage mega menu promotional banner — matches heritageclothings.com HTML exactly.
+
+  @param {object} settings - Block settings with promo_* fields
+{%- enddoc -%}
+
+{%- liquid
+  assign promo_bg_default = '//www.heritageclothings.com/cdn/shop/files/image_5_2a3f962d-5ebe-45b4-8e9c-75d77392ec65.png?v=1782209864&width=800'
+  assign promo_heading = settings.promo_heading | default: 'Shop Now, Pay Later.'
+  assign promo_text = settings.promo_text | default: 'Get what you love today and pay in 4 interest-free instalments with the following'
+-%}
+
+{%- if settings.show_promo_banner -%}
+  <div class="hzn-mega-panel__right">
+    <div class="hzn-mega-promo">
+      {%- if settings.promo_image != blank -%}
+        <img
+          src="{{ settings.promo_image | image_url: width: 800 }}"
+          alt=""
+          class="hzn-mega-promo__bg-img"
+          loading="lazy"
+          width="800"
+        >
+      {%- else -%}
+        <img
+          src="{{ promo_bg_default }}"
+          alt=""
+          class="hzn-mega-promo__bg-img"
+          loading="lazy"
+          width="800"
+        >
+      {%- endif -%}
+
+      <div class="hzn-mega-promo__overlay-text">
+        <p class="hzn-mega-promo__heading">{{ promo_heading }}</p>
+        <p class="hzn-mega-promo__sub">{{ promo_text }}</p>
+
+        {%- if settings.promo_payment_image != blank -%}
+          <div class="hzn-mega-promo__payment">
+            <img
+              src="{{ settings.promo_payment_image | image_url: width: 480 }}"
+              alt="{{ settings.promo_payment_image.alt | default: 'Payment methods' | escape }}"
+              class="hzn-mega-promo__payment-img"
+              loading="lazy"
+            >
+          </div>
+        {%- endif -%}
+
+        <ul class="hzn-mega-promo__icon-list">
+          <li>
+            <span class="hzn-mega-promo__icon-wrap">
+              {%- if settings.promo_icon_1 != blank -%}
+                <img src="{{ settings.promo_icon_1 | image_url: width: 56 }}">
+              {%- else -%}
+                <img src="https://cdn.shopify.com/s/files/1/0027/1636/8931/files/Group_24_2.svg?v=1782183015">
+              {%- endif -%}
+            </span>
+            {{ settings.promo_feature_1 | default: '0% Interest' }}
+          </li>
+          <li>
+            <span class="hzn-mega-promo__icon-wrap">
+              {%- if settings.promo_icon_2 != blank -%}
+                <img src="{{ settings.promo_icon_2 | image_url: width: 56 }}">
+              {%- else -%}
+                <img src="https://cdn.shopify.com/s/files/1/0027/1636/8931/files/Group_25_2.svg?v=1782183022">
+              {%- endif -%}
+            </span>
+            {{ settings.promo_feature_2 | default: 'Secure Checkout' }}
+          </li>
+          <li>
+            <span class="hzn-mega-promo__icon-wrap">
+              {%- if settings.promo_icon_3 != blank -%}
+                <img src="{{ settings.promo_icon_3 | image_url: width: 56 }}">
+              {%- else -%}
+                <img src="https://cdn.shopify.com/s/files/1/0027/1636/8931/files/Group_26_2.svg?v=1782183022">
+              {%- endif -%}
+            </span>
+            {{ settings.promo_feature_3 | default: 'Flexible Payments' }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{%- endif -%}

@@ -1,0 +1,341 @@
+<section class="promo_banner_split_">
+  {% if section.settings.image %}
+    <div class="promo_banner_split_image_wrap_">
+      {{
+        section.settings.image
+        | image_url: width: 2000
+        | image_tag: loading: 'lazy', class: 'promo_banner_split_image_'
+      }}
+    </div>
+  {% endif %}
+
+  {% if section.settings.image_mob %}
+    <div class="mobile_img ">
+      {{
+        section.settings.image_mob
+        | image_url: width: 2000
+        | image_tag: loading: 'lazy', class: 'promo_banner_split_image_'
+      }}
+    </div>
+  {% endif %}
+  <div class="page-width">
+    <div class="promo_banner_split_inner_">
+
+      <div class="promo_banner_split_content_">
+        <div class="top_layer">
+        {% if section.settings.heading != blank %}
+          <div class="promo_banner_split_heading_">
+            {{ section.settings.heading }}
+          </div>
+        {% endif %}
+
+        {% if section.settings.subheading != blank %}
+          <div class="promo_banner_split_subheading_">
+            {{ section.settings.subheading }}
+
+            <svg
+              class="svgLine"
+              xmlns="http://www.w3.org/2000/svg"
+              width="425"
+              height="7"
+              viewBox="0 0 425 7"
+              fill="none"
+            >
+              <path d="M0.0375977 6C0.0375977 6 129.186 1 212.038 1C294.89 1 424.038 6 424.038 6" stroke="#D17A2A" stroke-width="2"/>
+            </svg>
+          </div>
+        {% endif %}
+
+        {% if section.settings.text != blank %}
+          <div class="promo_banner_split_text_">
+            {{ section.settings.text }}
+          </div>
+        {% endif %}
+
+      </div>
+
+        {% if section.settings.button_text != blank %}
+          <a
+            href="{{ section.settings.button_link }}"
+            class="promo_banner_split_button_"
+          >
+            {{ section.settings.button_text }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .promo_banner_split_{
+
+    position: relative;
+  }
+
+  .promo_banner_split_inner_{
+    position:relative;
+    overflow:hidden;
+
+  }
+
+  .promo_banner_split_ .mobile_img{
+      display: none;
+  }
+
+
+  .promo_banner_split_image_wrap_{
+        width: 100%;
+  }
+
+  .promo_banner_split_ .page-width{
+     position:absolute;
+    inset:0;
+      display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  .promo_banner_split_image_{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+
+  .promo_banner_split_content_{
+    max-width:582px;
+    margin-left:auto;
+
+    color:#fff;
+
+        display: flex;
+      flex-direction: column;
+      align-items: center;
+
+
+  }
+  .promo_banner_split_content_ .top_layer{
+  
+        display: flex;
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .promo_banner_split_heading_{
+
+    margin-bottom:8px;
+     text-align: center;
+
+     font-family: Lora;
+  font-weight: 500;
+  font-size: 75px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  color: #FFFFFF;
+  }
+
+  .promo_banner_split_subheading_{
+    font-size:64px;
+    line-height:1;
+    font-style:italic;
+    margin-bottom:24px;
+       text-align: center;
+
+       font-family: Allura;
+  font-weight: 400;
+  font-size: 75px;
+
+  line-height: 120%;
+  letter-spacing: 0%;
+  position: relative;
+
+  }
+
+  .promo_banner_split_ .svgLine{
+   position: absolute;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+
+
+  }
+  .promo_banner_split_text_{
+    margin-bottom:30px;
+
+  font-weight: 500;
+    max-width: 450px;
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: 0%;
+  text-align: center;
+
+  }
+
+  .promo_banner_split_button_{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    width:max-content;
+    min-width:130px;
+    height:43px;
+
+    padding:0 24px;
+
+    border-radius:999px;
+
+    background: #2F4A36;
+    color:#fff;
+    text-decoration:none;
+    transition:.3s;
+  }
+
+  .promo_banner_split_button_:hover{
+    opacity:.85;
+  }
+
+  @media screen and (max-width: 1280px){
+  .promo_banner_split_heading_ {
+      margin-bottom: 8px;
+
+      font-size: 55px;
+  }
+  .promo_banner_split_subheading_ {
+
+      margin-bottom: 24px;
+      font-size: 55px;
+  }
+
+  }
+
+  @media screen and (max-width:989px){
+
+
+
+
+    .promo_banner_split_heading_{
+      font-size:54px;
+    }
+
+    .promo_banner_split_subheading_{
+      font-size:46px;
+    }
+  }
+
+  @media screen and (max-width:768px){
+
+    .promo_banner_split_inner_{
+           padding-top: 60px;
+           height: 100%;
+    }
+
+    .promo_banner_split_ .mobile_img{
+      display: block;
+
+  }
+
+  .promo_banner_split_ .mobile_img img{
+     height: 1000px;
+     object-position: 0 -100px;
+     object-fit: cover;
+  }
+  .promo_banner_split_image_wrap_{
+      display: none;
+  }
+
+    .promo_banner_split_content_{
+
+
+      max-width:100%;
+    }
+
+    .promo_banner_split_heading_{
+      font-size:40px;
+    }
+
+    .promo_banner_split_subheading_{
+      font-size:35px;
+    }
+
+    .promo_banner_split_text_{
+      max-width:100%;
+    }
+
+    .promo_banner_split_ .page-width {
+
+      justify-content: start;
+    }
+    .promo_banner_split_content_{
+         height: 100%;
+         justify-content: space-between;
+         padding-bottom: 74px;
+    }
+  }
+  @media screen and (max-width:700px){
+  .promo_banner_split_ .mobile_img img{
+     height: auto ;
+     object-position: 0   ;
+     object-fit: cover;
+  }
+  }
+  @media screen and (max-width: 500px){
+  .promo_banner_split_heading_{
+              font-size: 36px;
+  }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Promo Banner Split",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mob",
+      "label": "Background Image (mobile)"
+    },
+
+    {
+      "type": "html",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Priceless Styles."
+    },
+    {
+      "type": "html",
+      "id": "subheading",
+      "label": "Sub Heading",
+      "default": "Just under £50."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Effortless pieces to complete your look & a £150 minimum order value for free shipping."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop Under £50"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo Banner Split"
+    }
+  ]
+}
+{% endschema %}

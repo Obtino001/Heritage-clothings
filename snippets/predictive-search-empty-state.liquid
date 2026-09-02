@@ -1,0 +1,283 @@
+{% doc %}
+  Renders the predictive search empty state
+
+  @param {number} shadow_opacity - shadow opacity for the empty state container shadow
+  @param {string} products_test_id - a playwright test id, used to differentiate empty state from 'real' search results
+  @param {boolean} [load_empty_state] - Load the empty state or not
+
+  @example
+  {% render 'predictive-search-empty-state', shadow_opacity: 0.1, products_test_id: 'empty-state' %}
+{% enddoc %}
+
+<div
+  id="predictive-search-results"
+  class="predictive-search-dropdown predictive-search-dropdown--empty-custom"
+  role="listbox"
+  aria-expanded="true"
+  style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity }});"
+>
+  {% if load_empty_state %}
+    <div class="predictive-search-results__inner predictive-search-empty-state">
+      <div class="predictive-search-empty-state__layout">
+        <div class="predictive-search-empty-state__sidebar">
+          {% render 'predictive-search-sidebar' %}
+        </div>
+        <div class="predictive-search-empty-state__trending">
+          {% render 'predictive-search-trending' %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .predictive-search-dropdown--empty-custom {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    border: 0;
+  }
+
+  .predictive-search-empty-state {
+    padding: 0;
+  }
+
+  .predictive-search-empty-state__layout {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+    min-height: 0;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    align-items: start;
+  }
+
+  .predictive-search-empty-state__sidebar {
+    grid-column: span 12;
+  }
+
+  .predictive-search-empty-state__trending {
+    grid-column: span 12;
+  }
+
+  @media screen and (min-width: 990px) {
+    .predictive-search-empty-state__sidebar {
+      grid-column: span 4;
+    }
+
+    .predictive-search-empty-state__trending {
+      grid-column: span 8;
+    }
+  }
+
+  .predictive-search-empty-state__sidebar,
+  .predictive-search-empty-state__trending {
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .predictive-search-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .predictive-search-trending {
+    width: 100%;
+  }
+
+  .predictive-search-sidebar__section + .predictive-search-sidebar__section {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .predictive-search-sidebar__heading-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .predictive-search-sidebar__heading {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-align: left;
+    color: #000;
+    font-family: var(--font-body-family, inherit);
+    flex-shrink: 0;
+  }
+
+  .predictive-search-sidebar__heading-line {
+    flex: 1 1 auto;
+    display: block;
+    min-width: 24px;
+    height: 1px;
+    border: 0;
+    border-bottom: 1px solid #e6e6e6;
+    align-self: center;
+  }
+
+  .predictive-search-sidebar__list {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .predictive-search-sidebar__link {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    text-decoration: none;
+    color: #212121;
+    border-radius: 0;
+    transition: color 0.15s ease;
+  }
+
+  .predictive-search-sidebar__link--brand,
+  .predictive-search-sidebar__link--blog {
+    grid-template-columns: 20px 1fr;
+  }
+
+  .predictive-search-sidebar__link:hover {
+    background: transparent;
+  }
+
+  .predictive-search-sidebar__link:hover .predictive-search-sidebar__text {
+    color: #000;
+  }
+
+  .predictive-search-sidebar__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #212121;
+  }
+
+  .predictive-search-sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+
+  .predictive-search-sidebar__text {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 300;
+    min-width: 0;
+  }
+
+  .predictive-search-sidebar__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #212121;
+  }
+
+  .predictive-search-sidebar__arrow svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+
+  .predictive-search-trending__grid {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .predictive-search-trending__card {
+    display: block;
+    text-decoration: none;
+    color: #212121;
+  }
+
+  .predictive-search-trending__media {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 658 / 955;
+    background: #f2f2f2;
+  }
+
+  .predictive-search-trending__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .predictive-search-trending__placeholder {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #f2f2f2;
+  }
+
+  .predictive-search-trending__label {
+    display: block;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.4;
+    color: #212121;
+  }
+
+  .predictive-search-trending__card:hover .predictive-search-trending__image {
+    transform: scale(1.1);
+  }
+
+  @media screen and (max-width: 989px) {
+    .predictive-search-empty-state__layout {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 12px 0 16px;
+    }
+
+    .predictive-search-trending__grid {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+
+    .predictive-search-trending__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .predictive-search-trending__item {
+      flex: 0 0 calc(50% - 4px);
+      scroll-snap-align: start;
+      min-width: 0;
+    }
+  }
+{% endstylesheet %}

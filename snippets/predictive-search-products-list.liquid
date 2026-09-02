@@ -1,0 +1,125 @@
+{%- doc -%}
+  Renders the predictive search products list for empty state and recently viewed products
+
+  @param {string} title - title of the result list
+  @param {object[]} products - array of products
+  @param {string[]} [order_ids] - array of product ids
+  @param {number} [limit] - limit of products to display
+  @param {string} [products_test_id] - a playwright test id, used to differentiate empty state from 'real' search results
+  @param {string} [search_terms] - current search query for view-all link
+  @param {string} [layout] - 'grid' for active search two-column layout
+{%- enddoc -%}
+{%- liquid
+  assign recently_viewed_title_text = 'content.recently_viewed_products' | t
+  assign view_all_label = settings.predictive_search_view_all_label | default: 'View all'
+  assign use_grid = false
+  if layout == 'grid'
+    assign use_grid = true
+  endif
+-%}
+<div
+  id="predictive-search-products"
+  class="predictive-search-results__products{% if use_grid %} predictive-search-results__products--grid{% endif %}"
+  {% if products_test_id %}
+    data-testid="{{ products_test_id }}"
+  {% endif %}
+>
+  {% if title == recently_viewed_title_text %}
+    <div
+      class="recently-viewed-wrapper"
+      ref="recentlyViewedWrapper"
+    >
+      <h4
+        class="predictive-search-results__title"
+        ref="recentlyViewedTitle[]"
+      >
+        {{ title }}
+        <button
+          class="predictive-search-results__clear button button-unstyled"
+          type="button"
+          on:click="/clearRecentlyViewedProducts"
+        >
+          {{ 'actions.clear' | t }}
+        </button>
+      </h4>
+      <ul
+        class="predictive-search-results__list predictive-search-results__wrapper-products list-unstyled"
+      >
+        {% liquid
+          assign limit = limit | default: 8
+        %}
+        {% if order_ids != blank %}
+          {% for _id in order_ids %}
+            {% assign int_id = _id | times: 1 %}
+            {% assign product = products | find: 'id', int_id %}
+            <li
+              class="predictive-search-results__card predictive-search-results__card--product"
+              ref="recentlyViewedItems[]"
+            >
+              {% render 'resource-card',
+                resource_type: 'product',
+                resource: product,
+                image_width: 500,
+                image_hover: true,
+                image_aspect_ratio: '4 / 5',
+                product_view_context: 'search'
+              %}
+            </li>
+          {% endfor %}
+        {% else %}
+          {% for product in products limit: limit %}
+            <li
+              class="predictive-search-results__card predictive-search-results__card--product"
+              ref="recentlyViewedItems[]"
+            >
+              {% render 'resource-card',
+                resource_type: 'product',
+                resource: product,
+                image_width: 500,
+                image_hover: true,
+                image_aspect_ratio: '4 / 5',
+                product_view_context: 'search'
+              %}
+            </li>
+          {% endfor %}
+        {% endif %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="predictive-search-results__products-header">
+      <h4 class="predictive-search-results__title predictive-search-results__title--products">
+        {{ title }}
+      </h4>
+      {% if search_terms != blank %}
+        <a
+          href="{{ routes.search_url }}?q={{ search_terms | url_param_escape }}"
+          class="predictive-search-results__view-all"
+        >
+          {{ view_all_label }}
+        </a>
+      {% endif %}
+    </div>
+    <ul
+      class="predictive-search-results__list predictive-search-results__wrapper-products list-unstyled{% if use_grid %} predictive-search-results__grid-products{% endif %}"
+    >
+      {% liquid
+        assign limit = limit | default: 8
+      %}
+      {% for product in products limit: limit %}
+        <li
+          class="predictive-search-results__card predictive-search-results__card--product"
+          ref="resultsItems[]"
+        >
+          {% render 'resource-card',
+            resource_type: 'product',
+            resource: product,
+            image_width: 500,
+            image_hover: true,
+            image_aspect_ratio: '4 / 5',
+            product_view_context: 'search'
+          %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

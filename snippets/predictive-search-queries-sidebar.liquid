@@ -1,0 +1,156 @@
+{%- doc -%}
+
+  Query and collection suggestions for active predictive search (left sidebar).
+
+{%- enddoc -%}
+
+
+
+{%- liquid
+
+  assign suggestions_title = settings.predictive_search_suggestions_title | default: 'Popular searches'
+
+  assign has_queries = false
+
+  assign has_collections = false
+
+
+
+  if queries.size > 0
+
+    assign has_queries = true
+
+  endif
+
+
+
+  if collections.size > 0
+
+    assign has_collections = true
+
+  endif
+
+-%}
+
+
+
+<div class="predictive-search-sidebar predictive-search-sidebar--queries">
+
+  {%- if has_queries -%}
+
+    <section class="predictive-search-sidebar__section">
+
+      <div class="predictive-search-sidebar__heading-row">
+
+        <h4 class="predictive-search-sidebar__heading">{{ suggestions_title }}</h4>
+
+        <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
+
+      </div>
+
+      <ul class="predictive-search-sidebar__list list-unstyled" role="list">
+
+        {%- for query in queries -%}
+
+          <li>
+
+            <a href="{{ query.url }}" class="predictive-search-sidebar__link predictive-search-sidebar__link--search">
+
+              <span class="predictive-search-sidebar__icon" aria-hidden="true">
+
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+
+                  <circle cx="11" cy="11" r="7"></circle>
+
+                  <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+
+                </svg>
+
+              </span>
+
+              <span class="predictive-search-sidebar__text">{{ query.text }}</span>
+
+              <span class="predictive-search-sidebar__arrow" aria-hidden="true">
+
+               
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21" height="21" width="21">
+<path fill-opacity="0.6" fill="#212121" d="M6.99674 14.4966V8.17496L13.9076 15.0858C14.2334 15.4116 14.7609 15.4116 15.0859 15.0858C15.4109 14.76 15.4117 14.2325 15.0859 13.9075L8.17508 6.99662H14.4967C14.9567 6.99662 15.3301 6.62329 15.3301 6.16329C15.3301 5.70329 14.9567 5.32996 14.4967 5.32996H6.16341C5.70341 5.32996 5.33008 5.70329 5.33008 6.16329V14.4966C5.33008 14.9566 5.70341 15.33 6.16341 15.33C6.62341 15.33 6.99674 14.9566 6.99674 14.4966Z"></path>
+</svg>
+
+
+              </span>
+
+            </a>
+
+          </li>
+
+        {%- endfor -%}
+
+      </ul>
+
+    </section>
+
+  {%- endif -%}
+
+
+
+  {%- if has_collections -%}
+
+    <section class="predictive-search-sidebar__section">
+
+      <div class="predictive-search-sidebar__heading-row">
+
+        <h4 class="predictive-search-sidebar__heading">{{ 'content.search_results_resource_collections' | t }}</h4>
+
+        <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
+
+      </div>
+
+      <ul class="predictive-search-sidebar__list list-unstyled" role="list">
+
+        {%- for collection in collections -%}
+
+          <li>
+
+            <a href="{{ collection.url }}" class="predictive-search-sidebar__link predictive-search-sidebar__link--brand">
+
+              <span class="predictive-search-sidebar__icon" aria-hidden="true">
+
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+
+                  <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+
+                  <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+
+                  <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+
+                  <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+
+                </svg>
+
+              </span>
+
+              <span class="predictive-search-sidebar__text">{{ collection.title }}</span>
+
+            </a>
+
+          </li>
+
+        {%- endfor -%}
+
+      </ul>
+
+    </section>
+
+  {%- endif -%}
+
+
+
+  {%- unless has_queries or has_collections -%}
+
+    {% render 'predictive-search-sidebar' %}
+
+  {%- endunless -%}
+
+</div>
+

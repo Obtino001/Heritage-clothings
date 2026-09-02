@@ -1,0 +1,585 @@
+
+
+{% liquid
+  if section.settings.background_color != blank
+    render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
+  endif
+%}
+
+<div
+  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+></div>
+<div
+  class="section section--{{ section.settings.section_width }}{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+>
+  {% liquid
+    assign total_blocks = section.blocks.size
+
+    # Grid layout calculations
+    assign grid_columns = total_blocks | at_most: 4
+
+    # Calculate last row counts using modulo arithmetic
+    # last_row_count = (total_blocks - 1) % N + 1
+    assign last_row_count = total_blocks | minus: 1 | modulo: 4 | plus: 1
+    assign tablet_last_row_count = total_blocks | minus: 1 | modulo: 2 | plus: 1
+
+    # Check if there are orphaned elements (single item in last row)
+    assign has_isolated_grid_item_desktop = false
+    assign has_isolated_grid_item_tablet = false
+
+    if total_blocks > 4 and last_row_count == 1
+      assign has_isolated_grid_item_desktop = true
+    endif
+
+    if total_blocks == 5
+      assign has_isolated_grid_item_tablet = true
+    endif
+  %}
+  <div
+    class="
+      footer-content
+      spacing-style
+      footer-content--heritage
+      {% if has_isolated_grid_item_desktop %}footer-content--isolated-grid-item-desktop{% endif %}
+      {% if has_isolated_grid_item_tablet %}footer-content--isolated-grid-item-tablet{% endif %}
+    "
+    id="footer-content-{{ section.id }}"
+    style="
+
+    
+      {%  render 'spacing-style', settings: section.settings %}
+      --footer-gap: {{ section.settings.gap }}px;
+      --grid-columns: {{ grid_columns }};
+      --last-row-count: {{ last_row_count }};
+      --tablet-last-row-count: {{ tablet_last_row_count }};
+    "
+  >
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .footer-content {
+    contain: content;
+    content-visibility: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--footer-gap);
+    align-items: start;
+  }
+
+  .footer-content .menu__heading__default {
+    font-weight: var(--font-heading--weight);
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .footer-content {
+      grid-template-columns: repeat(min(var(--grid-columns), 3), 1fr);
+      grid-auto-flow: row;
+    }
+
+    .footer-content[style*='--grid-columns: 4'] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-content--isolated-grid-item-tablet > :last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+   @media screen and (min-width: 1024px) {
+    .footer-content {
+      grid-template-columns: repeat(var(--grid-columns), 1fr);
+      
+ grid-template-columns: minmax(250px, 300px) 1fr minmax(250px, 300px)  !important;
+   
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+   
+    /* Single item centered */
+    .footer-content[style*='--grid-columns: 1'] {
+      justify-items: center;
+    }
+
+    .footer-content--isolated-grid-item-desktop > :last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ── Mobile footer (accordion menus) ── */
+  @media screen and (max-width: 749px) {
+    .footer-content--heritage {
+      gap: 0;
+      contain: none;
+      content-visibility: visible;
+      overflow: visible;
+    }
+
+    .footer-content--heritage > shopify-block,
+    .footer-content--heritage > .shopify-block,
+    .footer-content--heritage > * {
+      width: 100%;
+    }
+
+    /* Brand / logo block — centered at top */
+    .footer-content--heritage .heritage-brand-block,
+    .footer-content--heritage .header-logo,
+    .footer-content--heritage [class*='logo'] {
+      text-align: center;
+      margin-inline: auto;
+      padding-block: 8px 20px;
+    }
+
+    .footer-content--heritage .heritage-brand-block__heading,
+    .footer-content--heritage .heritage-brand-block__text {
+      text-align: center;
+    }
+
+    .footer-content--heritage .heritage-brand-block__image {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Force accordion-style menus (Policy, Links, Shop) */
+    .footer-content--heritage accordion-custom.menu {
+      display: block;
+      width: 100%;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__details {
+      padding-inline: 0;
+      border-block-end: 1px solid rgba(26, 26, 26, 0.2);
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 18px 0;
+      margin: 0;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 500;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading::-webkit-details-marker {
+      display: none;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading__default {
+      display: none !important;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading__accordion {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading__toggle {
+      flex-shrink: 0;
+      margin-inline-start: auto;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__heading__toggle svg {
+      width: 12px;
+      height: 12px;
+      transition: transform 0.25s ease;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__details[open] .menu__heading__toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .footer-content--heritage accordion-custom.menu .details-content {
+      padding-block-end: 16px;
+    }
+
+    .footer-content--heritage accordion-custom.menu .menu__item + .menu__item {
+      margin-block-start: 10px;
+    }
+
+    /* Join The Community — heading + text */
+    .footer-content--heritage > shopify-block:has(.group-block),
+    .footer-content--heritage .group-block {
+      padding-block: 28px 0;
+      width: 100%;
+    }
+
+    .footer-content--heritage .group-block .text-block h3,
+    .footer-content--heritage .group-block .text-block.h3 > * {
+      margin-block: 0 8px;
+      font-weight: 600;
+    }
+
+    .footer-content--heritage .group-block .text-block p,
+    .footer-content--heritage .group-block .text-block.rte > * {
+      margin-block: 0;
+      line-height: 1.4;
+    }
+
+    /* Email signup — pill input + button */
+    .footer-content--heritage > shopify-block:has(.email-signup-block),
+    .footer-content--heritage .email-signup-block {
+      display: block !important;
+      width: 100%;
+      padding-block: 14px 0;
+      margin-block-end: 0;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .footer-content--heritage .email-signup__form {
+      gap: 10px;
+    }
+
+    .footer-content--heritage .email-signup__input-group:not(.email-signup__input-group--integrated) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .footer-content--heritage .email-signup__input {
+      width: 100%;
+      border-radius: 999px;
+      padding: 14px 18px;
+    }
+
+    .footer-content--heritage .email-signup__button {
+      width: 100%;
+      border-radius: 999px;
+      padding: 14px 18px;
+      background: #2f4a36;
+      color: #fff;
+    }
+
+    /* Social icons — centered row below newsletter */
+    .footer-content--heritage > shopify-block:has(.social-icons__wrapper) {
+      display: block !important;
+      width: 100%;
+      padding-block: 24px 28px;
+      visibility: visible;
+      opacity: 1;
+      overflow: visible;
+    }
+
+    .footer-content--heritage .social-icons__wrapper {
+      display: flex !important;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      visibility: visible;
+      opacity: 1;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .footer-content--heritage .social-icons__icon-wrapper {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #5a3a2e;
+      flex-shrink: 0;
+    }
+
+    .footer-content--heritage .social-icons__icon-wrapper a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .footer-content--heritage .social-icons__icon {
+      display: block !important;
+      width: 18px;
+      height: 18px;
+      color: #fff;
+      fill: currentColor;
+    }
+
+    .footer-content--heritage .social-icons__icon path {
+      fill: currentColor;
+    }
+
+    .footer-content--heritage .social-icons__icon-label {
+      display: none;
+    }
+
+    .footer-content--heritage .text-block,
+    .footer-content--heritage .group-block .text-block {
+      text-align: left;
+    }
+  }
+
+  /* Social in footer utilities row (if block lives there) */
+  @media screen and (max-width: 749px) {
+    .shopify-section-group-footer-group .social-icons__wrapper {
+      display: flex !important;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-block: 20px 24px;
+      width: 100%;
+    }
+
+    .shopify-section-group-footer-group .social-icons__icon-wrapper {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #5a3a2e;
+    }
+
+    .shopify-section-group-footer-group .social-icons__icon {
+      display: block !important;
+      width: 18px;
+      height: 18px;
+      color: #fff;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var FOOTER_SELECTOR = '.footer-content--heritage';
+
+    function isMobileFooter() {
+      return window.matchMedia('(max-width: 749px)').matches;
+    }
+
+    function initFooterMobileAccordions(root) {
+      if (!root) return;
+
+      root.querySelectorAll('accordion-custom.menu').forEach(function (accordion) {
+        var details = accordion.querySelector('.menu__details');
+        if (!details) return;
+
+        if (!accordion.dataset.footerAccordionReady) {
+          accordion.dataset.footerAccordionReady = 'true';
+          accordion.dataset.footerWasDisableMobile = accordion.hasAttribute('data-disable-on-mobile') ? '1' : '0';
+          accordion.dataset.footerWasOpenDefault = accordion.hasAttribute('open-by-default-on-mobile') ? '1' : '0';
+          accordion.dataset.footerWasOpen = details.hasAttribute('open') ? '1' : '0';
+        }
+
+        if (isMobileFooter()) {
+          accordion.classList.add('menu--accordion', 'menu--dividers');
+          accordion.removeAttribute('data-disable-on-mobile');
+          accordion.removeAttribute('open-by-default-on-mobile');
+          details.removeAttribute('open');
+          return;
+        }
+
+        accordion.classList.remove('menu--accordion', 'menu--dividers');
+
+        if (accordion.dataset.footerWasDisableMobile === '1') {
+          accordion.setAttribute('data-disable-on-mobile', 'true');
+        } else {
+          accordion.removeAttribute('data-disable-on-mobile');
+        }
+
+        if (accordion.dataset.footerWasOpenDefault === '1') {
+          accordion.setAttribute('open-by-default-on-mobile', '');
+        } else {
+          accordion.removeAttribute('open-by-default-on-mobile');
+        }
+
+        if (accordion.dataset.footerWasOpen === '1') {
+          details.setAttribute('open', '');
+        } else {
+          details.removeAttribute('open');
+        }
+      });
+    }
+
+    function boot() {
+      document.querySelectorAll(FOOTER_SELECTOR).forEach(initFooterMobileAccordions);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+
+    window.addEventListener('resize', boot);
+    document.addEventListener('shopify:section:load', boot);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:names.footer",
+  "class": "section-wrapper",
+  "blocks": [
+    {
+      "type": "_divider"
+    },
+    {
+      "type": "@app"
+    },
+    {
+      "type": "button"
+    },
+    {
+      "type": "follow-on-shop"
+    },
+    {
+      "type": "group"
+    },
+    {
+      "type": "icon"
+    },
+    {
+      "type": "image"
+    },
+    {
+      "type": "menu"
+    },
+    {
+      "type": "payment-icons"
+    },
+    {
+      "type": "text"
+    },
+    {
+      "type": "heritage_brand_block_"
+    },
+    {
+      "type": "logo"
+    },
+    {
+      "type": "jumbo-text"
+    },
+    {
+      "type": "social-links"
+    },
+    {
+      "type": "email-signup"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.footer",
+      "category": "t:categories.footer",
+      "settings": {
+        "gap": 20,
+        "padding-block-start": 36,
+        "padding-block-end": 36
+      },
+      "blocks": {
+        "newsletter-group": {
+          "type": "group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "center",
+            "gap": 6,
+            "width": "fill"
+          },
+          "blocks": {
+            "newsletter-heading": {
+              "type": "text",
+              "settings": {
+                "text": "t:html_defaults.join_our_email_list",
+                "width": "100%",
+                "alignment": "left",
+                "type_preset": "h3"
+              }
+            },
+            "newsletter-text": {
+              "type": "text",
+              "settings": {
+                "text": "t:html_defaults.get_exclusive_deals_and_early_access_to_new_products",
+                "width": "100%",
+                "alignment": "left",
+                "type_preset": "rte"
+              }
+            }
+          },
+          "block_order": ["newsletter-heading", "newsletter-text"]
+        },
+        "newsletter-form": {
+          "type": "email-signup"
+        }
+      },
+      "block_order": ["newsletter-group", "newsletter-form"]
+    }
+  ]
+}
+{% endschema %}

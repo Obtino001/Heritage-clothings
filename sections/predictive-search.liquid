@@ -1,0 +1,138 @@
+{% render 'predictive-search-styles' %}
+
+{%- if predictive_search.performed or search.performed -%}
+  {%- liquid
+    if predictive_search.performed
+      assign search_results_count = predictive_search.resources.products.size | plus: predictive_search.resources.pages.size | plus: predictive_search.resources.articles.size | plus: predictive_search.resources.collections.size
+    else
+      assign search_results_count = search.results_count
+    endif
+  -%}
+
+  <div
+    id="predictive-search-results"
+    class="predictive-search-dropdown predictive-search-dropdown--active-custom"
+    role="listbox"
+    aria-expanded="true"
+  >
+    <div class="visually-hidden" role="status" aria-live="polite">
+      {%- if predictive_search.performed and search_results_count > 0 -%}
+        {{ 'accessibility.search_results_count' | t: count: search_results_count, query: predictive_search.terms }}
+      {%- elsif predictive_search.performed and predictive_search.resources.queries.size > 0 -%}
+        {{- 'accessibility.search_suggestions_available' | t: query: predictive_search.terms -}}
+      {%- elsif predictive_search.performed -%}
+        {{ 'accessibility.search_results_no_results' | t: query: predictive_search.terms }}
+      {%- endif -%}
+    </div>
+
+    <div class="predictive-search-results__inner predictive-search-active-state" data-search-results>
+      {% if predictive_search.performed %}
+        {%- if search_results_count > 0 or predictive_search.resources.queries.size > 0 -%}
+          <div class="predictive-search-active-state__layout">
+            <div class="predictive-search-active-state__sidebar">
+              {% render 'predictive-search-queries-sidebar',
+                queries: predictive_search.resources.queries,
+                collections: predictive_search.resources.collections,
+                search_terms: predictive_search.terms
+              %}
+            </div>
+
+            <div class="predictive-search-active-state__main">
+              {%- if predictive_search.resources.products.size > 0 -%}
+                {%- liquid
+                  assign products_title = 'content.search_results_resource_products' | t
+                  assign products = predictive_search.resources.products
+                -%}
+                {% render 'predictive-search-products-list',
+                  title: products_title,
+                  products: products,
+                  search_terms: predictive_search.terms,
+                  limit: 4,
+                  layout: 'grid'
+                %}
+              {%- endif -%}
+              {%- if predictive_search.resources.pages.size > 0 -%}
+                {% assign resource_title = 'content.search_results_resource_pages' | t %}
+                {% render 'predictive-search-resource-carousel',
+                  title: resource_title,
+                  resource_type: 'page',
+                  resources: predictive_search.resources.pages
+                %}
+              {%- endif -%}
+
+              {%- if predictive_search.resources.articles.size > 0 -%}
+                {% assign resource_title = 'content.search_results_resource_articles' | t %}
+                {% render 'predictive-search-resource-carousel',
+                  title: resource_title,
+                  resource_type: 'article',
+                  resources: predictive_search.resources.articles
+                %}
+              {%- endif -%}
+
+              {%- if predictive_search.resources.products.size == 0 and search_results_count == 0 and predictive_search.resources.queries.size == 0 -%}
+                <div class="predictive-search-results__no-results">
+                  <p>{{ 'content.search_results_no_results' | t: terms: predictive_search.terms }}</p>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- else -%}
+          <div class="predictive-search-results__no-results">
+            <p>{{ 'content.search_results_no_results' | t: terms: predictive_search.terms }}</p>
+          </div>
+        {%- endif -%}
+      {% else %}
+        {%- unless settings.predictive_search_hide_recently_viewed -%}
+          {%- liquid
+            assign recently_viewed_title = 'content.recently_viewed_products' | t
+            assign products = search.results
+            assign new_products_ids = blank
+
+            if search.terms contains 'id:'
+              assign new_products_ids = search.terms | replace: 'id:', '' | split: ' OR '
+            endif
+          -%}
+          {% render 'predictive-search-products-list',
+            title: recently_viewed_title,
+            products: products,
+            order_ids: new_products_ids,
+            limit: 4
+          %}
+        {%- endunless -%}      {% endif %}
+
+      {% if predictive_search.performed %}
+        {%- if search_results_count > 0 -%}
+          {% assign total_results = predictive_search.resources.products.size | plus: predictive_search.resources.collections.size | plus: predictive_search.resources.pages.size | plus: predictive_search.resources.articles.size %}
+          {% assign single_result_url = null %}
+          {% if total_results == 1 %}
+            {% if predictive_search.resources.products.size == 1 %}
+              {% assign single_result_url = predictive_search.resources.products.first.url %}
+            {% elsif predictive_search.resources.collections.size == 1 %}
+              {% assign single_result_url = predictive_search.resources.collections.first.url %}
+            {% elsif predictive_search.resources.pages.size == 1 %}
+              {% assign single_result_url = predictive_search.resources.pages.first.url %}
+            {% elsif predictive_search.resources.articles.size == 1 %}
+              {% assign single_result_url = predictive_search.resources.articles.first.url %}
+            {% endif %}
+          {% endif %}
+
+          {% if single_result_url %}
+            <input type="hidden" name="single-result-url" value="{{ single_result_url }}">
+          {% endif %}
+        {%- endif -%}
+      {% endif %}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.predictive_search",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "@theme"
+    }
+  ]
+}
+{% endschema %}

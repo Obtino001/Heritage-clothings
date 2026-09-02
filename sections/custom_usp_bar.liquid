@@ -1,0 +1,245 @@
+<section class="usp_slider">
+  <div class="page-width">
+    <div class="usp_grid_ swiper">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          <div class="usp_item_ swiper-slide" {{ block.shopify_attributes }}>
+            {% if block.settings.icon %}
+              <div class="usp_icon_">
+                {{ block.settings.icon | image_url: width: 120 | image_tag: loading: 'lazy' }}
+              </div>
+            {% endif %}
+
+            <div class="usp_content_">
+              <h3 class="usp_title_">
+                {{ block.settings.heading }}
+              </h3>
+
+              <p class="usp_text_">
+                {{ block.settings.text }}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="usp_pagination"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+      .usp_slider {
+    width: 100%;
+    padding: 55px 0 ;
+  }
+
+  .usp_slider .usp_grid_ {
+    background: {{section.settings.box_bg | default: '#F5EFE6'}};
+    border-radius: 20px;
+    padding: 30px;
+  }
+
+  .usp_slider .usp_grid_ .swiper-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4,auto);
+    gap: 40px;
+  }
+
+  .usp_slider .usp_item_ {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .usp_slider .usp_icon_ img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .usp_slider .usp_title_ {
+    color: #000;
+  
+
+    margin: 0 0 8px;
+
+  font-family: "Neue Montreal Med" !important;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: left;
+
+  }
+
+  .usp_slider .usp_text_ {
+    color: #000;
+ 
+    margin: 8px 0 0;
+font-weight: 400;
+font-size: 14px;
+line-height: 100%;
+letter-spacing: 0%;
+
+  }
+.usp_pagination{
+ display: none;
+}
+ 
+ .usp_pagination .swiper-pagination-bullet{
+   min-width: 25px;
+   background: #D1D1D1 !important;
+   border-radius: 5px !important;
+   height: 3px;
+}
+ .usp_pagination .swiper-pagination-bullet.swiper-pagination-bullet-active{
+   background: #000 !important;
+}
+
+
+  @media screen and (max-width: 1280px) {
+
+    .usp_slider .usp_grid_ .swiper-wrapper {
+      display: flex;
+      gap: 0;
+    }
+     .usp_pagination.swiper-pagination-clickable{
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+.usp_slider {
+
+    padding: 45px 0;
+}
+.usp_slider .usp_item_ {
+  
+    justify-content: center;
+}
+
+
+  
+  }
+
+@media screen and (max-width: 500px) {
+  .usp_slider .usp_grid_ {
+   
+    padding: 14px 10px 12px 10px;
+}
+
+    .usp_slider {
+        padding: 30px 0;
+    }
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+<script>
+  let uspSwiper = null;
+
+  function initUspSlider() {
+    const slider = document.querySelector('.usp_grid_');
+    if (!slider || typeof Swiper === 'undefined') return;
+
+    if (window.innerWidth < 1281) {
+      if (!uspSwiper) {
+        uspSwiper = new Swiper(slider, {
+          slidesPerView: 1,
+          spaceBetween: 20,
+          pagination: { el: '.usp_pagination', clickable: true },
+          autoplay: { delay: 4000, disableOnInteraction: false },
+          breakpoints: {
+            0:   { slidesPerView: 1 },
+            480: { slidesPerView: 1 },
+            640: { slidesPerView: 2 },
+            990: { slidesPerView: 3 },
+          },
+        });
+      }
+    } else if (uspSwiper) {
+      uspSwiper.destroy(true, true);
+      uspSwiper = null;
+    }
+  }
+
+  // Load Swiper only once, then init
+  function loadSwiperThenInit() {
+    if (typeof Swiper !== 'undefined') {
+      initUspSlider();
+      return;
+    }
+    if (document.getElementById('swiper-cdn-js')) {
+      // Already loading from another section — wait for it
+      document.getElementById('swiper-cdn-js').addEventListener('load', initUspSlider);
+      return;
+    }
+    const s = document.createElement('script');
+    s.id = 'swiper-cdn-js';
+    s.src = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+    s.onload = initUspSlider;
+    document.head.appendChild(s);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadSwiperThenInit);
+  window.addEventListener('resize', initUspSlider);
+</script>
+
+{% schema %}
+{
+  "name": "USP Slider",
+  "settings": [
+    {
+      "type": "color",
+      "id": "box_bg",
+      "label": "Background Color",
+      "default": "#EBE6DD"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "USP Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "100% Heavy Cotton"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description",
+          "default": "Premium, breathable & made to last"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "USP Slider",
+      "blocks": [
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

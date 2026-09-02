@@ -1,0 +1,381 @@
+{%- liquid
+  assign item_count = 0
+  for block in section.blocks
+    if block.type == 'value_item'
+      assign item_count = item_count | plus: 1
+    endif
+  endfor
+-%}
+
+<section
+  id="WhatWeStandFor-{{ section.id }}"
+  class="wwsf-section"
+  {{ section.shopify_attributes }}
+  style="
+    --wwsf-padding-top: {{ section.settings.padding_top }}px;
+    --wwsf-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --wwsf-heading-color: {{ section.settings.heading_color }};
+    --wwsf-text-color: {{ section.settings.text_color }};
+    --wwsf-icon-color: {{ section.settings.icon_color }};
+    --wwsf-icon-ring: {{ section.settings.icon_ring_color }};
+    --wwsf-max-width: {{ section.settings.content_max_width }}px;
+    --wwsf-column-gap: {{ section.settings.column_gap }}px;
+  "
+>
+  <div class="wwsf-section__inner page-width">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="wwsf-section__heading">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if item_count > 0 -%}
+      <ul class="wwsf-grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'value_item' -%}
+            <li class="wwsf-grid__item" {{ block.shopify_attributes }}>
+              <div class="wwsf-item">
+                <div class="wwsf-item__icon-wrap" aria-hidden="true">
+                  {%- if block.settings.custom_icon != blank -%}
+                    {{
+                      block.settings.custom_icon
+                      | image_url: width: 120
+                      | image_tag:
+                        class: 'wwsf-item__custom-icon',
+                        loading: 'lazy',
+                        widths: '60, 80, 120',
+                        sizes: '56px',
+                        alt: ''
+                    }}
+                  {%- else -%}
+                    <span class="wwsf-item__icon">
+                      {%- case block.settings.icon -%}
+                        {%- when 'heritage' -%}
+                          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 36.5c-6.2-4.8-11-9.2-11-14.8 0-4.2 3.2-7.2 7.1-7.2 2.2 0 4.2 1.1 5.4 2.8 1.2-1.7 3.2-2.8 5.4-2.8 3.9 0 7.1 3 7.1 7.2 0 5.6-4.8 10-11 14.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                          </svg>
+                        {%- when 'everyday' -%}
+                          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M30 10c-2.8 4.2-8.2 7.2-14 8.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M30 10c-1.2 6.8-4.8 12.8-10 17.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M30 10c-5.2 2.2-10.8 2.8-16 1.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M14 29.2l-2.2 8.8 8.2-3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        {%- when 'standout' -%}
+                          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 14h12l-1.2 4H19.2L18 14z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            <path d="M17 18h14v2c0 7.5-3.5 12-7 12s-7-4.5-7-12v-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            <path d="M24 32v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M20 36h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M14 12l1 1.5M34 12l-1 1.5M24 8v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                          </svg>
+                        {%- else -%}
+                          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="1.5"/>
+                          </svg>
+                      {%- endcase -%}
+                    </span>
+                  {%- endif -%}
+                </div>
+
+                {%- if block.settings.title != blank -%}
+                  <h3 class="wwsf-item__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+
+                {%- if block.settings.text != blank -%}
+                  <p class="wwsf-item__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- elsif request.design_mode -%}
+      <p class="wwsf-section__placeholder">Add Value item blocks to build this section.</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .wwsf-section {
+    padding-top: var(--wwsf-padding-top, 72px);
+    padding-bottom: var(--wwsf-padding-bottom, 72px);
+    background: #ffffff;
+    color: var(--wwsf-text-color, #111111);
+  }
+
+  .wwsf-section__inner {
+    max-width: var(--wwsf-max-width, 1120px);
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .wwsf-section__heading {
+    margin: 0 0 56px;
+    text-align: center;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--wwsf-heading-color, #111111);
+  }
+
+  .wwsf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--wwsf-column-gap, 48px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .wwsf-grid__item {
+    min-width: 0;
+  }
+
+  .wwsf-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .wwsf-item__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 28px;
+    border-radius: 50%;
+    color: var(--wwsf-icon-color, #111111);
+    flex-shrink: 0;
+  }
+
+  .wwsf-item__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+  }
+
+  .wwsf-item__icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .wwsf-item__custom-icon {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .wwsf-item__title {
+  margin: 0 0 16px; font-size: 18px; font-weight: 700; line-height: 1.35; letter-spacing: .01em; color: var(--wwsf-heading-color, #111111); font-family: Neue Montreal !important;
+  }
+
+  .wwsf-item__text {
+    margin: 0;
+    max-width: 300px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+    color: var(--wwsf-text-color, #111111);
+  }
+
+  .wwsf-section__placeholder {
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    color: #888888;
+  }
+
+  @media (max-width: 989px) {
+    .wwsf-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .wwsf-section__heading {
+      margin-bottom: 40px;
+    }
+  }
+
+  @media (min-width: 990px) and (max-width: 1099px) {
+    .wwsf-grid {
+      gap: 32px;
+    }
+
+    .wwsf-item__text {
+      max-width: 260px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "What We Stand For",
+  "tag": "section",
+  "class": "section-what-we-stand-for",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What We Stand For"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 900,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 1120
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "min": 24,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading and title color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Body text color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "icon_ring_color",
+      "label": "Icon circle border color",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "blocks": [
+    {
+      "type": "value_item",
+      "name": "Value item",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "default": "heritage",
+          "options": [
+            { "value": "heritage", "label": "Heart (Celebrate Heritage)" },
+            { "value": "everyday", "label": "Feather (Everyday Life)" },
+            { "value": "standout", "label": "Dress (Stand Out)" }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "Custom icon image",
+          "info": "Optional. Replaces the selected icon above."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Celebrate Heritage"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Description",
+          "default": "Our collections are inspired by the beauty, vibrancy, and cultural richness of African fashion and print traditions."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "What We Stand For",
+      "category": "Storytelling",
+      "blocks": [
+        {
+          "type": "value_item",
+          "settings": {
+            "icon": "heritage",
+            "title": "Celebrate Heritage",
+            "text": "Our collections are inspired by the beauty, vibrancy, and cultural richness of African fashion and print traditions."
+          }
+        },
+        {
+          "type": "value_item",
+          "settings": {
+            "icon": "everyday",
+            "title": "Made For Everyday Life",
+            "text": "Our clothing is designed for work, celebrations, social occasions, and everyday wear, offering versatility without compromising style."
+          }
+        },
+        {
+          "type": "value_item",
+          "settings": {
+            "icon": "standout",
+            "title": "Designed To Stand Out",
+            "text": "Bold colours, striking prints, and confident silhouettes designed to make every occasion memorable."
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
