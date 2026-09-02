@@ -577,8 +577,11 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
     bottom: 130px;
 }
 
-/* Size chart pages: Horizon page-width-content is ~42rem and img { width: 100% }
-   stretches chart/model photos. Restore the previous full-page RTE layout. */
+/* Size chart pages: use the same content width as the rest of the site. */
+.page--size-chart.page-width-normal {
+  --page-content-width: 1340px;
+}
+
 .page--size-chart .text-block > * {
   max-inline-size: none;
 }
@@ -586,16 +589,16 @@ swym-storefront-layout-notification#swym-storefront-layout-notification.swym-sto
 .page--size-chart .page-content,
 .page-content--size-chart {
   width: 100%;
-  max-width: 1100px;
-  margin-inline: auto;
+  max-width: none;
 }
 
 .page--size-chart .page-content img,
 .page-content--size-chart img {
-  width: auto;
+  width: 100%;
   max-width: 100%;
   height: auto;
   margin-inline: auto;
+  display: block;
 }
 
 /* Adult chart: keep models/copy from the page, hide the Horizon-restyled RTE table. */
