@@ -465,10 +465,20 @@ body .bacurr-cur-blocker {  z-index: 6; position: relative; }
   white-space: nowrap;
   padding-inline: 10px !important;
 }
-.size-chart-modal__body { width: 100%; overflow-y: hidden; overflow-x: overlay; }
+.size-chart-modal__body {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
 @media (max-width: 749px) {
   .size-chart-modal__body:has(.size-chart-table--mobile) {
     overflow-x: hidden;
+  }
+  .size-chart-modal__body:has(.size-chart-table--mobile) .size-chart-scroll {
+    overflow: visible !important;
+  }
+  .size-chart-modal__body .size-chart-table--mobile {
+    min-width: 0 !important;
   }
 }
 footer span.footer-utilities__text { text-wrap-mode: wrap; white-space: break-spaces; overflow: hidden; }

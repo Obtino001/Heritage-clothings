@@ -624,7 +624,7 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
   }
 
   .size-chart-modal__panel .size-chart-modal__body {
-        margin-top: 35px;
+    margin-top: 35px;
     position: relative;
     z-index: 1;
     width: min(720px, 100%);
@@ -634,6 +634,7 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
     border-radius: 8px;
     padding: 28px 24px 24px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    -webkit-overflow-scrolling: touch;
   }
 
   .size-chart-modal__close {
@@ -687,6 +688,8 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
     .size-chart-modal__body .size-chart-table--mobile {
       display: table !important;
       width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
       table-layout: fixed !important;
     }
 
@@ -703,9 +706,23 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
     }
 
     .size-chart-modal__body .size-chart-table--mobile th:first-child,
-    .size-chart-modal__body .size-chart-table--mobile td:first-child {
-      width: 32.5% !important;
+    .size-chart-modal__body .size-chart-table--mobile td:first-child,
+    .size-chart-modal__body .size-chart-table--mobile .sticky-col {
+      width: 28% !important;
+      position: static !important;
       text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .size-chart-modal__body .size-chart-table--mobile td:first-child strong {
+      display: block;
+    }
+
+    .size-chart-modal__body .size-chart-table--mobile td:first-child span {
+      display: block;
+      font-size: 9px !important;
+      color: #8a8a8a !important;
+      white-space: normal !important;
     }
 
     .size-chart-mobile-value {
@@ -714,6 +731,15 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
 
     .size-chart-mobile-value + .size-chart-mobile-value {
       margin-top: 2px;
+    }
+
+    .size-chart-modal__body:has(.size-chart-table--mobile) .size-chart-scroll {
+      overflow: visible !important;
+    }
+
+    .size-chart-modal__body:has(.size-chart-table--mobile) .size-chart-swipe-hint,
+    .size-chart-modal__body--stacked .size-chart-swipe-hint {
+      display: none !important;
     }
 
     .size-chart-modal__body .size-chart-table--scroll-fallback {
@@ -726,11 +752,25 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
     }
 
     .size-chart-modal {
-      padding: 16px;
+      padding: 8px;
+      align-items: stretch;
     }
 
     .size-chart-modal__panel {
-      padding: 24px 16px 16px;
+      width: 100%;
+      max-width: none;
+      padding: 0;
+      max-height: none;
+      top: auto;
+    }
+
+    .size-chart-modal__panel .size-chart-modal__body {
+      width: 100%;
+      max-height: calc(100vh - 72px);
+      margin-top: 48px;
+      padding: 12px 12px 20px;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
   }
 {% endstylesheet %}
@@ -759,10 +799,13 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
       var tables = modal.querySelectorAll('.size-chart-modal__body table');
 
       tables.forEach(function (table) {
+        if (table.classList.contains('size-chart-table--mobile')) return;
         if (table.dataset.ppMobileChartInit === 'true') return;
         table.dataset.ppMobileChartInit = 'true';
 
-        var rows = Array.from(table.rows || []);
+        var rows = Array.from(table.rows || []).filter(function (row) {
+          return row.cells && row.cells.length > 0;
+        });
         var hasExpectedShape = rows.length > 1 && rows.every(function (row) {
           var cells = Array.from(row.cells || []);
           return cells.length === 7 && cells.every(function (cell) {
@@ -780,6 +823,8 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
         mobileTable.removeAttribute('data-pp-mobile-chart-init');
         mobileTable.classList.add('size-chart-table--mobile');
         mobileTable.setAttribute('data-mobile-size-chart', '');
+        mobileTable.style.minWidth = '0';
+        mobileTable.style.width = '100%';
 
         Array.from(mobileTable.rows).forEach(function (row) {
           var cells = Array.from(row.cells);
@@ -802,7 +847,13 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
         });
 
         table.classList.add('size-chart-table--desktop');
-        table.insertAdjacentElement('afterend', mobileTable);
+        // Page HTML wraps the table in .size-chart-scroll with min-width: 640px.
+        // Mount the collapsed table outside that wrapper or it still pans.
+        var scrollWrap = table.closest('.size-chart-scroll');
+        var mount = scrollWrap || table;
+        mount.insertAdjacentElement('afterend', mobileTable);
+        var body = table.closest('.size-chart-modal__body');
+        if (body) body.classList.add('size-chart-modal__body--stacked');
       });
     }
 
@@ -814,6 +865,7 @@ h2.size-chart_heading { font-size: 22px; margin: 0; }
           if (!modal) return;
           modal.hidden = false;
           document.body.style.overflow = 'hidden';
+          initMobileSizeChart(modal);
           var closeBtn = modal.querySelector('.size-chart-modal__close');
           if (closeBtn) closeBtn.focus();
         });
