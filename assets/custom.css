@@ -25,9 +25,18 @@ body, p, a, span{font-family: "Neue Montreal" !important;}
 
 div#smile-ui-container, .stamped-launcher-button{ z-index: 9999 !important; }
 body:has(.menu-drawer-container[open]) #smile-ui-container,
-body:has(.menu-drawer-container[open]) .stamped-launcher-button {
+body:has(.menu-drawer-container[open]) .stamped-launcher-button,
+body:has(.menu-drawer-container[open]) smile-ui-lite-launcher,
+body:has(.menu-drawer-container[open]) [id^="smile-"] {
   visibility: hidden !important;
+  opacity: 0 !important;
   pointer-events: none !important;
+}
+.menu-drawer-container[open] .menu-drawer__backdrop {
+  z-index: 10000 !important;
+}
+.menu-drawer-container[open] .menu-drawer {
+  z-index: 10001 !important;
 }
 
 .page-width { max-width: 1340px; padding: 0 20px; margin: 0 auto; }

@@ -1002,13 +1002,7 @@
     overflow: initial;
   }
 
-  /* Keep the open slide above later siblings (e.g. ACCESSORIES leaking over SHOP ALL). */
-  .menu-drawer--has-submenu-opened .menu-drawer__navigation > .menu-drawer__menu > .menu-drawer__list-item:has(> details.menu-open) {
-    position: relative;
-    z-index: 2;
-  }
-
-  .menu-drawer--has-submenu-opened .menu-drawer__navigation > .menu-drawer__menu > .menu-drawer__list-item:not(:has(> details.menu-open)) {
+  .menu-drawer--has-submenu-opened > .menu-drawer__close-button {
     visibility: hidden;
     pointer-events: none;
   }
