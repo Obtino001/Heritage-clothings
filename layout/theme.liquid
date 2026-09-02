@@ -54,6 +54,22 @@
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }} {% if localization.country.iso_code == 'GB' %}country_uk{% endif %}">
+    {%- if template.name == '404' and pages['reedem-points'].url != blank -%}
+      <script>
+        (function () {
+          var path = (window.location.pathname || '').replace(/\/+$/, '').toLowerCase();
+          var aliases = [
+            '/pages/redeem-points',
+            '/pages/redeem-my-points',
+            '/pages/redeem-point',
+            '/pages/reedem-point'
+          ];
+          if (aliases.indexOf(path) !== -1) {
+            window.location.replace({{ pages['reedem-points'].url | json }});
+          }
+        })();
+      </script>
+    {%- endif -%}
     <script>
       (function () {
         fetch('/browsing_context_suggestions.json')

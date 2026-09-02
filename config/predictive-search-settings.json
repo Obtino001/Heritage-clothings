@@ -23,7 +23,7 @@
   },
   {
     "type": "paragraph",
-    "content": "Configure the search dropdown shown before a customer types. Create menus in Online Store > Navigation for popular searches, brands, and blog articles."
+    "content": "Every search dropdown list is merchant-controlled. Uncheck a section to hide it. Nothing is auto-filled from all Shopify collections."
   },
   {
     "type": "checkbox",
@@ -32,71 +32,132 @@
     "default": true
   },
   {
+    "type": "checkbox",
+    "id": "predictive_search_show_result_suggestions",
+    "label": "Show search suggestions while typing",
+    "default": true
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_show_result_collections",
+    "label": "Show matching collections while typing",
+    "default": true
+  },
+  {
+    "type": "header",
+    "content": "Popular searches"
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_show_searches",
+    "label": "Show popular searches",
+    "default": true
+  },
+  {
     "type": "text",
     "id": "predictive_search_searches_title",
-    "label": "Popular searches heading",
+    "label": "Heading",
     "default": "Popular searches"
   },
   {
     "type": "link_list",
     "id": "predictive_search_popular_searches",
-    "label": "Popular searches menu"
+    "label": "Menu"
+  },
+  {
+    "type": "collection_list",
+    "id": "predictive_search_search_collections",
+    "label": "Collections",
+    "limit": 6
+  },
+  {
+    "type": "header",
+    "content": "Popular collections"
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_show_collections",
+    "label": "Show popular collections",
+    "default": true
   },
   {
     "type": "text",
     "id": "predictive_search_brands_title",
-    "label": "Popular brands heading",
-    "default": "Popular brands"
+    "label": "Heading",
+    "default": "Popular collections"
   },
   {
     "type": "link_list",
     "id": "predictive_search_popular_brands",
-    "label": "Popular brands menu"
+    "label": "Menu"
+  },
+  {
+    "type": "collection_list",
+    "id": "predictive_search_popular_collections",
+    "label": "Collections",
+    "limit": 8
+  },
+  {
+    "type": "header",
+    "content": "Stories"
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_show_stories",
+    "label": "Show stories",
+    "default": true
   },
   {
     "type": "text",
     "id": "predictive_search_blogs_title",
-    "label": "Featured blogs heading",
+    "label": "Heading",
     "default": "Stories"
   },
   {
     "type": "link_list",
     "id": "predictive_search_popular_blogs",
-    "label": "Featured blogs menu",
-    "info": "Add links to blog articles (recommended). Used first if set."
+    "label": "Menu"
   },
   {
     "type": "blog",
     "id": "predictive_search_featured_blog",
-    "label": "Blog for featured articles",
-    "info": "Select your Stories blog. Falls back to handle \"blog\" if empty."
+    "label": "Blog"
   },
   {
     "type": "text",
     "id": "predictive_search_featured_blog_handle",
-    "label": "Blog handle fallback",
-    "default": "blog",
-    "info": "Used when no blog is selected above. Your Stories blog URL is /blogs/blog"
+    "label": "Blog handle",
+    "default": "blog"
   },
   {
     "type": "range",
     "id": "predictive_search_blogs_limit",
-    "label": "Number of blog articles",
+    "label": "Number of articles",
     "min": 2,
     "max": 6,
     "step": 1,
     "default": 2
   },
   {
+    "type": "header",
+    "content": "Trending"
+  },
+  {
+    "type": "checkbox",
+    "id": "predictive_search_show_trending",
+    "label": "Show trending",
+    "default": true
+  },
+  {
     "type": "text",
     "id": "predictive_search_trending_title",
-    "label": "Trending heading",
+    "label": "Heading",
     "default": "Trending"
   },
   {
     "type": "collection_list",
     "id": "predictive_search_trending_collections",
-    "label": "Trending collections",
+    "label": "Collections",
     "limit": 4
   }
 ]

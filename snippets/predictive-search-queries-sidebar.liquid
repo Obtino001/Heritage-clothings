@@ -7,29 +7,22 @@
 
 
 {%- liquid
-
   assign suggestions_title = settings.predictive_search_suggestions_title | default: 'Popular searches'
-
+  assign collections_title = settings.predictive_search_brands_title | default: 'Popular collections'
   assign has_queries = false
-
   assign has_collections = false
 
+  unless settings.predictive_search_show_result_suggestions == false
+    if queries.size > 0
+      assign has_queries = true
+    endif
+  endunless
 
-
-  if queries.size > 0
-
-    assign has_queries = true
-
-  endif
-
-
-
-  if collections.size > 0
-
-    assign has_collections = true
-
-  endif
-
+  unless settings.predictive_search_show_result_collections == false
+    if collections.size > 0
+      assign has_collections = true
+    endif
+  endunless
 -%}
 
 
@@ -100,7 +93,7 @@
 
       <div class="predictive-search-sidebar__heading-row">
 
-        <h4 class="predictive-search-sidebar__heading">{{ 'content.search_results_resource_collections' | t }}</h4>
+        <h4 class="predictive-search-sidebar__heading">{{ collections_title }}</h4>
 
         <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
 

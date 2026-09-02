@@ -1,65 +1,75 @@
 {%- doc -%}
   Left sidebar for predictive search empty state.
-  Popular searches, brands, and blog links.
-  Falls back to shop collections/blog when theme settings are empty.
+  Popular searches, collections, and stories — only from theme settings.
 {%- enddoc -%}
 
 {%- liquid
+  assign show_searches = true
+  assign show_collections = true
+  assign show_stories = true
+  if settings.predictive_search_show_searches == false
+    assign show_searches = false
+  endif
+  if settings.predictive_search_show_collections == false
+    assign show_collections = false
+  endif
+  if settings.predictive_search_show_stories == false
+    assign show_stories = false
+  endif
+
   assign searches_menu = linklists[settings.predictive_search_popular_searches]
-  assign brands_menu = linklists[settings.predictive_search_popular_brands]
+  assign collections_menu = linklists[settings.predictive_search_popular_brands]
   assign blogs_menu = linklists[settings.predictive_search_popular_blogs]
+  assign search_collections = settings.predictive_search_search_collections
+  assign popular_collections = settings.predictive_search_popular_collections
   assign featured_blog = blogs[settings.predictive_search_featured_blog]
 
   if featured_blog == blank and settings.predictive_search_featured_blog_handle != blank
     assign featured_blog = blogs[settings.predictive_search_featured_blog_handle]
   endif
 
-  if featured_blog == blank
-    assign featured_blog = blogs['blog']
-  endif
-
-  if featured_blog == blank
-    assign featured_blog = blogs['stories']
-  endif
-
-  if featured_blog == blank
-    assign featured_blog = blogs['news']
-  endif
-
-  if featured_blog == blank
-    for blog in blogs
-      if blog.articles.size > 0
-        assign featured_blog = blog
-        break
-      endif
-    endfor
-  endif
-
-  if featured_blog == blank
-    assign featured_blog = blogs.first
-  endif
-
   assign searches_title = settings.predictive_search_searches_title | default: 'Popular searches'
-  assign brands_title = settings.predictive_search_brands_title | default: 'Popular collections'
+  assign collections_title = settings.predictive_search_brands_title | default: 'Popular collections'
   assign blogs_title = settings.predictive_search_blogs_title | default: 'Stories'
   assign blogs_limit = settings.predictive_search_blogs_limit | default: 2
+  if blogs_limit > 2
+    assign blogs_display_limit = 2
+  else
+    assign blogs_display_limit = blogs_limit
+  endif
 
   assign has_searches_menu = false
-  assign has_brands_menu = false
+  assign has_search_collections = false
+  assign has_collections_menu = false
+  assign has_popular_collections = false
   assign has_blogs_menu = false
+
   if searches_menu.links.size > 0
     assign has_searches_menu = true
   endif
-  if brands_menu.links.size > 0
-    assign has_brands_menu = true
+  if search_collections != blank and search_collections.size > 0
+    assign has_search_collections = true
+  endif
+  if collections_menu.links.size > 0
+    assign has_collections_menu = true
+  endif
+  if popular_collections != blank and popular_collections.size > 0
+    assign has_popular_collections = true
   endif
   if blogs_menu.links.size > 0
     assign has_blogs_menu = true
   endif
+
+  assign blog_source = 'none'
+  if has_blogs_menu
+    assign blog_source = 'menu'
+  elsif featured_blog != blank and featured_blog.articles.size > 0
+    assign blog_source = 'featured'
+  endif
 -%}
 
 <div class="predictive-search-sidebar">
-  {%- if has_searches_menu -%}
+  {%- if show_searches and has_searches_menu -%}
     <section class="predictive-search-sidebar__section">
       <div class="predictive-search-sidebar__heading-row">
         <h4 class="predictive-search-sidebar__heading">{{ searches_title }}</h4>
@@ -77,88 +87,63 @@
               </span>
               <span class="predictive-search-sidebar__text">{{ link.title }}</span>
               <span class="predictive-search-sidebar__arrow" aria-hidden="true">
-              
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21" height="21" width="21">
-<path fill-opacity="0.6" fill="#212121" d="M6.99674 14.4966V8.17496L13.9076 15.0858C14.2334 15.4116 14.7609 15.4116 15.0859 15.0858C15.4109 14.76 15.4117 14.2325 15.0859 13.9075L8.17508 6.99662H14.4967C14.9567 6.99662 15.3301 6.62329 15.3301 6.16329C15.3301 5.70329 14.9567 5.32996 14.4967 5.32996H6.16341C5.70341 5.32996 5.33008 5.70329 5.33008 6.16329V14.4966C5.33008 14.9566 5.70341 15.33 6.16341 15.33C6.62341 15.33 6.99674 14.9566 6.99674 14.4966Z"></path>
-</svg>
-
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21" height="21" width="21">
+                  <path fill-opacity="0.6" fill="#212121" d="M6.99674 14.4966V8.17496L13.9076 15.0858C14.2334 15.4116 14.7609 15.4116 15.0859 15.0858C15.4109 14.76 15.4117 14.2325 15.0859 13.9075L8.17508 6.99662H14.4967C14.9567 6.99662 15.3301 6.62329 15.3301 6.16329C15.3301 5.70329 14.9567 5.32996 14.4967 5.32996H6.16341C5.70341 5.32996 5.33008 5.70329 5.33008 6.16329V14.4966C5.33008 14.9566 5.70341 15.33 6.16341 15.33C6.62341 15.33 6.99674 14.9566 6.99674 14.4966Z"></path>
+                </svg>
               </span>
             </a>
           </li>
         {%- endfor -%}
       </ul>
     </section>
-  {%- else -%}
-    {%- assign fallback_search_count = 0 -%}
-    {%- for collection in collections -%}
-      {%- if fallback_search_count >= 2 -%}
-        {%- break -%}
-      {%- endif -%}
-      {%- if collection.all_products_count > 0 -%}
-        {%- assign fallback_search_count = fallback_search_count | plus: 1 -%}
-      {%- endif -%}
-    {%- endfor -%}
-
-    {%- if fallback_search_count > 0 -%}
-      <section class="predictive-search-sidebar__section">
-        <div class="predictive-search-sidebar__heading-row">
-          <h4 class="predictive-search-sidebar__heading">{{ searches_title }}</h4>
-          <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
-        </div>
-        <ul class="predictive-search-sidebar__list list-unstyled" role="list">
-          {%- assign rendered_searches = 0 -%}
-          {%- for collection in collections -%}
-            {%- if rendered_searches >= 2 -%}
-              {%- break -%}
-            {%- endif -%}
-            {%- if collection.all_products_count > 0 -%}
-              <li>
-                <a
-                  href="{{ routes.search_url }}?q={{ collection.title | url_param_escape }}"
-                  class="predictive-search-sidebar__link predictive-search-sidebar__link--search"
-                >
-                  <span class="predictive-search-sidebar__icon" aria-hidden="true">
-                  
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 20" height="20" width="21">
-<path stroke="black" fill="black" d="M9.5 1.62242C8.61872 1.62242 7.74607 1.796 6.93187 2.13325C6.11768 2.4705 5.37788 2.96482 4.75472 3.58798C4.13157 4.21113 3.63725 4.95093 3.3 5.76513C2.96275 6.57932 2.78917 7.45197 2.78917 8.33325C2.78917 9.21453 2.96275 10.0872 3.3 10.9014C3.63725 11.7156 4.13157 12.4554 4.75472 13.0785C5.37788 13.7017 6.11768 14.196 6.93187 14.5333C7.74607 14.8705 8.61872 15.0441 9.5 15.0441C11.2798 15.0441 12.9868 14.3371 14.2453 13.0785C15.5038 11.82 16.2108 10.1131 16.2108 8.33325C16.2108 6.55343 15.5038 4.8465 14.2453 3.58798C12.9868 2.32945 11.2798 1.62242 9.5 1.62242ZM2 8.33325C2 6.34413 2.79018 4.43647 4.1967 3.02995C5.60322 1.62343 7.51088 0.833252 9.5 0.833252C11.4891 0.833252 13.3968 1.62343 14.8033 3.02995C16.2098 4.43647 17 6.34413 17 8.33325C17 10.3224 16.2098 12.23 14.8033 13.6366C13.3968 15.0431 11.4891 15.8333 9.5 15.8333C7.51088 15.8333 5.60322 15.0431 4.1967 13.6366C2.79018 12.23 2 10.3224 2 8.33325Z" clip-rule="evenodd" fill-rule="evenodd"></path>
-<path stroke="black" fill="black" d="M14.6732 12.9165L20.0398 18.2832C20.0796 18.3217 20.1112 18.3677 20.133 18.4185C20.1548 18.4694 20.1662 18.5241 20.1666 18.5794C20.167 18.6348 20.1563 18.6896 20.1353 18.7408C20.1143 18.792 20.0833 18.8384 20.0441 18.8775C20.0049 18.9166 19.9584 18.9474 19.9072 18.9683C19.8559 18.9892 19.801 18.9997 19.7457 18.9991C19.6904 18.9985 19.6357 18.987 19.5849 18.9651C19.5341 18.9432 19.4882 18.9114 19.4498 18.8715L14.084 13.5057L14.6732 12.9165Z" clip-rule="evenodd" fill-rule="evenodd"></path>
-</svg>
-
-                  </span>
-                  <span class="predictive-search-sidebar__text">{{ collection.title }}</span>
-                  <span class="predictive-search-sidebar__arrow" aria-hidden="true">
-                   
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21" height="21" width="21">
-<path fill-opacity="0.6" fill="#212121" d="M6.99674 14.4966V8.17496L13.9076 15.0858C14.2334 15.4116 14.7609 15.4116 15.0859 15.0858C15.4109 14.76 15.4117 14.2325 15.0859 13.9075L8.17508 6.99662H14.4967C14.9567 6.99662 15.3301 6.62329 15.3301 6.16329C15.3301 5.70329 14.9567 5.32996 14.4967 5.32996H6.16341C5.70341 5.32996 5.33008 5.70329 5.33008 6.16329V14.4966C5.33008 14.9566 5.70341 15.33 6.16341 15.33C6.62341 15.33 6.99674 14.9566 6.99674 14.4966Z"></path>
-</svg>
-
-                  </span>
-                </a>
-              </li>
-              {%- assign rendered_searches = rendered_searches | plus: 1 -%}
-            {%- endif -%}
-          {%- endfor -%}
-        </ul>
-      </section>
-    {%- endif -%}
-  {%- endif -%}
-
-  {%- if has_brands_menu -%}
+  {%- elsif show_searches and has_search_collections -%}
     <section class="predictive-search-sidebar__section">
       <div class="predictive-search-sidebar__heading-row">
-        <h4 class="predictive-search-sidebar__heading">{{ brands_title }}</h4>
+        <h4 class="predictive-search-sidebar__heading">{{ searches_title }}</h4>
         <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
       </div>
       <ul class="predictive-search-sidebar__list list-unstyled" role="list">
-        {%- for link in brands_menu.links -%}
+        {%- for collection in search_collections -%}
+          {%- if collection != blank -%}
+            <li>
+              <a
+                href="{{ routes.search_url }}?q={{ collection.title | url_param_escape }}"
+                class="predictive-search-sidebar__link predictive-search-sidebar__link--search"
+              >
+                <span class="predictive-search-sidebar__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                  </svg>
+                </span>
+                <span class="predictive-search-sidebar__text">{{ collection.title }}</span>
+                <span class="predictive-search-sidebar__arrow" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21" height="21" width="21">
+                    <path fill-opacity="0.6" fill="#212121" d="M6.99674 14.4966V8.17496L13.9076 15.0858C14.2334 15.4116 14.7609 15.4116 15.0859 15.0858C15.4109 14.76 15.4117 14.2325 15.0859 13.9075L8.17508 6.99662H14.4967C14.9567 6.99662 15.3301 6.62329 15.3301 6.16329C15.3301 5.70329 14.9567 5.32996 14.4967 5.32996H6.16341C5.70341 5.32996 5.33008 5.70329 5.33008 6.16329V14.4966C5.33008 14.9566 5.70341 15.33 6.16341 15.33C6.62341 15.33 6.99674 14.9566 6.99674 14.4966Z"></path>
+                  </svg>
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </section>
+  {%- endif -%}
+
+  {%- if show_collections and has_collections_menu -%}
+    <section class="predictive-search-sidebar__section">
+      <div class="predictive-search-sidebar__heading-row">
+        <h4 class="predictive-search-sidebar__heading">{{ collections_title }}</h4>
+        <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
+      </div>
+      <ul class="predictive-search-sidebar__list list-unstyled" role="list">
+        {%- for link in collections_menu.links -%}
           <li>
             <a href="{{ link.url }}" class="predictive-search-sidebar__link predictive-search-sidebar__link--brand">
               <span class="predictive-search-sidebar__icon" aria-hidden="true">
-                
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" height="20" width="20">
-<path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.66667" stroke="#212121" d="M3.33398 5.00004C3.33398 4.55801 3.50958 4.13409 3.82214 3.82153C4.1347 3.50897 4.55862 3.33337 5.00065 3.33337H6.66732C7.10935 3.33337 7.53327 3.50897 7.84583 3.82153C8.15839 4.13409 8.33398 4.55801 8.33398 5.00004V6.66671C8.33398 7.10873 8.15839 7.53266 7.84583 7.84522C7.53327 8.15778 7.10935 8.33337 6.66732 8.33337H5.00065C4.55862 8.33337 4.1347 8.15778 3.82214 7.84522C3.50958 7.53266 3.33398 7.10873 3.33398 6.66671V5.00004ZM11.6673 5.00004C11.6673 4.55801 11.8429 4.13409 12.1555 3.82153C12.468 3.50897 12.892 3.33337 13.334 3.33337H15.0007C15.4427 3.33337 15.8666 3.50897 16.1792 3.82153C16.4917 4.13409 16.6673 4.55801 16.6673 5.00004V6.66671C16.6673 7.10873 16.4917 7.53266 16.1792 7.84522C15.8666 8.15778 15.4427 8.33337 15.0007 8.33337H13.334C12.892 8.33337 12.468 8.15778 12.1555 7.84522C11.8429 7.53266 11.6673 7.10873 11.6673 6.66671V5.00004ZM3.33398 13.3334C3.33398 12.8913 3.50958 12.4674 3.82214 12.1549C4.1347 11.8423 4.55862 11.6667 5.00065 11.6667H6.66732C7.10935 11.6667 7.53327 11.8423 7.84583 12.1549C8.15839 12.4674 8.33398 12.8913 8.33398 13.3334V15C8.33398 15.4421 8.15839 15.866 7.84583 16.1786C7.53327 16.4911 7.10935 16.6667 6.66732 16.6667H5.00065C4.55862 16.6667 4.1347 16.4911 3.82214 16.1786C3.50958 15.866 3.33398 15.4421 3.33398 15V13.3334ZM11.6673 13.3334C11.6673 12.8913 11.8429 12.4674 12.1555 12.1549C12.468 11.8423 12.892 11.6667 13.334 11.6667H15.0007C15.4427 11.6667 15.8666 11.8423 16.1792 12.1549C16.4917 12.4674 16.6673 12.8913 16.6673 13.3334V15C16.6673 15.4421 16.4917 15.866 16.1792 16.1786C15.8666 16.4911 15.4427 16.6667 15.0007 16.6667H13.334C12.892 16.6667 12.468 16.4911 12.1555 16.1786C11.8429 15.866 11.6673 15.4421 11.6673 15V13.3334Z"></path>
-</svg>
-
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" height="20" width="20">
+                  <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.66667" stroke="#212121" d="M3.33398 5.00004C3.33398 4.55801 3.50958 4.13409 3.82214 3.82153C4.1347 3.50897 4.55862 3.33337 5.00065 3.33337H6.66732C7.10935 3.33337 7.53327 3.50897 7.84583 3.82153C8.15839 4.13409 8.33398 4.55801 8.33398 5.00004V6.66671C8.33398 7.10873 8.15839 7.53266 7.84583 7.84522C7.53327 8.15778 7.10935 8.33337 6.66732 8.33337H5.00065C4.55862 8.33337 4.1347 8.15778 3.82214 7.84522C3.50958 7.53266 3.33398 7.10873 3.33398 6.66671V5.00004ZM11.6673 5.00004C11.6673 4.55801 11.8429 4.13409 12.1555 3.82153C12.468 3.50897 12.892 3.33337 13.334 3.33337H15.0007C15.4427 3.33337 15.8666 3.50897 16.1792 3.82153C16.4917 4.13409 16.6673 4.55801 16.6673 5.00004V6.66671C16.6673 7.10873 16.4917 7.53266 16.1792 7.84522C15.8666 8.15778 15.4427 8.33337 15.0007 8.33337H13.334C12.892 8.33337 12.468 8.15778 12.1555 7.84522C11.8429 7.53266 11.6673 7.10873 11.6673 6.66671V5.00004ZM3.33398 13.3334C3.33398 12.8913 3.50958 12.4674 3.82214 12.1549C4.1347 11.8423 4.55862 11.6667 5.00065 11.6667H6.66732C7.10935 11.6667 7.53327 11.8423 7.84583 12.1549C8.15839 12.4674 8.33398 12.8913 8.33398 13.3334V15C8.33398 15.4421 8.15839 15.866 7.84583 16.1786C7.53327 16.4911 7.10935 16.6667 6.66732 16.6667H5.00065C4.55862 16.6667 4.1347 16.4911 3.82214 16.1786C3.50958 15.866 3.33398 15.4421 3.33398 15V13.3334ZM11.6673 13.3334C11.6673 12.8913 11.8429 12.4674 12.1555 12.1549C12.468 11.8423 12.892 11.6667 13.334 11.6667H15.0007C15.4427 11.6667 15.8666 11.8423 16.1792 12.1549C16.4917 12.4674 16.6673 12.8913 16.6673 13.3334V15C16.6673 15.4421 16.4917 15.866 16.1792 16.1786C15.8666 16.4911 15.4427 16.6667 15.0007 16.6667H13.334C12.892 16.6667 12.468 16.4911 12.1555 16.1786C11.8429 15.866 11.6673 15.4421 11.6673 15V13.3334Z"></path>
+                </svg>
               </span>
               <span class="predictive-search-sidebar__text">{{ link.title }}</span>
             </a>
@@ -166,78 +151,32 @@
         {%- endfor -%}
       </ul>
     </section>
-  {%- else -%}
-    {%- assign fallback_brand_count = 0 -%}
-    {%- for collection in collections -%}
-      {%- if fallback_brand_count >= 4 -%}
-        {%- break -%}
-      {%- endif -%}
-      {%- if collection.all_products_count > 0 -%}
-        {%- assign fallback_brand_count = fallback_brand_count | plus: 1 -%}
-      {%- endif -%}
-    {%- endfor -%}
-
-    {%- if fallback_brand_count > 2 -%}
-      <section class="predictive-search-sidebar__section">
-        <div class="predictive-search-sidebar__heading-row">
-          <h4 class="predictive-search-sidebar__heading">{{ brands_title }}</h4>
-          <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
-        </div>
-        <ul class="predictive-search-sidebar__list list-unstyled" role="list">
-          {%- assign rendered_brands = 0 -%}
-          {%- assign skipped_brands = 0 -%}
-          {%- for collection in collections -%}
-            {%- if rendered_brands >= 2 -%}
-              {%- break -%}
-            {%- endif -%}
-            {%- if collection.all_products_count > 0 -%}
-              {%- if skipped_brands < 2 -%}
-                {%- assign skipped_brands = skipped_brands | plus: 1 -%}
-                {%- continue -%}
-              {%- endif -%}
-              <li>
-                <a href="{{ collection.url }}" class="predictive-search-sidebar__link predictive-search-sidebar__link--brand">
-                  <span class="predictive-search-sidebar__icon" aria-hidden="true">
-                   
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" height="20" width="20">
-<path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.66667" stroke="#212121" d="M3.33398 5.00004C3.33398 4.55801 3.50958 4.13409 3.82214 3.82153C4.1347 3.50897 4.55862 3.33337 5.00065 3.33337H6.66732C7.10935 3.33337 7.53327 3.50897 7.84583 3.82153C8.15839 4.13409 8.33398 4.55801 8.33398 5.00004V6.66671C8.33398 7.10873 8.15839 7.53266 7.84583 7.84522C7.53327 8.15778 7.10935 8.33337 6.66732 8.33337H5.00065C4.55862 8.33337 4.1347 8.15778 3.82214 7.84522C3.50958 7.53266 3.33398 7.10873 3.33398 6.66671V5.00004ZM11.6673 5.00004C11.6673 4.55801 11.8429 4.13409 12.1555 3.82153C12.468 3.50897 12.892 3.33337 13.334 3.33337H15.0007C15.4427 3.33337 15.8666 3.50897 16.1792 3.82153C16.4917 4.13409 16.6673 4.55801 16.6673 5.00004V6.66671C16.6673 7.10873 16.4917 7.53266 16.1792 7.84522C15.8666 8.15778 15.4427 8.33337 15.0007 8.33337H13.334C12.892 8.33337 12.468 8.15778 12.1555 7.84522C11.8429 7.53266 11.6673 7.10873 11.6673 6.66671V5.00004ZM3.33398 13.3334C3.33398 12.8913 3.50958 12.4674 3.82214 12.1549C4.1347 11.8423 4.55862 11.6667 5.00065 11.6667H6.66732C7.10935 11.6667 7.53327 11.8423 7.84583 12.1549C8.15839 12.4674 8.33398 12.8913 8.33398 13.3334V15C8.33398 15.4421 8.15839 15.866 7.84583 16.1786C7.53327 16.4911 7.10935 16.6667 6.66732 16.6667H5.00065C4.55862 16.6667 4.1347 16.4911 3.82214 16.1786C3.50958 15.866 3.33398 15.4421 3.33398 15V13.3334ZM11.6673 13.3334C11.6673 12.8913 11.8429 12.4674 12.1555 12.1549C12.468 11.8423 12.892 11.6667 13.334 11.6667H15.0007C15.4427 11.6667 15.8666 11.8423 16.1792 12.1549C16.4917 12.4674 16.6673 12.8913 16.6673 13.3334V15C16.6673 15.4421 16.4917 15.866 16.1792 16.1786C15.8666 16.4911 15.4427 16.6667 15.0007 16.6667H13.334C12.892 16.6667 12.468 16.4911 12.1555 16.1786C11.8429 15.866 11.6673 15.4421 11.6673 15V13.3334Z"></path>
-</svg>
-
-                  </span>
-                  <span class="predictive-search-sidebar__text">{{ collection.title }}</span>
-                </a>
-              </li>
-              {%- assign rendered_brands = rendered_brands | plus: 1 -%}
-            {%- endif -%}
-          {%- endfor -%}
-        </ul>
-      </section>
-    {%- endif -%}
+  {%- elsif show_collections and has_popular_collections -%}
+    <section class="predictive-search-sidebar__section">
+      <div class="predictive-search-sidebar__heading-row">
+        <h4 class="predictive-search-sidebar__heading">{{ collections_title }}</h4>
+        <span class="predictive-search-sidebar__heading-line" aria-hidden="true"></span>
+      </div>
+      <ul class="predictive-search-sidebar__list list-unstyled" role="list">
+        {%- for collection in popular_collections -%}
+          {%- if collection != blank -%}
+            <li>
+              <a href="{{ collection.url }}" class="predictive-search-sidebar__link predictive-search-sidebar__link--brand">
+                <span class="predictive-search-sidebar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" height="20" width="20">
+                    <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.66667" stroke="#212121" d="M3.33398 5.00004C3.33398 4.55801 3.50958 4.13409 3.82214 3.82153C4.1347 3.50897 4.55862 3.33337 5.00065 3.33337H6.66732C7.10935 3.33337 7.53327 3.50897 7.84583 3.82153C8.15839 4.13409 8.33398 4.55801 8.33398 5.00004V6.66671C8.33398 7.10873 8.15839 7.53266 7.84583 7.84522C7.53327 8.15778 7.10935 8.33337 6.66732 8.33337H5.00065C4.55862 8.33337 4.1347 8.15778 3.82214 7.84522C3.50958 7.53266 3.33398 7.10873 3.33398 6.66671V5.00004ZM11.6673 5.00004C11.6673 4.55801 11.8429 4.13409 12.1555 3.82153C12.468 3.50897 12.892 3.33337 13.334 3.33337H15.0007C15.4427 3.33337 15.8666 3.50897 16.1792 3.82153C16.4917 4.13409 16.6673 4.55801 16.6673 5.00004V6.66671C16.6673 7.10873 16.4917 7.53266 16.1792 7.84522C15.8666 8.15778 15.4427 8.33337 15.0007 8.33337H13.334C12.892 8.33337 12.468 8.15778 12.1555 7.84522C11.8429 7.53266 11.6673 7.10873 11.6673 6.66671V5.00004ZM3.33398 13.3334C3.33398 12.8913 3.50958 12.4674 3.82214 12.1549C4.1347 11.8423 4.55862 11.6667 5.00065 11.6667H6.66732C7.10935 11.6667 7.53327 11.8423 7.84583 12.1549C8.15839 12.4674 8.33398 12.8913 8.33398 13.3334V15C8.33398 15.4421 8.15839 15.866 7.84583 16.1786C7.53327 16.4911 7.10935 16.6667 6.66732 16.6667H5.00065C4.55862 16.6667 4.1347 16.4911 3.82214 16.1786C3.50958 15.866 3.33398 15.4421 3.33398 15V13.3334ZM11.6673 13.3334C11.6673 12.8913 11.8429 12.4674 12.1555 12.1549C12.468 11.8423 12.892 11.6667 13.334 11.6667H15.0007C15.4427 11.6667 15.8666 11.8423 16.1792 12.1549C16.4917 12.4674 16.6673 12.8913 16.6673 13.3334V15C16.6673 15.4421 16.4917 15.866 16.1792 16.1786C15.8666 16.4911 15.4427 16.6667 15.0007 16.6667H13.334C12.892 16.6667 12.468 16.4911 12.1555 16.1786C11.8429 15.866 11.6673 15.4421 11.6673 15V13.3334Z"></path>
+                  </svg>
+                </span>
+                <span class="predictive-search-sidebar__text">{{ collection.title }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </section>
   {%- endif -%}
 
-  {%- liquid
-    assign blog_source = 'none'
-
-    if has_blogs_menu
-      assign blog_source = 'menu'
-    elsif featured_blog != blank and featured_blog.articles.size > 0
-      assign blog_source = 'featured'
-    else
-      for blog in blogs
-        if blog.articles.size > 0
-          assign blog_source = 'any_blog'
-          break
-        endif
-      endfor
-    endif
-
-    assign blogs_display_limit = blogs_limit
-    if blogs_display_limit > 2
-      assign blogs_display_limit = 2
-    endif
-  -%}
-
-  {%- if blog_source != 'none' -%}
+  {%- if show_stories and blog_source != 'none' -%}
     <section class="predictive-search-sidebar__section predictive-search-sidebar__section--blogs">
       <div class="predictive-search-sidebar__heading-row">
         <h4 class="predictive-search-sidebar__heading">{{ blogs_title }}</h4>
@@ -248,23 +187,9 @@
           {%- for link in blogs_menu.links limit: blogs_display_limit -%}
             {% render 'predictive-search-sidebar-blog-item', url: link.url, title: link.title %}
           {%- endfor -%}
-        {%- elsif blog_source == 'featured' -%}
+        {%- else -%}
           {%- for article in featured_blog.articles limit: blogs_display_limit -%}
             {% render 'predictive-search-sidebar-blog-item', url: article.url, title: article.title %}
-          {%- endfor -%}
-        {%- elsif blog_source == 'any_blog' -%}
-          {%- assign blogs_rendered = 0 -%}
-          {%- for blog in blogs -%}
-            {%- if blogs_rendered >= blogs_display_limit -%}
-              {%- break -%}
-            {%- endif -%}
-            {%- for article in blog.articles -%}
-              {%- if blogs_rendered >= blogs_display_limit -%}
-                {%- break -%}
-              {%- endif -%}
-              {% render 'predictive-search-sidebar-blog-item', url: article.url, title: article.title %}
-              {%- assign blogs_rendered = blogs_rendered | plus: 1 -%}
-            {%- endfor -%}
           {%- endfor -%}
         {%- endif -%}
       </ul>
