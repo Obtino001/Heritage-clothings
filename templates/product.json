@@ -353,7 +353,7 @@
               "name": "Colour swatches",
               "settings": {
                 "label_name": "Colour",
-                "option_name": "Colour:",
+                "option_name": "",
                 "hide_unavailable": false,
                 "thumbnail_width": 88,
                 "thumbnail_radius": 14,

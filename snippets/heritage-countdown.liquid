@@ -1,0 +1,298 @@
+{% doc %}
+  Sale countdown timer for the announcement bar and product page.
+
+  @param {string} style - `bar` or `product`
+  @param {string} heading - Heading text
+  @param {string} end_datetime - End date `YYYY-MM-DD HH:MM`
+  @param {boolean} [hide_when_ended] - Hide the timer after it ends
+  @param {string} [ended_message] - Message shown when the sale has ended
+  @param {string} [background_color] - Product card background
+  @param {string} [text_color] - Product heading color
+  @param {string} [digit_background] - Digit tile background
+  @param {string} [digit_color] - Digit tile text color
+  @param {string} [shopify_attributes] - Theme editor attributes
+
+  @example
+  {% render 'heritage-countdown', style: 'bar', heading: 'Sale ends in', end_datetime: '2026-09-15 23:59' %}
+{% enddoc %}
+
+{%- liquid
+  assign countdown_style = style | default: 'product'
+  assign countdown_end = end_datetime | strip
+  assign hide_ended = hide_when_ended
+  if hide_ended == nil
+    assign hide_ended = true
+  endif
+  assign end_iso = countdown_end | replace: ' ', 'T'
+-%}
+
+{%- if countdown_end != blank -%}
+  <heritage-countdown
+    class="hc-countdown hc-countdown--{{ countdown_style }}"
+    data-end="{{ end_iso | escape }}"
+    data-hide-ended="{% if hide_ended %}true{% else %}false{% endif %}"
+    style="
+      {% if background_color != blank %}--hc-bg: {{ background_color }};{% endif %}
+      {% if text_color != blank %}--hc-text: {{ text_color }};{% endif %}
+      {% if digit_background != blank %}--hc-digit-bg: {{ digit_background }};{% endif %}
+      {% if digit_color != blank %}--hc-digit: {{ digit_color }};{% endif %}
+    "
+    {{ shopify_attributes }}
+  >
+    {%- if heading != blank -%}
+      <p class="hc-countdown__heading">{{ heading | escape }}</p>
+    {%- endif -%}
+    <div class="hc-countdown__units" role="timer" aria-live="polite" aria-atomic="true">
+      <div class="hc-countdown__unit">
+        <span class="hc-countdown__digit" data-days>00</span>
+        <span class="hc-countdown__label">{{ 'countdown.days' | t }}</span>
+      </div>
+      <span class="hc-countdown__sep" aria-hidden="true">:</span>
+      <div class="hc-countdown__unit">
+        <span class="hc-countdown__digit" data-hours>00</span>
+        <span class="hc-countdown__label">{{ 'countdown.hours' | t }}</span>
+      </div>
+      <span class="hc-countdown__sep" aria-hidden="true">:</span>
+      <div class="hc-countdown__unit">
+        <span class="hc-countdown__digit" data-minutes>00</span>
+        <span class="hc-countdown__label">{{ 'countdown.minutes' | t }}</span>
+      </div>
+      <span class="hc-countdown__sep" aria-hidden="true">:</span>
+      <div class="hc-countdown__unit">
+        <span class="hc-countdown__digit" data-seconds>00</span>
+        <span class="hc-countdown__label">{{ 'countdown.seconds' | t }}</span>
+      </div>
+    </div>
+    {%- if ended_message != blank -%}
+      <p class="hc-countdown__ended" hidden>{{ ended_message | escape }}</p>
+    {%- endif -%}
+  </heritage-countdown>
+{%- endif -%}
+
+{% stylesheet %}
+  .hc-countdown {
+    --hc-bg: #f5efe6;
+    --hc-text: #2f4a36;
+    --hc-digit-bg: #2f4a36;
+    --hc-digit: #ffffff;
+  }
+
+  .hc-countdown__heading {
+    margin: 0;
+    color: var(--hc-text);
+  }
+
+  .hc-countdown__units {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hc-countdown__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hc-countdown__digit {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .hc-countdown__label {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .hc-countdown__sep {
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .hc-countdown__ended {
+    margin: 0;
+  }
+
+  .hc-countdown.is-ended .hc-countdown__units,
+  .hc-countdown.is-ended .hc-countdown__heading {
+    display: none;
+  }
+
+  .hc-countdown.is-ended .hc-countdown__ended {
+    display: block;
+  }
+
+  .hc-countdown--bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    color: var(--color-foreground);
+  }
+
+  .hc-countdown--bar .hc-countdown__heading {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hc-countdown--bar .hc-countdown__units {
+    gap: 4px;
+  }
+
+  .hc-countdown--bar .hc-countdown__digit {
+    min-width: 1.7em;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
+    color: var(--color-foreground);
+    font-size: 13px;
+  }
+
+  .hc-countdown--bar .hc-countdown__label {
+    margin-top: 3px;
+    font-size: 9px;
+    color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+  }
+
+  .hc-countdown--bar .hc-countdown__sep {
+    padding-bottom: 12px;
+    font-size: 12px;
+    opacity: 0.55;
+  }
+
+  .hc-countdown--bar .hc-countdown__ended {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hc-countdown--product {
+    display: block;
+    width: 100%;
+    padding: 16px 18px 18px;
+    background: var(--hc-bg);
+    border: 1px solid color-mix(in srgb, var(--hc-text) 12%, transparent);
+    border-radius: 12px;
+  }
+
+  .hc-countdown--product .hc-countdown__heading {
+    margin-bottom: 14px;
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+
+  .hc-countdown--product .hc-countdown__units {
+    gap: 6px;
+  }
+
+  .hc-countdown--product .hc-countdown__unit {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .hc-countdown--product .hc-countdown__digit {
+    width: 100%;
+    padding: 12px 4px;
+    border-radius: 8px;
+    background: var(--hc-digit-bg);
+    color: var(--hc-digit);
+    font-size: 22px;
+  }
+
+  .hc-countdown--product .hc-countdown__label {
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--hc-text);
+  }
+
+  .hc-countdown--product .hc-countdown__sep {
+    display: none;
+  }
+
+  .hc-countdown--product .hc-countdown__ended {
+    color: var(--hc-text);
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  @media screen and (max-width: 749px) {
+    .hc-countdown--bar .hc-countdown__heading {
+      font-size: 11px;
+    }
+
+    .hc-countdown--product .hc-countdown__digit {
+      font-size: 18px;
+      padding: 10px 2px;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  class HeritageCountdown extends HTMLElement {
+    connectedCallback() {
+      const raw = this.dataset.end || '';
+      const parsed = Date.parse(raw);
+      this.endAt = Number.isNaN(parsed) ? Date.parse(raw.replace(' ', 'T')) : parsed;
+
+      this.daysEl = this.querySelector('[data-days]');
+      this.hoursEl = this.querySelector('[data-hours]');
+      this.minutesEl = this.querySelector('[data-minutes]');
+      this.secondsEl = this.querySelector('[data-seconds]');
+      this.endedEl = this.querySelector('.hc-countdown__ended');
+
+      if (!this.endAt) {
+        this.hidden = true;
+        return;
+      }
+
+      this.tick();
+      this.timer = setInterval(() => this.tick(), 1000);
+    }
+
+    disconnectedCallback() {
+      clearInterval(this.timer);
+    }
+
+    pad(value) {
+      return String(Math.max(0, value)).padStart(2, '0');
+    }
+
+    tick() {
+      const diff = this.endAt - Date.now();
+
+      if (diff <= 0) {
+        this.classList.add('is-ended');
+        if (this.endedEl) this.endedEl.hidden = false;
+        if (this.dataset.hideEnded === 'true') this.hidden = true;
+        clearInterval(this.timer);
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      if (this.daysEl) this.daysEl.textContent = this.pad(days);
+      if (this.hoursEl) this.hoursEl.textContent = this.pad(hours);
+      if (this.minutesEl) this.minutesEl.textContent = this.pad(minutes);
+      if (this.secondsEl) this.secondsEl.textContent = this.pad(seconds);
+    }
+  }
+
+  if (!customElements.get('heritage-countdown')) {
+    customElements.define('heritage-countdown', HeritageCountdown);
+  }
+{% endjavascript %}
