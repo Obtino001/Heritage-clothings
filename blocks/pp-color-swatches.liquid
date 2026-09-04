@@ -129,6 +129,7 @@
     class="pp-color-swatches"
     id="pp-color-swatches-{{ block.id }}"
     data-color-mode="{{ color_mode }}"
+    data-current-handle="{{ product.handle }}"
     {% if color_mode == 'option' %}data-option-position="{{ color_option.position }}"{% endif %}
     style="
       --pp-cs-thumb-width: {{ block_settings.thumbnail_width }}px;
@@ -167,18 +168,18 @@
                 sizes: '(max-width: 749px) 72px, 96px',
                 alt: current_color_label,
                 class: 'pp-color-swatches__img',
-                loading: 'eager',
-                fetchpriority: 'high'
+                loading: 'eager'
             }}
           {%- else -%}
             <span class="pp-color-swatches__fallback">{{ current_color_label | slice: 0, 1 }}</span>
           {%- endif -%}
         </a>
         {%- for linked_product in linked_color_products -%}
-          {%- if linked_product.id == product.id -%}
-            {%- continue -%}
-          {%- endif -%}
           {%- liquid
+            assign is_current_linked = false
+            if linked_product.id == product.id or linked_product.handle == product.handle
+              assign is_current_linked = true
+            endif
             assign linked_label = linked_product.metafields.custom.color_name.value | default: linked_product.metafields.custom.color_name | strip
             if linked_label == blank
               assign linked_label = linked_product.title
@@ -187,6 +188,9 @@
             assign linked_image = linked_variant.featured_media.preview_image | default: linked_variant.image | default: linked_product.featured_media.preview_image | default: linked_product.featured_image
             assign linked_url = linked_variant.url | default: linked_product.url
             assign show_linked = true
+            if is_current_linked
+              assign show_linked = false
+            endif
             if block_settings.hide_unavailable and linked_product.available == false
               assign show_linked = false
             endif
@@ -482,7 +486,41 @@
       if (!root) return;
 
       var colorMode = root.dataset.colorMode;
-      if (colorMode === 'linked') return;
+      if (colorMode === 'linked') {
+        var list = root.querySelector('.pp-color-swatches__list');
+        if (!list) return;
+
+        var currentHandle = (root.dataset.currentHandle || '').toLowerCase();
+        var pagePath = (window.location.pathname || '').replace(/\/$/, '').toLowerCase();
+        var items = Array.prototype.slice.call(list.querySelectorAll('.pp-color-swatches__item'));
+
+        function isCurrentSwatch(item) {
+          var href = (item.getAttribute('href') || '').split('?')[0].replace(/\/$/, '').toLowerCase();
+          if (item.classList.contains('is-selected')) return true;
+          if (currentHandle && href.indexOf('/products/' + currentHandle) !== -1) return true;
+          return href === pagePath;
+        }
+
+        var current = null;
+        for (var i = 0; i < items.length; i++) {
+          if (isCurrentSwatch(items[i])) {
+            current = items[i];
+            break;
+          }
+        }
+
+        items.forEach(function (item) {
+          var active = item === current;
+          item.classList.toggle('is-selected', active);
+          if (active) item.setAttribute('aria-current', 'page');
+          else item.removeAttribute('aria-current');
+        });
+
+        if (current && list.firstElementChild !== current) {
+          list.insertBefore(current, list.firstElementChild);
+        }
+        return;
+      }
       var optionPosition = parseInt(root.dataset.optionPosition, 10);
       var swatches = root.querySelectorAll('[data-color-swatch]');
       var labelEl = root.querySelector('[data-color-label]');
@@ -789,16 +827,18 @@
     border: var(--pp-cs-border-width, 2px) solid transparent;
     border-radius: var(--pp-cs-thumb-radius, 14px);
     background: #f5f5f5;
-    overflow: hidden;
+    overflow: visible;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, opacity 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   }
 
   .pp-color-swatches__item.is-selected {
+    order: -1;
     border-color: #111111;
+    box-shadow: 0 0 0 1px #111111;
   }
 
   .pp-color-swatches__item.is-unavailable {
@@ -833,6 +873,7 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: inherit;
   }
 
   .pp-color-swatches__fallback {
