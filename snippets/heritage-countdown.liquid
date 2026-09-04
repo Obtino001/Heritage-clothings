@@ -248,6 +248,58 @@
     text-align: left;
   }
 
+  .hc-countdown--banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 18px;
+    width: 100%;
+    color: var(--hc-text, #2f4a36);
+  }
+
+  .hc-countdown--banner .hc-countdown__heading {
+    color: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hc-countdown--banner .hc-countdown__units {
+    gap: 6px;
+  }
+
+  .hc-countdown--banner .hc-countdown__digit {
+    min-width: 2.4em;
+    padding: 10px 8px;
+    border-radius: 6px;
+    background: var(--hc-digit-bg, #2f4a36);
+    color: var(--hc-digit, #ffffff);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .hc-countdown--banner .hc-countdown__label {
+    margin-top: 5px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--hc-text, #2f4a36) 72%, transparent);
+  }
+
+  .hc-countdown--banner .hc-countdown__sep {
+    padding-bottom: 16px;
+    font-size: 18px;
+    opacity: 0.4;
+  }
+
+  .hc-countdown--banner .hc-countdown__ended {
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   @media screen and (max-width: 749px) {
     .hc-countdown--bar .hc-countdown__heading,
     .hc-countdown--product .hc-countdown__heading {
@@ -257,6 +309,25 @@
     .hc-countdown--bar .hc-countdown__digit,
     .hc-countdown--product .hc-countdown__digit {
       font-size: 12px;
+    }
+
+    .hc-countdown--banner {
+      gap: 8px 12px;
+    }
+
+    .hc-countdown--banner .hc-countdown__heading {
+      font-size: 12px;
+    }
+
+    .hc-countdown--banner .hc-countdown__digit {
+      min-width: 2em;
+      padding: 8px 6px;
+      font-size: 16px;
+    }
+
+    .hc-countdown--banner .hc-countdown__sep {
+      padding-bottom: 14px;
+      font-size: 14px;
     }
   }
 {% endstylesheet %}

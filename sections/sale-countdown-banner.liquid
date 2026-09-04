@@ -1,0 +1,202 @@
+{% doc %}
+  Full-width sale countdown banner. Add it under the header in the theme editor.
+{% enddoc %}
+
+{%- liquid
+  assign countdown_end = section.settings.end_datetime | strip
+  if countdown_end == blank
+    assign countdown_end = '2026-09-15 23:59'
+  endif
+-%}
+
+<div
+  class="sale-countdown-banner section color-custom-{{ section.id }}"
+  style="
+    --scb-bg: {{ section.settings.background_color | default: '#f5efe6' }};
+    --scb-text: {{ section.settings.text_color | default: '#2f4a36' }};
+    --scb-padding-block: {{ section.settings.padding_block }}px;
+  "
+>
+  <div class="sale-countdown-banner__inner page-width">
+    {%- if section.settings.subheading != blank -%}
+      <p class="sale-countdown-banner__subheading">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {% render 'heritage-countdown',
+      style: 'banner',
+      heading: section.settings.heading,
+      end_datetime: countdown_end,
+      hide_when_ended: section.settings.hide_when_ended,
+      ended_message: section.settings.ended_message,
+      text_color: section.settings.text_color,
+      digit_background: section.settings.digit_background,
+      digit_color: section.settings.digit_color
+    %}
+
+    {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+      <a class="sale-countdown-banner__button" href="{{ section.settings.button_link }}">
+        {{ section.settings.button_label | escape }}
+      </a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .sale-countdown-banner {
+    width: 100%;
+    background: var(--scb-bg, #f5efe6);
+    color: var(--scb-text, #2f4a36);
+  }
+
+  .sale-countdown-banner__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 24px;
+    padding-block: var(--scb-padding-block, 16px);
+  }
+
+  .sale-countdown-banner__subheading {
+    margin: 0;
+    width: 100%;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    color: var(--scb-text, #2f4a36);
+  }
+
+  .sale-countdown-banner .hc-countdown--banner {
+    flex: 1 1 auto;
+  }
+
+  .sale-countdown-banner__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    border-radius: 80px;
+    background: #2f4a36;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .sale-countdown-banner__button:hover {
+    background: #24392a;
+    color: #fff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .sale-countdown-banner__subheading {
+      font-size: 14px;
+    }
+
+    .sale-countdown-banner__button {
+      width: 100%;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Sale countdown banner",
+  "tag": "section",
+  "class": "sale-countdown-banner-section",
+  "enabled_on": {
+    "templates": ["*"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Sale ends in"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "20% sitewide"
+    },
+    {
+      "type": "text",
+      "id": "end_datetime",
+      "label": "End date and time",
+      "default": "2026-09-15 23:59",
+      "info": "Use YYYY-MM-DD HH:MM"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_ended",
+      "label": "Hide when sale ends",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ended_message",
+      "label": "Ended message",
+      "default": "This sale has ended"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop sale"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5efe6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2f4a36"
+    },
+    {
+      "type": "color",
+      "id": "digit_background",
+      "label": "Number background",
+      "default": "#2f4a36"
+    },
+    {
+      "type": "color",
+      "id": "digit_color",
+      "label": "Number color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_block",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale countdown banner"
+    }
+  ]
+}
+{% endschema %}
