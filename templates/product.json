@@ -324,6 +324,20 @@
                 "price_tVjtKg"
               ]
             },
+            "sale_countdown_heritage": {
+              "type": "sale-countdown",
+              "name": "Sale countdown",
+              "settings": {
+                "heading": "Sale ends in",
+                "end_datetime": "2026-09-15 23:59",
+                "hide_when_ended": true,
+                "ended_message": "This sale has ended",
+                "background_color": "#f5efe6",
+                "text_color": "#2f4a36",
+                "digit_background": "#2f4a36",
+                "digit_color": "#ffffff"
+              }
+            },
             "klarna_on_site_messaging_app_block_NJBpeL": {
               "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
               "settings": {
@@ -695,6 +709,7 @@
             "pp_product_rating_gLi9py",
             "stamped_reviews_star_rating_badge_eGKHaq",
             "group_icgrde",
+            "sale_countdown_heritage",
             "klarna_on_site_messaging_app_block_NJBpeL",
             "divider_VJhene",
             "pp_color_swatches_PCALqk",

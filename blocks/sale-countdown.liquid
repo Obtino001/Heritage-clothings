@@ -1,0 +1,87 @@
+{% doc %}
+  Product-page sale countdown card.
+
+  @example
+  {% content_for 'block', type: 'sale-countdown', id: 'sale-countdown' %}
+{% enddoc %}
+
+{% render 'heritage-countdown',
+  style: 'product',
+  heading: block.settings.heading,
+  end_datetime: block.settings.end_datetime,
+  hide_when_ended: block.settings.hide_when_ended,
+  ended_message: block.settings.ended_message,
+  background_color: block.settings.background_color,
+  text_color: block.settings.text_color,
+  digit_background: block.settings.digit_background,
+  digit_color: block.settings.digit_color,
+  shopify_attributes: block.shopify_attributes
+%}
+
+{% schema %}
+{
+  "name": "t:names.sale_countdown",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:settings.countdown_heading",
+      "default": "Sale ends in"
+    },
+    {
+      "type": "text",
+      "id": "end_datetime",
+      "label": "t:settings.end_datetime",
+      "default": "2026-09-15 23:59",
+      "info": "t:info.end_datetime"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_ended",
+      "label": "t:settings.hide_when_ended",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ended_message",
+      "label": "t:settings.ended_message",
+      "default": "This sale has ended"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "default": "#f5efe6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text_color",
+      "default": "#2f4a36"
+    },
+    {
+      "type": "color",
+      "id": "digit_background",
+      "label": "t:settings.digit_background",
+      "default": "#2f4a36"
+    },
+    {
+      "type": "color",
+      "id": "digit_color",
+      "label": "t:settings.digit_color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.sale_countdown",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

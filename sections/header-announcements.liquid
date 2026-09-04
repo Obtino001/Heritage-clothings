@@ -30,9 +30,21 @@
 
 {% render 'contrast-override', background_color: section.settings.background_color, section_id: section.id %}
 
+{%- liquid
+  assign countdown_end = section.settings.end_datetime | strip
+  if countdown_end == blank
+    assign countdown_end = '2026-09-15 23:59'
+  endif
+  assign countdown_heading = section.settings.countdown_heading | default: 'Sale ends in'
+  assign show_countdown = false
+  if section.settings.countdown_visibility != 'hidden' and countdown_end != blank
+    assign show_countdown = true
+  endif
+-%}
+
 <div class="section-background color-custom-{{ section.id }}"></div>
 <aside
-  class="announcement-bar spacing-style section section--{{ section.settings.section_width }} color-custom-{{ section.id }}"
+  class="announcement-bar spacing-style section section--{{ section.settings.section_width }} color-custom-{{ section.id }}{% if show_countdown %} announcement-bar--has-countdown{% endif %}"
   style="{% render 'spacing-padding', settings: section.settings %}; --border-bottom-width: {{ section.settings.divider_width }}px;{% if section.settings.divider_color != blank %} --color-border: {{ section.settings.divider_color }};{% endif %}"
 >
   {% liquid
@@ -44,25 +56,70 @@
     endif
   %}
 
-  <announcement-bar-component
-    class="announcement-bar__slider"
-    {% if autoplay == true %}
-      autoplay="{{ section.settings.speed }}" aria-live="polite"
-    {% endif %}
-  >
-    {% if show_arrows %}
-      {% render 'slideshow-arrows', icon_style: 'chevron' %}
-    {% endif %}
+  <div class="announcement-bar__row">
+    {%- if show_countdown -%}
+      {% render 'heritage-countdown',
+        style: 'bar',
+        heading: countdown_heading,
+        end_datetime: countdown_end,
+        hide_when_ended: section.settings.hide_when_ended,
+        ended_message: section.settings.ended_message
+      %}
+    {%- endif -%}
 
-    <div class="announcement-bar__slides">
-      {% content_for 'blocks' %}
-    </div>
-  </announcement-bar-component>
+    <announcement-bar-component
+      class="announcement-bar__slider"
+      {% if autoplay == true %}
+        autoplay="{{ section.settings.speed }}" aria-live="polite"
+      {% endif %}
+    >
+      {% if show_arrows %}
+        {% render 'slideshow-arrows', icon_style: 'chevron' %}
+      {% endif %}
+
+      <div class="announcement-bar__slides">
+        {% content_for 'blocks' %}
+      </div>
+    </announcement-bar-component>
+  </div>
 </aside>
 
 {% stylesheet %}
   .announcement-bar {
     border-block-end: var(--border-bottom-width) solid var(--color-border);
+  }
+
+  .announcement-bar__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 20px;
+    width: 100%;
+  }
+
+  .announcement-bar--has-countdown .announcement-bar__slider {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  .announcement-bar--has-countdown .announcement-bar__slides {
+    max-width: 420px;
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  @media screen and (max-width: 749px) {
+    .announcement-bar--has-countdown .announcement-bar__row {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .announcement-bar--has-countdown .announcement-bar__slider,
+    .announcement-bar--has-countdown .announcement-bar__slides {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 
   .announcement-bar__slider {
@@ -177,6 +234,51 @@
       "max": 10,
       "default": 5,
       "unit": "sec"
+    },
+    {
+      "type": "header",
+      "content": "t:names.sale_countdown"
+    },
+    {
+      "type": "select",
+      "id": "countdown_visibility",
+      "label": "t:settings.countdown_visibility",
+      "options": [
+        {
+          "value": "show",
+          "label": "t:settings.show"
+        },
+        {
+          "value": "hidden",
+          "label": "t:options.hidden"
+        }
+      ],
+      "default": "show"
+    },
+    {
+      "type": "text",
+      "id": "countdown_heading",
+      "label": "t:settings.countdown_heading",
+      "default": "Sale ends in"
+    },
+    {
+      "type": "text",
+      "id": "end_datetime",
+      "label": "t:settings.end_datetime",
+      "default": "2026-09-15 23:59",
+      "info": "t:info.end_datetime"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_ended",
+      "label": "t:settings.hide_when_ended",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ended_message",
+      "label": "t:settings.ended_message",
+      "default": "This sale has ended"
     },
     {
       "type": "header",
