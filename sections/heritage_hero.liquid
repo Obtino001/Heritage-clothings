@@ -165,31 +165,6 @@
         </h1>
       {% endif %}
 
-      {%- liquid
-        assign hero_countdown_end = section.settings.countdown_end | strip
-        if hero_countdown_end == blank
-          assign hero_countdown_end = '2026-09-15 23:59'
-        endif
-        assign hero_countdown_heading = section.settings.countdown_heading | strip
-        if hero_countdown_heading == blank
-          assign hero_countdown_heading = 'Sale ends in'
-        endif
-        assign show_hero_countdown = true
-        if section.settings.show_countdown == false
-          assign show_hero_countdown = false
-        endif
-      -%}
-      {%- if show_hero_countdown -%}
-        {% render 'heritage-countdown',
-          style: 'hero',
-          heading: hero_countdown_heading,
-          end_datetime: hero_countdown_end,
-          hide_when_ended: section.settings.countdown_hide_when_ended,
-          ended_message: section.settings.countdown_ended_message,
-          text_color: '#ffffff'
-        %}
-      {%- endif -%}
-
       <div class="heritage_hero_buttons_">
         {% if section.settings.button_1_text != blank %}
           <a
@@ -681,7 +656,7 @@
       "type": "checkbox",
       "id": "show_countdown",
       "label": "Show countdown",
-      "default": true
+      "default": false
     },
     {
       "type": "text",

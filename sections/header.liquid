@@ -471,6 +471,33 @@ You can learn more about this (and learn how to cleanly revert these changes) at
       {{ navigation_bar }}
     </div>
   {% endif %}
+
+  {%- liquid
+    assign header_countdown_end = section.settings.countdown_end | strip
+    if header_countdown_end == blank
+      assign header_countdown_end = '2026-09-15 23:59'
+    endif
+    assign header_countdown_heading = section.settings.countdown_heading | strip
+    if header_countdown_heading == blank
+      assign header_countdown_heading = 'Sale ends in'
+    endif
+    assign show_header_countdown = true
+    if section.settings.show_countdown == false
+      assign show_header_countdown = false
+    endif
+  -%}
+  {%- if show_header_countdown -%}
+    <div class="header-countdown">
+      {% render 'heritage-countdown',
+        style: 'header',
+        heading: header_countdown_heading,
+        end_datetime: header_countdown_end,
+        hide_when_ended: section.settings.countdown_hide_when_ended,
+        ended_message: section.settings.countdown_ended_message,
+        text_color: section.settings.countdown_text_color
+      %}
+    </div>
+  {%- endif -%}
 </header-component>
 
 <script
@@ -483,6 +510,16 @@ You can learn more about this (and learn how to cleanly revert these changes) at
     --header-height: 60px;
     --header-group-height: var(--header-height);
     --transparent-header-offset-boolean: 0; /* stylelint-disable-line declaration-property-value-disallowed-list */
+  }
+
+  .header-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 8px 16px;
+    border-top: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    background: #fff;
   }
 
   .header {
@@ -1756,6 +1793,47 @@ You can learn more about this (and learn how to cleanly revert these changes) at
       "label": "t:settings.text_color_transparent",
       "placeholder": "t:settings.default",
       "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+    },
+    {
+      "type": "header",
+      "content": "Sale countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show countdown under header",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_heading",
+      "label": "Countdown heading",
+      "default": "Sale ends in"
+    },
+    {
+      "type": "text",
+      "id": "countdown_end",
+      "label": "End date and time",
+      "default": "2026-09-15 23:59",
+      "info": "Use YYYY-MM-DD HH:MM"
+    },
+    {
+      "type": "checkbox",
+      "id": "countdown_hide_when_ended",
+      "label": "Hide when sale ends",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_ended_message",
+      "label": "Ended message",
+      "default": "This sale has ended"
+    },
+    {
+      "type": "color",
+      "id": "countdown_text_color",
+      "label": "Countdown text",
+      "default": "#2f4a36"
     }
   ],
   "presets": []

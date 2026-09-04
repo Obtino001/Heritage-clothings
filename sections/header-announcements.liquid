@@ -28,9 +28,6 @@
   endif
   assign countdown_heading = section.settings.countdown_heading | default: 'Sale ends in'
   assign show_countdown = false
-  if section.settings.countdown_visibility != 'hidden' and countdown_end != blank
-    assign show_countdown = true
-  endif
 -%}
 
 <div class="section-background color-custom-{{ section.id }}"></div>
@@ -261,7 +258,7 @@
           "label": "t:options.hidden"
         }
       ],
-      "default": "show"
+      "default": "hidden"
     },
     {
       "type": "text",

@@ -1,7 +1,7 @@
 {% doc %}
   Sale countdown timer for the announcement bar and product page.
 
-  @param {string} style - `bar`, `product`, `banner`, or `hero`
+  @param {string} style - `bar`, `product`, `banner`, `hero`, or `header`
   @param {string} heading - Heading text
   @param {string} end_datetime - End date `YYYY-MM-DD HH:MM`
   @param {boolean} [hide_when_ended] - Hide the timer after it ends
@@ -371,6 +371,70 @@
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
   }
 
+  .hc-countdown--header {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px 12px;
+    width: 100%;
+    color: var(--hc-text, #2f4a36);
+    font-family: var(--font-heading--family), Lora, Georgia, serif;
+    font-weight: var(--font-heading--weight, 500);
+  }
+
+  .hc-countdown--header .hc-countdown__heading {
+    margin: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  .hc-countdown--header .hc-countdown__units {
+    gap: 6px;
+  }
+
+  .hc-countdown--header .hc-countdown__unit {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .hc-countdown--header .hc-countdown__digit {
+    min-width: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .hc-countdown--header .hc-countdown__label {
+    display: none;
+  }
+
+  .hc-countdown--header .hc-countdown__sep {
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    opacity: 0.45;
+  }
+
+  .hc-countdown--header .hc-countdown__ended {
+    margin: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
   @media screen and (max-width: 749px) {
     .hc-countdown--bar .hc-countdown__heading,
     .hc-countdown--product .hc-countdown__heading {
@@ -420,6 +484,21 @@
     .hc-countdown--hero .hc-countdown__sep {
       padding-bottom: 14px;
       font-size: 22px;
+    }
+
+    .header-countdown {
+      padding: 6px 12px;
+    }
+
+    .hc-countdown--header {
+      gap: 8px 10px;
+    }
+
+    .hc-countdown--header .hc-countdown__heading,
+    .hc-countdown--header .hc-countdown__digit,
+    .hc-countdown--header .hc-countdown__sep,
+    .hc-countdown--header .hc-countdown__ended {
+      font-size: 13px;
     }
   }
 {% endstylesheet %}
