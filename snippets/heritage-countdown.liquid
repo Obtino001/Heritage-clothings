@@ -306,24 +306,27 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 8px 14px;
-    margin-top: 18px;
+    gap: 10px 20px;
+    margin-top: 20px;
     color: #fff;
+    font-family: var(--font-heading--family), Lora, Georgia, serif;
+    font-weight: var(--font-heading--weight, 500);
   }
 
   .hc-countdown--hero .hc-countdown__heading {
     margin: 0;
     color: inherit;
-    font-size: 12px;
+    font-family: inherit;
+    font-size: 22px;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     white-space: nowrap;
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
   }
 
   .hc-countdown--hero .hc-countdown__units {
-    gap: 6px;
+    gap: 8px;
   }
 
   .hc-countdown--hero .hc-countdown__digit {
@@ -331,32 +334,39 @@
     padding: 0;
     background: none;
     color: inherit;
-    font-size: 20px;
+    font-family: inherit;
+    font-size: 36px;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
+    line-height: 1;
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
   }
 
   .hc-countdown--hero .hc-countdown__label {
-    margin-top: 3px;
-    font-size: 9px;
+    margin-top: 4px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.72);
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .hc-countdown--hero .hc-countdown__sep {
-    padding-bottom: 12px;
+    padding-bottom: 18px;
     color: inherit;
-    font-size: 16px;
-    font-weight: 400;
-    opacity: 0.55;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 500;
+    opacity: 0.7;
   }
 
   .hc-countdown--hero .hc-countdown__ended {
     margin: 0;
     color: inherit;
-    font-size: 13px;
-    letter-spacing: 0.1em;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
   }
@@ -391,20 +401,25 @@
 
     .hc-countdown--hero {
       justify-content: center;
-      margin-top: 14px;
+      margin-top: 16px;
+      gap: 8px 14px;
     }
 
     .hc-countdown--hero .hc-countdown__heading {
-      font-size: 11px;
-    }
-
-    .hc-countdown--hero .hc-countdown__digit {
       font-size: 16px;
     }
 
+    .hc-countdown--hero .hc-countdown__digit {
+      font-size: 26px;
+    }
+
+    .hc-countdown--hero .hc-countdown__label {
+      font-size: 11px;
+    }
+
     .hc-countdown--hero .hc-countdown__sep {
-      padding-bottom: 10px;
-      font-size: 14px;
+      padding-bottom: 14px;
+      font-size: 22px;
     }
   }
 {% endstylesheet %}
