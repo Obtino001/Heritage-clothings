@@ -140,6 +140,10 @@
     .announcement-bar__slides {
       width: 100%;
     }
+
+    .announcement-bar__text:first-child {
+      white-space: normal;
+    }
   }
 
   .announcement-bar__slider {
@@ -156,7 +160,7 @@
   .announcement-bar__slides {
     display: block;
     width: calc(100% - var(--button-size) * 2);
-    max-width: 680px;
+    max-width: 72rem;
     margin-inline: auto;
     position: relative;
     overflow: hidden;
@@ -211,6 +215,7 @@
 
   .announcement-bar__text:first-child {
     margin: 0;
+    white-space: nowrap;
   }
 
   .announcement-bar__link {
