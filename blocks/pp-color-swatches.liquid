@@ -824,21 +824,22 @@
     width: var(--pp-cs-thumb-width, 88px);
     aspect-ratio: 4 / 4.6;
     padding: 0;
-    border: var(--pp-cs-border-width, 2px) solid transparent;
+    border: 1px solid #e6e6e6;
     border-radius: var(--pp-cs-thumb-radius, 14px);
     background: #f5f5f5;
-    overflow: visible;
+    overflow: hidden;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    transition: border-color 0.2s ease, opacity 0.2s ease;
   }
 
   .pp-color-swatches__item.is-selected {
     order: -1;
+    border-width: 2px;
     border-color: #111111;
-    box-shadow: 0 0 0 1px #111111;
+    box-shadow: none;
   }
 
   .pp-color-swatches__item.is-unavailable {
