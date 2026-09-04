@@ -165,6 +165,31 @@
         </h1>
       {% endif %}
 
+      {%- liquid
+        assign hero_countdown_end = section.settings.countdown_end | strip
+        if hero_countdown_end == blank
+          assign hero_countdown_end = '2026-09-15 23:59'
+        endif
+        assign hero_countdown_heading = section.settings.countdown_heading | strip
+        if hero_countdown_heading == blank
+          assign hero_countdown_heading = 'Sale ends in'
+        endif
+        assign show_hero_countdown = true
+        if section.settings.show_countdown == false
+          assign show_hero_countdown = false
+        endif
+      -%}
+      {%- if show_hero_countdown -%}
+        {% render 'heritage-countdown',
+          style: 'hero',
+          heading: hero_countdown_heading,
+          end_datetime: hero_countdown_end,
+          hide_when_ended: section.settings.countdown_hide_when_ended,
+          ended_message: section.settings.countdown_ended_message,
+          text_color: '#ffffff'
+        %}
+      {%- endif -%}
+
       <div class="heritage_hero_buttons_">
         {% if section.settings.button_1_text != blank %}
           <a
@@ -260,6 +285,10 @@
           justify-content: center;
         }
 
+        .heritage_hero_[data-content-position='center'] .hc-countdown--hero {
+          justify-content: center;
+        }
+
         .heritage_hero_[data-content-position='right'] .page-width {
           justify-content: end;
         }
@@ -274,6 +303,10 @@
         }
 
         .heritage_hero_[data-content-position='right'] .heritage_hero_buttons_ {
+          justify-content: flex-end;
+        }
+
+        .heritage_hero_[data-content-position='right'] .hc-countdown--hero {
           justify-content: flex-end;
         }
 
@@ -335,7 +368,7 @@
         .heritage_hero_buttons_ {
           display: flex;
           gap: 16px;
-          margin-top: 40px;
+          margin-top: 28px;
           flex-wrap: wrap;
         }
 
@@ -471,6 +504,11 @@
       justify-content: center;
     }
 
+    .heritage_hero_[data-content-position='center'] .hc-countdown--hero,
+    .heritage_hero_[data-content-position='right'] .hc-countdown--hero {
+      justify-content: center;
+    }
+
     .heritage_hero_content_ {
     max-width: 100%;
 
@@ -495,6 +533,10 @@
     width: 100%;
     justify-content: center;
   }
+    .heritage_hero_ .hc-countdown--hero {
+      width: 100%;
+      justify-content: center;
+    }
     .heritage_hero_button_ {
         padding: 12px 10px;
         min-width: 150px;
@@ -630,6 +672,41 @@
         }
       ],
       "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Sale countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show countdown",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_heading",
+      "label": "Countdown heading",
+      "default": "Sale ends in"
+    },
+    {
+      "type": "text",
+      "id": "countdown_end",
+      "label": "End date and time",
+      "default": "2026-09-15 23:59",
+      "info": "Use YYYY-MM-DD HH:MM"
+    },
+    {
+      "type": "checkbox",
+      "id": "countdown_hide_when_ended",
+      "label": "Hide when sale ends",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_ended_message",
+      "label": "Ended message",
+      "default": "This sale has ended"
     }
   ],
   "presets": [
