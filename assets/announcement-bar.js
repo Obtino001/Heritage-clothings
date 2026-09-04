@@ -132,8 +132,10 @@ export class AnnouncementBar extends Component {
 
     slides.forEach((slide, index) => {
       const isActive = index === relativeIndex;
+      slide.classList.toggle('is-active', isActive);
       slide.setAttribute('aria-hidden', `${!isActive}`);
       slide.toggleAttribute('hidden', !isActive);
+      slide.style.display = isActive ? '' : 'none';
     });
 
     this.setAttribute('data-ready', '');

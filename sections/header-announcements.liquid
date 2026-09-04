@@ -14,26 +14,8 @@
     overflow: hidden;
   }
 
-  .announcement-bar__slides > * {
+  .announcement-bar__slide:not(.is-active) {
     display: none !important;
-  }
-
-  .announcement-bar__slides > *:first-child {
-    display: block !important;
-  }
-
-  .announcement-bar__slide[hidden],
-  .announcement-bar__slide[aria-hidden='true'] {
-    display: none !important;
-  }
-
-  .announcement-bar__slider[data-ready] .announcement-bar__slides > * {
-    display: none !important;
-  }
-
-  .announcement-bar__slider[data-ready] .announcement-bar__slides > .announcement-bar__slide:not([hidden]),
-  .announcement-bar__slider[data-ready] .announcement-bar__slides > *:has(> .announcement-bar__slide:not([hidden])) {
-    display: block !important;
   }
 {% endstyle %}
 
@@ -97,8 +79,10 @@
             var slides = root.querySelectorAll('.announcement-bar__slide');
             slides.forEach(function (slide, index) {
               var active = index === 0;
+              slide.classList.toggle('is-active', active);
               slide.toggleAttribute('hidden', !active);
               slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+              slide.style.display = active ? '' : 'none';
             });
           })();
         </script>

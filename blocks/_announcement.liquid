@@ -54,8 +54,9 @@
 -%}
 
 {%- if plain_text != blank and show_announcement -%}
-  <slideshow-slide
-    ref="slides[]"
+  {%- capture announcement_idx -%}{% increment heritage_announcement_idx %}{%- endcapture -%}
+  {%- assign announcement_idx_n = announcement_idx | strip | plus: 0 -%}
+  <div
     class="
       announcement-bar__slide
       text-block
@@ -63,6 +64,7 @@
       text-block--align-center
       text-block--full-width
       custom-typography
+      {% if announcement_idx_n == 0 %}is-active{% endif %}
       {% if block_settings.font_size != "" %}custom-font-size{% endif %}
       {% if block_settings.weight != "" %}custom-font-weight{% endif %}
     "
@@ -72,10 +74,11 @@
       --width: 100%;
       --text-align: center;
       --line-height: 1;
+      {% if announcement_idx_n > 0 %}display: none;{% endif %}
     "
     {{ block.shopify_attributes }}
-    aria-hidden="{% if visible_block_index == 0 %}false{% else %}true{% endif %}"
-    {% unless visible_block_index == 0 %}hidden{% endunless %}
+    aria-hidden="{% if announcement_idx_n == 0 %}false{% else %}true{% endif %}"
+    {% if announcement_idx_n > 0 %}hidden{% endif %}
   >
     <p class="announcement-bar__text">
       {{ block.settings.text }}
@@ -91,7 +94,7 @@
         </span>
       </a>
     {% endif %}
-</slideshow-slide>
+  </div>
 {%- endif -%}
 
 {% stylesheet %}
