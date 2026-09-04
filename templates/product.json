@@ -9,24 +9,6 @@
  */
 {
   "sections": {
-    "sale_countdown_banner_heritage": {
-      "type": "sale-countdown-banner",
-      "name": "Sale countdown banner",
-      "settings": {
-        "heading": "Sale ends in",
-        "subheading": "20% sitewide",
-        "end_datetime": "2026-09-15 23:59",
-        "hide_when_ended": true,
-        "ended_message": "This sale has ended",
-        "button_label": "Shop sale",
-        "button_link": "/collections/all",
-        "background_color": "#f5efe6",
-        "text_color": "#2f4a36",
-        "digit_background": "#2f4a36",
-        "digit_color": "#ffffff",
-        "padding_block": 16
-      }
-    },
     "pp_breadcrumbs_hQ6YJh": {
       "type": "pp-breadcrumbs",
       "name": "Breadcrumbs",
@@ -1381,7 +1363,6 @@
     }
   },
   "order": [
-    "sale_countdown_banner_heritage",
     "pp_breadcrumbs_hQ6YJh",
     "main",
     "product_recommendations_qggXJq",

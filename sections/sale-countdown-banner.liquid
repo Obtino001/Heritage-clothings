@@ -1,5 +1,5 @@
 {% doc %}
-  Full-width sale countdown banner. Add it under the header in the theme editor.
+  Slim homepage sale countdown strip, rendered under the header.
 {% enddoc %}
 
 {%- liquid
@@ -9,6 +9,7 @@
   endif
 -%}
 
+{%- if template.name == 'index' -%}
 <div
   class="sale-countdown-banner section color-custom-{{ section.id }}"
   style="
@@ -28,9 +29,7 @@
       end_datetime: countdown_end,
       hide_when_ended: section.settings.hide_when_ended,
       ended_message: section.settings.ended_message,
-      text_color: section.settings.text_color,
-      digit_background: section.settings.digit_background,
-      digit_color: section.settings.digit_color
+      text_color: section.settings.text_color
     %}
 
     {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
@@ -40,12 +39,14 @@
     {%- endif -%}
   </div>
 </div>
+{%- endif -%}
 
 {% stylesheet %}
   .sale-countdown-banner {
     width: 100%;
     background: var(--scb-bg, #f5efe6);
     color: var(--scb-text, #2f4a36);
+    border-block-end: 1px solid color-mix(in srgb, var(--scb-text, #2f4a36) 12%, transparent);
   }
 
   .sale-countdown-banner__inner {
@@ -53,53 +54,52 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 10px 24px;
-    padding-block: var(--scb-padding-block, 16px);
+    gap: 6px 16px;
+    padding-block: var(--scb-padding-block, 10px);
   }
 
   .sale-countdown-banner__subheading {
     margin: 0;
-    width: 100%;
     font-family: 'Lora', Georgia, serif;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
-    text-align: center;
+    letter-spacing: 0.02em;
     color: var(--scb-text, #2f4a36);
   }
 
   .sale-countdown-banner .hc-countdown--banner {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
   }
 
   .sale-countdown-banner__button {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 10px 22px;
-    border-radius: 80px;
-    background: #2f4a36;
-    color: #fff;
-    font-size: 14px;
+    color: inherit;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.04em;
-    text-decoration: none;
+    letter-spacing: 0.14em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
     text-transform: uppercase;
     white-space: nowrap;
   }
 
   .sale-countdown-banner__button:hover {
-    background: #24392a;
-    color: #fff;
+    opacity: 0.65;
   }
 
   @media screen and (max-width: 749px) {
-    .sale-countdown-banner__subheading {
-      font-size: 14px;
+    .sale-countdown-banner__inner {
+      gap: 4px 12px;
     }
 
-    .sale-countdown-banner__button {
-      width: 100%;
+    .sale-countdown-banner__subheading {
+      font-size: 12px;
     }
+  }
+
+  .shopify-section.sale-countdown-banner-section:not(:has(.sale-countdown-banner)) {
+    display: none;
   }
 {% endstylesheet %}
 
@@ -108,8 +108,9 @@
   "name": "Sale countdown banner",
   "tag": "section",
   "class": "sale-countdown-banner-section",
+  "limit": 1,
   "enabled_on": {
-    "templates": ["*"]
+    "templates": ["index"]
   },
   "settings": [
     {
@@ -171,31 +172,14 @@
       "default": "#2f4a36"
     },
     {
-      "type": "color",
-      "id": "digit_background",
-      "label": "Number background",
-      "default": "#2f4a36"
-    },
-    {
-      "type": "color",
-      "id": "digit_color",
-      "label": "Number color",
-      "default": "#ffffff"
-    },
-    {
       "type": "range",
       "id": "padding_block",
       "label": "Vertical padding",
-      "min": 8,
-      "max": 40,
+      "min": 4,
+      "max": 32,
       "step": 2,
       "unit": "px",
-      "default": 16
-    }
-  ],
-  "presets": [
-    {
-      "name": "Sale countdown banner"
+      "default": 10
     }
   ]
 }
