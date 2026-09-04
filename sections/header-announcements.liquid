@@ -9,22 +9,31 @@
 
 {% style %}
   .announcement-bar__slides {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: block;
+    position: relative;
+    overflow: hidden;
   }
 
   .announcement-bar__slides > * {
-    grid-area: 1 / 1;
-  }
-
-  .announcement-bar__slide[aria-hidden='true'],
-  .announcement-bar__slide[hidden] {
     display: none !important;
   }
 
-  .announcement-bar__slides > *:has(.announcement-bar__slide[aria-hidden='true']),
-  .announcement-bar__slides > *:has(.announcement-bar__slide[hidden]) {
+  .announcement-bar__slides > *:first-child {
+    display: block !important;
+  }
+
+  .announcement-bar__slide[hidden],
+  .announcement-bar__slide[aria-hidden='true'] {
     display: none !important;
+  }
+
+  .announcement-bar__slider[data-ready] .announcement-bar__slides > * {
+    display: none !important;
+  }
+
+  .announcement-bar__slider[data-ready] .announcement-bar__slides > .announcement-bar__slide:not([hidden]),
+  .announcement-bar__slider[data-ready] .announcement-bar__slides > *:has(> .announcement-bar__slide:not([hidden])) {
+    display: block !important;
   }
 {% endstyle %}
 
@@ -80,6 +89,20 @@
       <div class="announcement-bar__slides">
         {% content_for 'blocks' %}
       </div>
+      {%- if section.blocks.size > 1 -%}
+        <script>
+          (function () {
+            var root = document.currentScript && document.currentScript.previousElementSibling;
+            if (!root) return;
+            var slides = root.querySelectorAll('.announcement-bar__slide');
+            slides.forEach(function (slide, index) {
+              var active = index === 0;
+              slide.toggleAttribute('hidden', !active);
+              slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+            });
+          })();
+        </script>
+      {%- endif -%}
     </announcement-bar-component>
   </div>
 </aside>
@@ -150,37 +173,22 @@
   }
 
   .announcement-bar__slides {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: block;
     width: calc(100% - var(--button-size) * 2);
     max-width: 680px;
     margin-inline: auto;
     position: relative;
-    isolation: isolate;
+    overflow: hidden;
   }
 
   .announcement-bar__slides > * {
-    grid-area: 1 / 1;
     min-width: 0;
   }
 
   .announcement-bar__slide {
     width: 100%;
     max-width: 100%;
-    overflow: visible;
-    content-visibility: visible;
-    view-timeline-name: none;
-    contain-intrinsic-size: none;
-  }
-
-  .announcement-bar .announcement-bar__slide[aria-hidden='true'],
-  .announcement-bar .announcement-bar__slide[hidden] {
-    display: none !important;
-  }
-
-  .announcement-bar__slides > *:has(.announcement-bar__slide[aria-hidden='true']),
-  .announcement-bar__slides > *:has(.announcement-bar__slide[hidden]) {
-    display: none !important;
+    overflow: hidden;
   }
 
   .announcement-bar__slider slideshow-arrows {
