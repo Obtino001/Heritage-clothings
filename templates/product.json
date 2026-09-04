@@ -403,21 +403,21 @@
                 "swym_atw_display_btn_text": true,
                 "swym_button_position": "product_title_right",
                 "swym_atw_button_vertical_offset": 0,
-                "swym_atw_full_width": false,
-                "swym_atw_button_alignment": "right",
+                "swym_atw_full_width": true,
+                "swym_atw_button_alignment": "center",
                 "swym_add_to_wishlist_color": "#000000",
                 "swym_added_to_wishlist_color": "#222222",
                 "swym_button_text_color": "#fff",
                 "swym_atw_border_color": "#d2d2d2",
                 "swym_atw_border_thickness": 0,
-                "swym_atw_button_border_radius": 80,
+                "swym_atw_button_border_radius": 0,
                 "swym_enable_hover_customization": true,
                 "swym_hover_add_to_wishlist_color": "#000000",
                 "swym_hover_added_to_wishlist_color": "#222222",
                 "swym_hover_button_text_color": "#fff",
                 "swym_hover_atw_border_color": "#000",
                 "swym_hover_atw_border_thickness": 0,
-                "swym_hover_atw_button_border_radius": 80,
+                "swym_hover_atw_button_border_radius": 0,
                 "swym_custom_css": ""
               }
             },
@@ -726,8 +726,8 @@
         "disclosures_g9mWze"
       ],
       "custom_css": [
-        ".group-block-content button.wishlist-btn svg {width: 20px; height: 20px; flex-shrink: 0; overflow: visible;}",
-        ".group-block-content button.wishlist-btn {border-radius: 999px; padding: 10px 16px; border: 0; width: auto; height: auto; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; overflow: visible;}",
+        ".group-block-content button.wishlist-btn svg {width: 26px; height: 26px;}",
+        ".group-block-content button.wishlist-btn {border-radius: 50%; padding: 0; border: 1px solid #d2d2d2d2; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;}",
         ".fa-star,.fa-star-checked,.fa-star-half-o,.fa-star-o,.stamped-fa-star,.stamped-fa-star-checked,.stamped-fa-star-half-o,.stamped-fa-star-o {color: #5a3a2e; padding: 0;}"
       ],
       "settings": {
