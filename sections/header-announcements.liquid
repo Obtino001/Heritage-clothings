@@ -89,30 +89,38 @@
     border-block-end: var(--border-bottom-width) solid var(--color-border);
   }
 
-  .announcement-bar__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 8px 20px;
+  .announcement-bar.section > .announcement-bar__row {
+    grid-column: 2;
     width: 100%;
-  }
-
-  .announcement-bar--has-countdown .announcement-bar__slider {
-    flex: 1 1 220px;
+    max-width: 100%;
     min-width: 0;
   }
 
-  .announcement-bar--has-countdown .announcement-bar__slides {
-    max-width: 420px;
-    width: auto;
+  .announcement-bar__row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 20px;
+  }
+
+  .announcement-bar--has-countdown .announcement-bar__slider {
     flex: 1 1 auto;
+    min-width: 0;
+    max-width: min(42rem, 100%);
+  }
+
+  .announcement-bar--has-countdown .announcement-bar__slides {
+    width: calc(100% - var(--button-size) * 2);
+    max-width: 100%;
   }
 
   @media screen and (max-width: 749px) {
+    .announcement-bar__row,
     .announcement-bar--has-countdown .announcement-bar__row {
       flex-direction: column;
-      gap: 6px;
+      flex-wrap: wrap;
+      gap: 4px;
     }
 
     .announcement-bar--has-countdown .announcement-bar__slider,

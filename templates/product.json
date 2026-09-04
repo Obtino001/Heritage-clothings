@@ -332,10 +332,7 @@
                 "end_datetime": "2026-09-15 23:59",
                 "hide_when_ended": true,
                 "ended_message": "This sale has ended",
-                "background_color": "#f5efe6",
-                "text_color": "#2f4a36",
-                "digit_background": "#2f4a36",
-                "digit_color": "#ffffff"
+                "text_color": "#2f4a36"
               }
             },
             "klarna_on_site_messaging_app_block_NJBpeL": {

@@ -146,66 +146,57 @@
     <div class="pp-color-swatches__list" role="list" aria-label="{{ label_name }} options">
       {%- if color_mode == 'linked' -%}
         {%- liquid
-          assign linked_has_current = false
-          for linked_product in linked_color_products
-            if linked_product.id == product.id
-              assign linked_has_current = true
-              break
-            endif
-          endfor
+          assign current_color_label = product.metafields.custom.color_name.value | default: product.metafields.custom.color_name | strip | default: product.title
+          assign current_color_image = current_variant.featured_media.preview_image | default: current_variant.image | default: product.featured_media.preview_image | default: product.featured_image
+          assign current_color_url = current_variant.url | default: product.url
         -%}
-        {%- unless linked_has_current -%}
-          {%- liquid
-            assign current_color_label = product.metafields.custom.color_name.value | default: product.metafields.custom.color_name | strip | default: product.title
-            assign current_color_image = product.featured_media.preview_image | default: product.featured_image
-          -%}
-          <a
-            href="{{ product.url }}"
-            class="pp-color-swatches__item is-selected{% unless product.available %} is-unavailable{% endunless %}"
-            role="listitem"
-            title="{{ current_color_label | escape }}"
-            aria-current="page"
-            aria-label="{{ current_color_label | escape }}{% unless product.available %} (sold out){% endunless %}"
-          >
-            {%- if current_color_image -%}
-              {{
-                current_color_image
-                | image_url: width: 240
-                | image_tag:
-                  widths: '120, 180, 240',
-                  sizes: '(max-width: 749px) 72px, 96px',
-                  alt: current_color_label,
-                  class: 'pp-color-swatches__img',
-                  loading: 'lazy'
-              }}
-            {%- else -%}
-              <span class="pp-color-swatches__fallback">{{ current_color_label | slice: 0, 1 }}</span>
-            {%- endif -%}
-          </a>
-        {%- endunless -%}
+        <a
+          href="{{ current_color_url }}"
+          class="pp-color-swatches__item is-selected{% unless product.available %} is-unavailable{% endunless %}"
+          role="listitem"
+          title="{{ current_color_label | escape }}"
+          aria-current="page"
+          aria-label="{{ current_color_label | escape }}{% unless product.available %} (sold out){% endunless %}"
+        >
+          {%- if current_color_image -%}
+            {{
+              current_color_image
+              | image_url: width: 240
+              | image_tag:
+                widths: '120, 180, 240',
+                sizes: '(max-width: 749px) 72px, 96px',
+                alt: current_color_label,
+                class: 'pp-color-swatches__img',
+                loading: 'eager',
+                fetchpriority: 'high'
+            }}
+          {%- else -%}
+            <span class="pp-color-swatches__fallback">{{ current_color_label | slice: 0, 1 }}</span>
+          {%- endif -%}
+        </a>
         {%- for linked_product in linked_color_products -%}
+          {%- if linked_product.id == product.id -%}
+            {%- continue -%}
+          {%- endif -%}
           {%- liquid
             assign linked_label = linked_product.metafields.custom.color_name.value | default: linked_product.metafields.custom.color_name | strip
             if linked_label == blank
               assign linked_label = linked_product.title
             endif
-            assign linked_image = linked_product.featured_media.preview_image | default: linked_product.featured_image
-            assign linked_selected = false
-            if linked_product.id == product.id
-              assign linked_selected = true
-            endif
+            assign linked_variant = linked_product.selected_or_first_available_variant
+            assign linked_image = linked_variant.featured_media.preview_image | default: linked_variant.image | default: linked_product.featured_media.preview_image | default: linked_product.featured_image
+            assign linked_url = linked_variant.url | default: linked_product.url
             assign show_linked = true
             if block_settings.hide_unavailable and linked_product.available == false
               assign show_linked = false
             endif
           -%}
-          {%- if show_linked -%}
+          {%- if show_linked and linked_url != blank -%}
             <a
-              href="{{ linked_product.url }}"
-              class="pp-color-swatches__item{% if linked_selected %} is-selected{% endif %}{% unless linked_product.available %} is-unavailable{% endunless %}"
+              href="{{ linked_url }}"
+              class="pp-color-swatches__item{% unless linked_product.available %} is-unavailable{% endunless %}"
               role="listitem"
               title="{{ linked_label | escape }}{% unless linked_product.available %} (sold out){% endunless %}"
-              {% if linked_selected %}aria-current="page"{% endif %}
               aria-label="{{ linked_label | escape }}{% unless linked_product.available %} (sold out){% endunless %}"
             >
               {%- if linked_image -%}

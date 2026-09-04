@@ -11,10 +11,7 @@
   end_datetime: block.settings.end_datetime,
   hide_when_ended: block.settings.hide_when_ended,
   ended_message: block.settings.ended_message,
-  background_color: block.settings.background_color,
   text_color: block.settings.text_color,
-  digit_background: block.settings.digit_background,
-  digit_color: block.settings.digit_color,
   shopify_attributes: block.shopify_attributes
 %}
 
@@ -54,27 +51,9 @@
     },
     {
       "type": "color",
-      "id": "background_color",
-      "label": "t:settings.background_color",
-      "default": "#f5efe6"
-    },
-    {
-      "type": "color",
       "id": "text_color",
       "label": "t:settings.text_color",
       "default": "#2f4a36"
-    },
-    {
-      "type": "color",
-      "id": "digit_background",
-      "label": "t:settings.digit_background",
-      "default": "#2f4a36"
-    },
-    {
-      "type": "color",
-      "id": "digit_color",
-      "label": "t:settings.digit_color",
-      "default": "#ffffff"
     }
   ],
   "presets": [

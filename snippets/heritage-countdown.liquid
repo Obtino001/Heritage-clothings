@@ -126,49 +126,53 @@
 
   .hc-countdown--bar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    justify-content: center;
-    gap: 8px 12px;
+    justify-content: flex-start;
+    gap: 8px 10px;
+    flex: 0 1 auto;
+    min-width: 0;
     color: var(--color-foreground);
   }
 
   .hc-countdown--bar .hc-countdown__heading {
     color: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     white-space: nowrap;
   }
 
   .hc-countdown--bar .hc-countdown__units {
-    gap: 4px;
+    gap: 0;
   }
 
   .hc-countdown--bar .hc-countdown__digit {
-    min-width: 1.7em;
-    padding: 4px 6px;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
-    color: var(--color-foreground);
+    min-width: 1.35em;
+    padding: 0;
+    background: none;
+    color: inherit;
     font-size: 13px;
+    font-weight: 500;
   }
 
   .hc-countdown--bar .hc-countdown__label {
-    margin-top: 3px;
-    font-size: 9px;
-    color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+    margin-top: 1px;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--color-foreground) 62%, transparent);
   }
 
   .hc-countdown--bar .hc-countdown__sep {
-    padding-bottom: 12px;
-    font-size: 12px;
-    opacity: 0.55;
+    padding-bottom: 10px;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.4;
   }
 
   .hc-countdown--bar .hc-countdown__ended {
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -176,64 +180,73 @@
   .hc-countdown--product {
     display: block;
     width: 100%;
-    padding: 16px 18px 18px;
-    background: var(--hc-bg);
-    border: 1px solid color-mix(in srgb, var(--hc-text) 12%, transparent);
-    border-radius: 12px;
+    padding: 0;
+    background: none;
+    border: 0;
   }
 
   .hc-countdown--product .hc-countdown__heading {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     font-family: 'Lora', Georgia, 'Times New Roman', serif;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 500;
-    letter-spacing: 0.01em;
-    text-align: center;
+    letter-spacing: 0.02em;
+    text-align: left;
   }
 
   .hc-countdown--product .hc-countdown__units {
-    gap: 6px;
+    justify-content: flex-start;
+    gap: 0;
   }
 
   .hc-countdown--product .hc-countdown__unit {
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: 2.4em;
   }
 
   .hc-countdown--product .hc-countdown__digit {
-    width: 100%;
-    padding: 12px 4px;
-    border-radius: 8px;
-    background: var(--hc-digit-bg);
-    color: var(--hc-digit);
+    width: auto;
+    padding: 0;
+    background: none;
+    color: var(--hc-text);
     font-size: 22px;
+    font-weight: 500;
   }
 
   .hc-countdown--product .hc-countdown__label {
-    margin-top: 6px;
-    font-size: 10px;
-    color: var(--hc-text);
+    margin-top: 4px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--hc-text) 70%, transparent);
   }
 
   .hc-countdown--product .hc-countdown__sep {
-    display: none;
+    display: block;
+    padding: 0 8px 12px;
+    color: var(--hc-text);
+    font-size: 18px;
+    font-weight: 400;
+    opacity: 0.35;
   }
 
   .hc-countdown--product .hc-countdown__ended {
     color: var(--hc-text);
     font-family: 'Lora', Georgia, 'Times New Roman', serif;
-    font-size: 16px;
-    text-align: center;
+    font-size: 15px;
+    text-align: left;
   }
 
   @media screen and (max-width: 749px) {
     .hc-countdown--bar .hc-countdown__heading {
-      font-size: 11px;
+      font-size: 10px;
+    }
+
+    .hc-countdown--bar .hc-countdown__digit {
+      font-size: 12px;
     }
 
     .hc-countdown--product .hc-countdown__digit {
       font-size: 18px;
-      padding: 10px 2px;
     }
   }
 {% endstylesheet %}
