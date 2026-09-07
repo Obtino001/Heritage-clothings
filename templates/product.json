@@ -327,13 +327,15 @@
             "sale_countdown_heritage": {
               "type": "sale-countdown",
               "name": "Sale countdown",
+              "disabled": true,
               "settings": {
                 "heading": "Sale ends in",
                 "end_datetime": "2026-09-15 23:59",
                 "hide_when_ended": true,
                 "ended_message": "This sale has ended",
                 "text_color": "#2f4a36"
-              }
+              },
+              "blocks": {}
             },
             "klarna_on_site_messaging_app_block_NJBpeL": {
               "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
