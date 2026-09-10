@@ -30,7 +30,7 @@
         "content_position": "center",
         "show_countdown": false,
         "countdown_heading": "Sale ends in",
-        "countdown_end": "2026-09-07 23:59",
+        "countdown_end": "2026-09-27 23:59",
         "countdown_hide_when_ended": true,
         "countdown_ended_message": "This sale has ended"
       }
