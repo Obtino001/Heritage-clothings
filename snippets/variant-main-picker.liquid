@@ -199,6 +199,68 @@
                 {% if product_option_value.size > longest_value and option_id_attribute %}
                   {% assign longest_value = product_option_value.size %}
                 {% endif %}
+
+                {%- liquid
+                  comment
+                    HERITAGE FIX — Fallback Variant ID
+                    -----------------------------------
+                    product_option_value.variant resolves against the CURRENT combination
+                    of all selected options. On multi-option products (e.g. Colour + Size)
+                    it returns nil when the current Size has no matching variant for this
+                    Colour, causing data-variant-id to be omitted from the HTML.
+
+                    When that happens the JS #applyVariantId() skips silently and the
+                    previously-selected (default) variant stays in the form — sending the
+                    WRONG colour to checkout.
+
+                    Fix: loop all variants to find the first one that shares this option
+                    value, preferring available variants. For Combined Listing child
+                    products (product_url present) the JS fetch still handles the final
+                    correct ID after the section reloads.
+                  endcomment
+
+                  assign _fv_vid   = product_option_value.variant.id
+                  assign _fv_media = product_option_value.variant.featured_media
+
+                  if _fv_vid == blank
+                    assign _fv_best_available = nil
+                    assign _fv_first          = nil
+
+                    for _v in product_resource.variants
+                      assign _match = false
+                      if product_option.position == 1 and _v.option1 == product_option_value
+                        assign _match = true
+                      elsif product_option.position == 2 and _v.option2 == product_option_value
+                        assign _match = true
+                      elsif product_option.position == 3 and _v.option3 == product_option_value
+                        assign _match = true
+                      endif
+
+                      if _match
+                        if _fv_first == nil
+                          assign _fv_first = _v
+                        endif
+                        if _v.available and _fv_best_available == nil
+                          assign _fv_best_available = _v
+                        endif
+                      endif
+                    endfor
+
+                    comment Prefer available variant; fall back to first found endcomment
+                    assign _fv_resolved = _fv_best_available | default: _fv_first
+
+                    if _fv_resolved
+                      assign _fv_vid   = _fv_resolved.id
+                      assign _fv_media = _fv_resolved.featured_media
+                    endif
+                  endif
+
+                  comment Also pull media from the connected product if still blank endcomment
+                  if _fv_media == blank and product_option_value.product_url
+                    assign _fv_media = product_option_value.variant.product.featured_media
+                  endif
+                -%}
+
                 <label
                   class="variant-option__button-label{% if variant_style == 'swatch' %} variant-option__button-label--has-swatch{% endif %}{% if is_size_buttons %} variant-option__button-label--size{% endif %}"
                 >
@@ -218,8 +280,8 @@
                     data-option-value-id="{{ product_option_value.id }}"
                     data-option-available="{{ product_option_value.available }}"
                     data-connected-product-url="{{ product_option_value.product_url }}"
-                    {% if product_option_value.variant.id %}
-                      data-variant-id="{{ product_option_value.variant.id }}"
+                    {% if _fv_vid %}
+                      data-variant-id="{{ _fv_vid }}"
                     {% endif %}
                     {% if product_option_value.selected %}
                       data-current-checked="true"
@@ -229,17 +291,9 @@
                     {% endif %}
                   >
                   {% if variant_style == 'swatch' %}
-                    {% liquid
-                      assign featured_media = product_option_value.variant.featured_media
-
-                      if featured_media == blank and product_option_value.product_url
-                        assign featured_media = product_option_value.variant.product.featured_media
-                      endif
-                    %}
-
                     {% render 'swatch',
                       swatch: product_option_value.swatch,
-                      variant_image: featured_media,
+                      variant_image: _fv_media,
                       mode: 'unscaled'
                     %}
                   {% else %}
@@ -300,12 +354,42 @@
                 class="variant-option__select"
               >
                 {%- for product_option_value in product_option.values -%}
+                  {%- liquid
+                    comment HERITAGE FIX — same fallback as radio swatches above endcomment
+                    assign _dd_vid = product_option_value.variant.id
+                    if _dd_vid == blank
+                      assign _dd_best = nil
+                      assign _dd_first = nil
+                      for _dv in product_resource.variants
+                        assign _dm = false
+                        if product_option.position == 1 and _dv.option1 == product_option_value
+                          assign _dm = true
+                        elsif product_option.position == 2 and _dv.option2 == product_option_value
+                          assign _dm = true
+                        elsif product_option.position == 3 and _dv.option3 == product_option_value
+                          assign _dm = true
+                        endif
+                        if _dm
+                          if _dd_first == nil
+                            assign _dd_first = _dv
+                          endif
+                          if _dv.available and _dd_best == nil
+                            assign _dd_best = _dv
+                          endif
+                        endif
+                      endfor
+                      assign _dd_resolved = _dd_best | default: _dd_first
+                      if _dd_resolved
+                        assign _dd_vid = _dd_resolved.id
+                      endif
+                    endif
+                  -%}
                   <option
                     value="{{ product_option_value | escape }}"
                     data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
                     data-option-name="{{ product_option.name | escape }}"
                     data-option-value-id="{{ product_option_value.id }}"
-                    data-variant-id="{{ product_option_value.variant.id }}"
+                    data-variant-id="{{ _dd_vid }}"
                     data-connected-product-url="{{ product_option_value.product_url }}"
                     {% if product_option_value.selected %}
                       selected="selected"

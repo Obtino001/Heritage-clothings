@@ -142,7 +142,14 @@ export default class VariantPicker extends Component {
    * @param {string | null} variantId
    */
   #applyVariantId(variantId) {
-    if (!variantId) return;
+    if (!variantId) {
+      // data-variant-id is missing on this swatch — this happens for Combined Listing
+      // child-product swatches or multi-option products where Liquid cannot resolve
+      // the variant at render time. The correct ID will be applied after the section
+      // fetch completes (see fetchUpdatedSection below).
+      console.warn('[Heritage] data-variant-id missing on swatch — form ID unchanged until fetch resolves.');
+      return;
+    }
 
     const section =
       this.closest(
@@ -445,6 +452,20 @@ export default class VariantPicker extends Component {
           const variantData = JSON.parse(textContent);
 
           if (variantData && typeof variantData === 'object') {
+            // ── HERITAGE FIX: Sync correct variant ID after fetch ──────────────────────
+            // The server-rendered JSON always contains the correct selected variant ID.
+            // We apply it here AFTER the morph so the cart form always gets the right
+            // variant — even for Combined Listing products where the swatch's own
+            // data-variant-id was blank or pointed to the wrong (default) product.
+            //
+            // Flow:
+            //   pointerdown → #applyVariantId(swatch.dataset.variantId)  ← may be wrong/blank
+            //   fetch completes → morph DOM → THIS LINE fixes the form ID ← always correct
+            if (variantData.id) {
+              this.#applyVariantId(String(variantData.id));
+            }
+            // ──────────────────────────────────────────────────────────────────────────
+
             const productViewAttr = variantPickerJsonScript
               ?.closest('[view-event-payload]')
               ?.getAttribute('view-event-payload')
