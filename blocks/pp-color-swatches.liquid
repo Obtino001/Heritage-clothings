@@ -74,7 +74,7 @@
 
   assign sibling_collection = product.metafields.stiletto.siblings_collection.value
   assign sibling_option_name = product.metafields.stiletto.sibling_option_name.value | strip
-  assign linked_color_products = product.metafields.custom.products_color.value
+  assign linked_color_products = product.metafields.custom.sibling_products.value
 
   assign color_mode = 'none'
   if linked_color_products != blank
