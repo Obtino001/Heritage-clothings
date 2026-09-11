@@ -347,6 +347,11 @@
         "type": "shopify://apps/smile-io/blocks/smile-shopify-app/2fae4e25-1841-4ea2-bc02-bd548478c4f6",
         "disabled": false,
         "settings": {}
+      },
+      "6610233760104865948": {
+        "type": "shopify://apps/brevo-pushowl/blocks/pushowl-app-embed-3d2ff2b5/fa20c3ba-38bf-43e0-ba5c-431f6ae07d95",
+        "disabled": false,
+        "settings": {}
       }
     },
     "color_palette": {
