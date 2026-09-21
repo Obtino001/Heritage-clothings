@@ -621,7 +621,7 @@
                     "text_9Rh6Jw": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>We will work quickly to ship your order as soon as possible. Once your order has shipped, you will receive an email with further information. Delivery times vary depending on your location.</p>",
+                        "text": "<p>   Orders are dispatched within 1–2 working days from our UK or US fulfilment centre, depending on your location and stock availability. Shipping options, costs and estimated delivery times are displayed at checkout. Once dispatched, you will receive a confirmation email with tracking details.<br/><br/>UK delivery is free on orders over £50.<br/>US delivery is $6.99.<br/>International delivery is free on orders over £200.<br/><br/>Most orders to Ireland, the European Union, the US, Canada and Australia arrive without additional customs charges. <br/><br/>Returns and exchanges must be registered within 14 days of delivery through our Returns Portal. We offer free exchanges on all orders, subject to stock availability. Returned items must be unworn, unwashed and in their original condition with all tags attached.<br/><br/>Please see our Shipping FAQ and Returns Policy for full details.</p>",
                         "width": "100%",
                         "max_width": "normal",
                         "alignment": "left",
