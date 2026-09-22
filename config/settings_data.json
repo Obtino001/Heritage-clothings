@@ -352,6 +352,11 @@
         "type": "shopify://apps/smile-io/blocks/smile-shopify-app/2fae4e25-1841-4ea2-bc02-bd548478c4f6",
         "disabled": false,
         "settings": {}
+      },
+      "18423266570658624584": {
+        "type": "shopify://apps/beast-currency-converter/blocks/doubly/267afa86-a419-4d5b-a61b-556038e7294d",
+        "disabled": true,
+        "settings": {}
       }
     },
     "color_palette": {
