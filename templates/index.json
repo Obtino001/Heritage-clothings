@@ -644,6 +644,7 @@
         "icon_w7kYjA",
         "icon_xJWNWG"
       ],
+      "disabled": true,
       "name": "Pay Later Hero",
       "settings": {
         "image": "shopify://shop_images/bg_image.webp",
@@ -672,6 +673,7 @@
     },
     "blogs_carousel_LHpkYp": {
       "type": "blogs_carousel",
+      "disabled": true,
       "name": "Blog Stories Carousel",
       "settings": {
         "heading": "Stories by Heritage",
