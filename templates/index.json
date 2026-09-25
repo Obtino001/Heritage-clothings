@@ -18,7 +18,7 @@
       "settings": {
         "desktop_video": "shopify://files/videos/copy_3445C476-6F2C-4A52-BBD5-031872F9315A.mov",
         "mobile_video": "shopify://files/videos/copy_91F784F2-8E7B-4D68-BA32-4DA40128BD7E.mov",
-        "rating_text": "4.8 out of 5 Ratings on Trustpilot",
+        "rating_text": "<a href=\"https://www.trustpilot.com/review/heritageclothings.com\">4.8 out of 5 Ratings on Trustpilott</a>",
         "heading": "Bold Prints <br><em>Long Lasting Impression</em>",
         "button_1_text": "SHOP NEW ARRIVALS",
         "button_1_link": "shopify://collections/brand-new",
@@ -417,7 +417,7 @@
       ],
       "name": "Hero Rating (Trustpilot)",
       "settings": {
-        "rating_text": "<a href=\"https://www.trustpilot.com/review/heritageclothings.com\">Excellent 4.9 out of 5 based on 420+ reviews </a>",
+        "rating_text": "Excellent 4.9 out of 5 based on 420+ reviews",
         "font_size": 20,
         "text_color": "#000000",
         "star_count": 5,
